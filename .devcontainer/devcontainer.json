@@ -12,7 +12,8 @@
     "ghcr.io/devcontainers/features/go:1": {
       "version": "1.24"
     },
-    "ghcr.io/devcontainers/features/github-cli:1": {}
+    "ghcr.io/devcontainers/features/github-cli:1": {},
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {}
   },
   "customizations": {
     "vscode": {
@@ -32,10 +33,12 @@
     }
   },
 
-  // 5. --- AUTOMATION ---
-  // Run a command *after* the container is created
-  //"postCreateCommand": "npm install -g yarn",
+  "remoteUser": "root",
 
-  // Connect as the 'root' user (simpler for a personal env, no permissions issues)
-  "remoteUser": "root"
+  // // Settings for docker-in-docker
+  // "remoteEnv": {
+  //   "PODMAN_USERNS": "keep-id"
+  // },
+  // "containerUser": "vscode"
+  // // Settings for docker-in-docker
 }
