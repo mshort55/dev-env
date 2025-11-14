@@ -7,6 +7,7 @@ This script runs once on container creation to set up ephemeral secrets.
 import os
 import sys
 import getpass
+import subprocess
 from pathlib import Path
 from pykeepass import PyKeePass
 
@@ -32,6 +33,51 @@ def setup_ssh_keys(kp: PyKeePass):
 
     print(f"SSH keys configured at {ssh_dir}")
 
+def setup_gpg_key(kp: PyKeePass):
+    print("Setting up GPG key...")
+
+    entry = kp.find_entries(title='gpg', first=True)
+    if not entry:
+        print("Warning: No GPG entry found in database")
+        return
+
+    gpg_private_key = entry.password
+
+    try:
+        subprocess.run(
+            ['gpg', '--import', '--batch'],
+            input=gpg_private_key.encode(),
+            capture_output=True,
+            check=True
+        )
+        print("GPG key imported successfully")
+    except subprocess.CalledProcessError as e:
+        print(f"Warning: Failed to import GPG key: {e.stderr.decode()}")
+        return
+    except FileNotFoundError:
+        print("Warning: gpg command not found, skipping GPG setup")
+        return
+
+    gpg_conf_dir = Path.home() / '.gnupg'
+    gpg_conf_dir.mkdir(mode=0o700, exist_ok=True)
+
+    gpg_agent_conf = gpg_conf_dir / 'gpg-agent.conf'
+    gpg_agent_conf.write_text('allow-loopback-pinentry\n')
+    gpg_agent_conf.chmod(0o600)
+
+    gpg_conf = gpg_conf_dir / 'gpg.conf'
+    gpg_conf.write_text('pinentry-mode loopback\n')
+    gpg_conf.chmod(0o600)
+
+    bashrc_path = Path.home() / '.bashrc'
+    gpg_tty_config = '\n# GPG configuration\nexport GPG_TTY=$(tty)\n'
+
+    bashrc_content = bashrc_path.read_text() if bashrc_path.exists() else ''
+    if 'GPG_TTY' not in bashrc_content:
+        with bashrc_path.open('a') as f:
+            f.write(gpg_tty_config)
+
+    print("GPG configuration updated for container use")
 
 def main():
     kdbx_path = '/UbuntuSync/dev-env.kdbx'
@@ -40,7 +86,6 @@ def main():
         print(f"Error: KeePass database not found at {kdbx_path}")
         sys.exit(1)
 
-    # Prompt for master password
     try:
         master_password = getpass.getpass("Enter KeePass master password: ")
     except KeyboardInterrupt:
@@ -56,6 +101,7 @@ def main():
     print("\nSuccessfully opened KeePass database\n")
 
     setup_ssh_keys(kp)
+    setup_gpg_key(kp)
 
     print("\nAll secrets configured successfully!")
 

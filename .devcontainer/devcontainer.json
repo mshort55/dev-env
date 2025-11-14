@@ -35,12 +35,5 @@
 
   "remoteUser": "mjs",
 
-  "postCreateCommand": "pip3 install --no-cache-dir pykeepass && python3 /UbuntuSync/bootstrap-secrets.py"
-
-  // // Settings for docker-in-docker
-  // "remoteEnv": {
-  //   "PODMAN_USERNS": "keep-id"
-  // },
-  // "containerUser": "vscode"
-  // // Settings for docker-in-docker
+  "postCreateCommand": "pip3 install --no-cache-dir pykeepass && python3 /Repos/dev-env/bootstrap-secrets.py"
 }
