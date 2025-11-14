@@ -11,6 +11,6 @@ RUN useradd -m -s /bin/bash mjs && \
     echo "mjs ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
 
 USER mjs
-WORKDIR /mjs
+WORKDIR /UbuntuSync
 
 CMD ["/bin/bash"]

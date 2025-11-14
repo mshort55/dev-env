@@ -5,6 +5,5 @@ services:
     container_name: dev-container
     command: tail -f /dev/null
     volumes:
-      - /Users/mshort/mjs:/mjs:cached
-      - /Users/mshort/UbuntuSync:/UbuntuSync:cached
-      - /Users/mshort/Repos:/Repos:cached
+      - /Users/mshort/UbuntuSync:/UbuntuSync
+      - /Users/mshort/Repos:/Repos
