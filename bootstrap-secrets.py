@@ -108,16 +108,33 @@ def setup_gcloud_config(kp: PyKeePass):
 
     creds_entry = kp.find_entries(title='gcloud/credentials.db', first=True)
     if creds_entry:
-        creds_attachment = creds_entry.get_attachment('credentials.db')
-        if creds_attachment:
+        if creds_entry.attachments:
+            attachment = creds_entry.attachments[0]
+            creds_data = attachment.data
             creds_path = gcloud_dir / 'credentials.db'
-            creds_path.write_bytes(creds_attachment)
+            creds_path.write_bytes(creds_data)
             creds_path.chmod(0o600)
             print("  - credentials.db configured")
         else:
-            print("  Warning: credentials.db attachment not found in entry")
+            print("  Warning: gcloud/credentials.db entry has no attachments")
     else:
         print("  Warning: gcloud/credentials.db entry not found")
+
+    email_entry = kp.find_entries(title='email', first=True)
+    if email_entry and email_entry.username:
+        try:
+            subprocess.run(
+                ['gcloud', 'config', 'set', 'account', email_entry.username],
+                capture_output=True,
+                check=True
+            )
+            print(f"  - gcloud account set to {email_entry.username}")
+        except subprocess.CalledProcessError as e:
+            print(f"  Warning: Failed to set gcloud account: {e.stderr.decode()}")
+        except FileNotFoundError:
+            print("  Warning: gcloud command not found")
+    else:
+        print("  Warning: email entry not found or has no username")
 
     print("gcloud configuration complete")
 
