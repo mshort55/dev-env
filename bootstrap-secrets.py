@@ -79,6 +79,49 @@ def setup_gpg_key(kp: PyKeePass):
 
     print("GPG configuration updated for container use")
 
+
+def setup_gcloud_config(kp: PyKeePass):
+    print("Setting up gcloud configuration...")
+
+    gcloud_dir = Path.home() / '.config' / 'gcloud'
+    gcloud_dir.mkdir(mode=0o700, parents=True, exist_ok=True)
+
+    adc_entry = kp.find_entries(title='gcloud/application_default_credentials.json', first=True)
+    if adc_entry:
+        adc_path = gcloud_dir / 'application_default_credentials.json'
+        adc_path.write_text(adc_entry.password)
+        adc_path.chmod(0o600)
+        print("  - application_default_credentials.json configured")
+    else:
+        print("  Warning: gcloud/application_default_credentials.json entry not found")
+
+    config_entry = kp.find_entries(title='gcloud/configurations/config_default', first=True)
+    if config_entry:
+        config_dir = gcloud_dir / 'configurations'
+        config_dir.mkdir(mode=0o700, exist_ok=True)
+        config_path = config_dir / 'config_default'
+        config_path.write_text(config_entry.password)
+        config_path.chmod(0o600)
+        print("  - configurations/config_default configured")
+    else:
+        print("  Warning: gcloud/configurations/config_default entry not found")
+
+    creds_entry = kp.find_entries(title='gcloud/credentials.db', first=True)
+    if creds_entry:
+        creds_attachment = creds_entry.get_attachment('credentials.db')
+        if creds_attachment:
+            creds_path = gcloud_dir / 'credentials.db'
+            creds_path.write_bytes(creds_attachment)
+            creds_path.chmod(0o600)
+            print("  - credentials.db configured")
+        else:
+            print("  Warning: credentials.db attachment not found in entry")
+    else:
+        print("  Warning: gcloud/credentials.db entry not found")
+
+    print("gcloud configuration complete")
+
+
 def main():
     kdbx_path = '/UbuntuSync/dev-env.kdbx'
 
@@ -102,6 +145,7 @@ def main():
 
     setup_ssh_keys(kp)
     setup_gpg_key(kp)
+    setup_gcloud_config(kp)
 
     print("\nAll secrets configured successfully!")
 
