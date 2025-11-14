@@ -33,7 +33,7 @@
     }
   },
 
-  "remoteUser": "root",
+  "remoteUser": "root"
 
   // // Settings for docker-in-docker
   // "remoteEnv": {

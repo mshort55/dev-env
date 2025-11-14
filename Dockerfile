@@ -8,4 +8,4 @@ RUN apt-get update && apt-get install -y \
 
 WORKDIR /work
 
-CMD ["/bin/zsh"]
+CMD ["/bin/bash"]

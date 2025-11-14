@@ -13,4 +13,3 @@ Host setup:
   - vim $HOME/Library/Application\ Support/Code/User/settings.json
   - add: "dev.containers.dockerPath": "podman",
 6. Set up compose for podman on desktop app
-  - enable Docker Compatability
