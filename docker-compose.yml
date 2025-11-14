@@ -1,0 +1,12 @@
+version: '3.8'
+
+services:
+  dev:
+    build: .
+    image: dev-env:latest
+    container_name: dev-container
+    command: tail -f /dev/null
+    volumes:
+      - .:/work:cached
+      - /Users/mshort/UbuntuSync:/ubuntusync:cached
+      - /Users/mshort/REPO:/repo:cached
