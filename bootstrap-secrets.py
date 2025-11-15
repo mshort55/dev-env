@@ -14,6 +14,24 @@ from pykeepass import PyKeePass
 from pykeepass.entry import Entry
 
 
+def add_env_vars_to_bashrc(env_vars: dict[str, str], section_name: str):
+    bashrc_path = Path.home() / '.bashrc'
+    bashrc_content = bashrc_path.read_text() if bashrc_path.exists() else ''
+
+    section_comment = f'# {section_name}\n'
+
+    if section_comment.strip() in bashrc_content:
+        return
+
+    env_lines = [f'\n{section_comment}']
+
+    for env_name, env_value in env_vars.items():
+        env_lines.append(f'export {env_name}={env_value}\n')
+
+    with bashrc_path.open('a') as f:
+        f.writelines(env_lines)
+
+
 def setup_ssh_keys(kp: PyKeePass):
     print("Setting up SSH keys...")
 
@@ -149,30 +167,49 @@ def setup_gcloud_config(kp: PyKeePass):
 def setup_claude_code_env(kp: PyKeePass):
     print("Setting up Claude Code environment variables...")
 
-    bashrc_path = Path.home() / '.bashrc'
-    bashrc_content = bashrc_path.read_text() if bashrc_path.exists() else ''
-
-    env_vars = {
+    env_var_mappings = {
         'ANTHROPIC_VERTEX_PROJECT_ID': 'claude_env_ANTHROPIC_VERTEX_PROJECT_ID',
         'CLAUDE_CODE_USE_VERTEX': 'claude_env_CLAUDE_CODE_USE_VERTEX',
         'CLOUD_ML_REGION': 'claude_env_CLOUD_ML_REGION'
     }
 
-    env_lines = ['\n# Claude Code environment variables\n']
+    env_vars = {}
 
-    for env_name, keepass_title in env_vars.items():
+    for env_name, keepass_title in env_var_mappings.items():
         entry = cast(Optional[Entry], kp.find_entries(title=keepass_title, first=True))
         if entry and entry.password:
-            env_lines.append(f'export {env_name}={entry.password}\n')
+            env_vars[env_name] = entry.password
             print(f"  - {env_name} configured")
         else:
             print(f"  Warning: {keepass_title} entry not found or has no password")
 
-    if env_lines and 'Claude Code environment variables' not in bashrc_content:
-        with bashrc_path.open('a') as f:
-            f.writelines(env_lines)
+    if env_vars:
+        add_env_vars_to_bashrc(env_vars, "Claude Code environment variables")
 
     print("Claude Code environment variables configured")
+
+
+def setup_kube_context_env(kp: PyKeePass):
+    print("Setting up Kubernetes context environment variables...")
+
+    env_var_mappings = {
+        'THREE_NODE': 'kube_env_THREE_NODE'
+    }
+
+    env_vars = {}
+
+    for env_name, keepass_title in env_var_mappings.items():
+        entry = cast(Optional[Entry], kp.find_entries(title=keepass_title, first=True))
+        if entry and entry.password:
+            env_vars[env_name] = entry.password
+            print(f"  - {env_name} configured")
+        else:
+            print(f"  Warning: {keepass_title} entry not found or has no password")
+
+    if env_vars:
+        add_env_vars_to_bashrc(env_vars, "Kubernetes context environment variables")
+
+    print("Kubernetes context environment variables configured")
 
 
 def setup_github_cli_config(kp: PyKeePass):
@@ -279,6 +316,7 @@ def main():
     setup_gpg_key(kp)
     setup_gcloud_config(kp)
     setup_claude_code_env(kp)
+    setup_kube_context_env(kp)
     setup_github_cli_config(kp)
     setup_docker_config(kp)
     setup_git_config(kp)
