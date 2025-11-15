@@ -9,15 +9,25 @@ import sys
 import getpass
 import subprocess
 from pathlib import Path
+from typing import cast, Optional
 from pykeepass import PyKeePass
+from pykeepass.entry import Entry
 
 
 def setup_ssh_keys(kp: PyKeePass):
     print("Setting up SSH keys...")
 
-    entry = kp.find_entries(title='ssh', first=True)
+    entry = cast(Optional[Entry], kp.find_entries(title='ssh', first=True))
     if not entry:
         print("Warning: No SSH entry found in database")
+        return
+
+    if not entry.password:
+        print("Warning: SSH entry has no password (private key)")
+        return
+
+    if not entry.notes:
+        print("Warning: SSH entry has no notes (public key)")
         return
 
     ssh_dir = Path.home() / '.ssh'
@@ -36,9 +46,13 @@ def setup_ssh_keys(kp: PyKeePass):
 def setup_gpg_key(kp: PyKeePass):
     print("Setting up GPG key...")
 
-    entry = kp.find_entries(title='gpg', first=True)
+    entry = cast(Optional[Entry], kp.find_entries(title='gpg', first=True))
     if not entry:
         print("Warning: No GPG entry found in database")
+        return
+
+    if not entry.password:
+        print("Warning: GPG entry has no password (private key)")
         return
 
     gpg_private_key = entry.password
@@ -86,17 +100,17 @@ def setup_gcloud_config(kp: PyKeePass):
     gcloud_dir = Path.home() / '.config' / 'gcloud'
     gcloud_dir.mkdir(mode=0o700, parents=True, exist_ok=True)
 
-    adc_entry = kp.find_entries(title='gcloud/application_default_credentials.json', first=True)
-    if adc_entry:
+    adc_entry = cast(Optional[Entry], kp.find_entries(title='gcloud/application_default_credentials.json', first=True))
+    if adc_entry and adc_entry.password:
         adc_path = gcloud_dir / 'application_default_credentials.json'
         adc_path.write_text(adc_entry.password)
         adc_path.chmod(0o600)
         print("  - application_default_credentials.json configured")
     else:
-        print("  Warning: gcloud/application_default_credentials.json entry not found")
+        print("  Warning: gcloud/application_default_credentials.json entry not found or has no password")
 
-    config_entry = kp.find_entries(title='gcloud/configurations/config_default', first=True)
-    if config_entry:
+    config_entry = cast(Optional[Entry], kp.find_entries(title='gcloud/configurations/config_default', first=True))
+    if config_entry and config_entry.password:
         config_dir = gcloud_dir / 'configurations'
         config_dir.mkdir(mode=0o700, exist_ok=True)
         config_path = config_dir / 'config_default'
@@ -104,9 +118,9 @@ def setup_gcloud_config(kp: PyKeePass):
         config_path.chmod(0o600)
         print("  - configurations/config_default configured")
     else:
-        print("  Warning: gcloud/configurations/config_default entry not found")
+        print("  Warning: gcloud/configurations/config_default entry not found or has no password")
 
-    creds_entry = kp.find_entries(title='gcloud/credentials.db', first=True)
+    creds_entry = cast(Optional[Entry], kp.find_entries(title='gcloud/credentials.db', first=True))
     if creds_entry:
         if creds_entry.attachments:
             attachment = creds_entry.attachments[0]
@@ -138,7 +152,7 @@ def setup_claude_code_env(kp: PyKeePass):
     env_lines = ['\n# Claude Code environment variables\n']
 
     for env_name, keepass_title in env_vars.items():
-        entry = kp.find_entries(title=keepass_title, first=True)
+        entry = cast(Optional[Entry], kp.find_entries(title=keepass_title, first=True))
         if entry and entry.password:
             env_lines.append(f'export {env_name}={entry.password}\n')
             print(f"  - {env_name} configured")
