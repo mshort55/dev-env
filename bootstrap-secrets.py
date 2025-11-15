@@ -43,6 +43,7 @@ def setup_ssh_keys(kp: PyKeePass):
 
     print(f"SSH keys configured at {ssh_dir}")
 
+
 def setup_gpg_key(kp: PyKeePass):
     print("Setting up GPG key...")
 
@@ -97,42 +98,49 @@ def setup_gpg_key(kp: PyKeePass):
 def setup_gcloud_config(kp: PyKeePass):
     print("Setting up gcloud configuration...")
 
+    GCLOUD_ADC_ENTRY_TITLE = '.config/gcloud/application_default_credentials.json'
+    GCLOUD_CONFIG_ENTRY_TITLE = '.config/gcloud/configurations/config_default'
+    GCLOUD_CREDENTIALS_DB_ENTRY_TITLE = '.config/gcloud/credentials.db'
+
     gcloud_dir = Path.home() / '.config' / 'gcloud'
     gcloud_dir.mkdir(mode=0o700, parents=True, exist_ok=True)
 
-    adc_entry = cast(Optional[Entry], kp.find_entries(title='gcloud/application_default_credentials.json', first=True))
+    adc_entry = cast(Optional[Entry], kp.find_entries(title=GCLOUD_ADC_ENTRY_TITLE, first=True))
     if adc_entry and adc_entry.password:
-        adc_path = gcloud_dir / 'application_default_credentials.json'
+        adc_filename = Path(GCLOUD_ADC_ENTRY_TITLE).name
+        adc_path = gcloud_dir / adc_filename
         adc_path.write_text(adc_entry.password)
         adc_path.chmod(0o600)
-        print("  - application_default_credentials.json configured")
+        print(f"  - {GCLOUD_ADC_ENTRY_TITLE} configured")
     else:
-        print("  Warning: gcloud/application_default_credentials.json entry not found or has no password")
+        print(f"  Warning: {GCLOUD_ADC_ENTRY_TITLE} entry not found or has no password")
 
-    config_entry = cast(Optional[Entry], kp.find_entries(title='gcloud/configurations/config_default', first=True))
+    config_entry = cast(Optional[Entry], kp.find_entries(title=GCLOUD_CONFIG_ENTRY_TITLE, first=True))
     if config_entry and config_entry.password:
-        config_dir = gcloud_dir / 'configurations'
+        config_parts = Path(GCLOUD_CONFIG_ENTRY_TITLE).parts
+        config_dir = gcloud_dir / config_parts[-2]
         config_dir.mkdir(mode=0o700, exist_ok=True)
-        config_path = config_dir / 'config_default'
+        config_path = config_dir / config_parts[-1]
         config_path.write_text(config_entry.password)
         config_path.chmod(0o600)
-        print("  - configurations/config_default configured")
+        print(f"  - {GCLOUD_CONFIG_ENTRY_TITLE} configured")
     else:
-        print("  Warning: gcloud/configurations/config_default entry not found or has no password")
+        print(f"  Warning: {GCLOUD_CONFIG_ENTRY_TITLE} entry not found or has no password")
 
-    creds_entry = cast(Optional[Entry], kp.find_entries(title='gcloud/credentials.db', first=True))
+    creds_entry = cast(Optional[Entry], kp.find_entries(title=GCLOUD_CREDENTIALS_DB_ENTRY_TITLE, first=True))
     if creds_entry:
         if creds_entry.attachments:
             attachment = creds_entry.attachments[0]
             creds_data = attachment.data
-            creds_path = gcloud_dir / 'credentials.db'
+            creds_filename = Path(GCLOUD_CREDENTIALS_DB_ENTRY_TITLE).name
+            creds_path = gcloud_dir / creds_filename
             creds_path.write_bytes(creds_data)
             creds_path.chmod(0o600)
-            print("  - credentials.db configured")
+            print(f"  - {GCLOUD_CREDENTIALS_DB_ENTRY_TITLE} configured")
         else:
-            print("  Warning: gcloud/credentials.db entry has no attachments")
+            print(f"  Warning: {GCLOUD_CREDENTIALS_DB_ENTRY_TITLE} entry has no attachments")
     else:
-        print("  Warning: gcloud/credentials.db entry not found")
+        print(f"  Warning: {GCLOUD_CREDENTIALS_DB_ENTRY_TITLE} entry not found")
 
     print("gcloud configuration complete")
 
@@ -169,19 +177,43 @@ def setup_claude_code_env(kp: PyKeePass):
 def setup_github_cli_config(kp: PyKeePass):
     print("Setting up GitHub CLI configuration...")
 
+    GH_HOSTS_ENTRY_TITLE = '.config/gh/hosts.yml'
+
     gh_dir = Path.home() / '.config' / 'gh'
     gh_dir.mkdir(mode=0o700, parents=True, exist_ok=True)
 
-    entry = cast(Optional[Entry], kp.find_entries(title='gh/hosts.yml', first=True))
+    entry = cast(Optional[Entry], kp.find_entries(title=GH_HOSTS_ENTRY_TITLE, first=True))
     if entry and entry.password:
-        hosts_path = gh_dir / 'hosts.yml'
+        hosts_filename = Path(GH_HOSTS_ENTRY_TITLE).name
+        hosts_path = gh_dir / hosts_filename
         hosts_path.write_text(entry.password)
         hosts_path.chmod(0o600)
-        print("  - hosts.yml configured")
+        print(f"  - {GH_HOSTS_ENTRY_TITLE} configured")
     else:
-        print("  Warning: gh/hosts.yml entry not found or has no password")
+        print(f"  Warning: {GH_HOSTS_ENTRY_TITLE} entry not found or has no password")
 
     print("GitHub CLI configuration complete")
+
+
+def setup_docker_config(kp: PyKeePass):
+    print("Setting up Docker configuration...")
+
+    DOCKER_CONFIG_ENTRY_TITLE = '.docker/config.json'
+
+    docker_dir = Path.home() / '.docker'
+    docker_dir.mkdir(mode=0o700, parents=True, exist_ok=True)
+
+    entry = cast(Optional[Entry], kp.find_entries(title=DOCKER_CONFIG_ENTRY_TITLE, first=True))
+    if entry and entry.password:
+        config_filename = Path(DOCKER_CONFIG_ENTRY_TITLE).name
+        config_path = docker_dir / config_filename
+        config_path.write_text(entry.password)
+        config_path.chmod(0o600)
+        print(f"  - {DOCKER_CONFIG_ENTRY_TITLE} configured")
+    else:
+        print(f"  Warning: {DOCKER_CONFIG_ENTRY_TITLE} entry not found or has no password")
+
+    print("Docker configuration complete")
 
 
 def setup_git_config(kp: PyKeePass):
@@ -247,6 +279,7 @@ def main():
     setup_gcloud_config(kp)
     setup_claude_code_env(kp)
     setup_github_cli_config(kp)
+    setup_docker_config(kp)
     setup_git_config(kp)
 
     print("\nAll secrets configured successfully!")
