@@ -12,6 +12,9 @@
     "ghcr.io/devcontainers/features/go:1": {
       "version": "1.24"
     },
+    "ghcr.io/devcontainers/features/node:1": {
+      "version": "24.11.1"
+    },
     "ghcr.io/devcontainers/features/github-cli:1": {},
     "ghcr.io/devcontainers/features/docker-in-docker:2": {}
   },
@@ -35,5 +38,5 @@
 
   "remoteUser": "mjs",
 
-  "postCreateCommand": "pip3 install --no-cache-dir pykeepass && python3 /Repos/dev-env/bootstrap-secrets.py"
+  "postCreateCommand": "pip3 install --no-cache-dir pykeepass && python3 /Repos/dev-env/bootstrap-secrets.py && npm install -g @anthropic-ai/claude-code"
 }

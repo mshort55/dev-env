@@ -120,23 +120,36 @@ def setup_gcloud_config(kp: PyKeePass):
     else:
         print("  Warning: gcloud/credentials.db entry not found")
 
-    email_entry = kp.find_entries(title='email', first=True)
-    if email_entry and email_entry.username:
-        try:
-            subprocess.run(
-                ['gcloud', 'config', 'set', 'account', email_entry.username],
-                capture_output=True,
-                check=True
-            )
-            print(f"  - gcloud account set to {email_entry.username}")
-        except subprocess.CalledProcessError as e:
-            print(f"  Warning: Failed to set gcloud account: {e.stderr.decode()}")
-        except FileNotFoundError:
-            print("  Warning: gcloud command not found")
-    else:
-        print("  Warning: email entry not found or has no username")
-
     print("gcloud configuration complete")
+
+
+def setup_claude_code_env(kp: PyKeePass):
+    print("Setting up Claude Code environment variables...")
+
+    bashrc_path = Path.home() / '.bashrc'
+    bashrc_content = bashrc_path.read_text() if bashrc_path.exists() else ''
+
+    env_vars = {
+        'ANTHROPIC_VERTEX_PROJECT_ID': 'claude_env_ANTHROPIC_VERTEX_PROJECT_ID',
+        'CLAUDE_CODE_USE_VERTEX': 'claude_env_CLAUDE_CODE_USE_VERTEX',
+        'CLOUD_ML_REGION': 'claude_env_CLOUD_ML_REGION'
+    }
+
+    env_lines = ['\n# Claude Code environment variables\n']
+
+    for env_name, keepass_title in env_vars.items():
+        entry = kp.find_entries(title=keepass_title, first=True)
+        if entry and entry.password:
+            env_lines.append(f'export {env_name}={entry.password}\n')
+            print(f"  - {env_name} configured")
+        else:
+            print(f"  Warning: {keepass_title} entry not found or has no password")
+
+    if env_lines and 'Claude Code environment variables' not in bashrc_content:
+        with bashrc_path.open('a') as f:
+            f.writelines(env_lines)
+
+    print("Claude Code environment variables configured")
 
 
 def main():
@@ -163,6 +176,7 @@ def main():
     setup_ssh_keys(kp)
     setup_gpg_key(kp)
     setup_gcloud_config(kp)
+    setup_claude_code_env(kp)
 
     print("\nAll secrets configured successfully!")
 
