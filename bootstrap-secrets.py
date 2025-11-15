@@ -166,6 +166,24 @@ def setup_claude_code_env(kp: PyKeePass):
     print("Claude Code environment variables configured")
 
 
+def setup_github_cli_config(kp: PyKeePass):
+    print("Setting up GitHub CLI configuration...")
+
+    gh_dir = Path.home() / '.config' / 'gh'
+    gh_dir.mkdir(mode=0o700, parents=True, exist_ok=True)
+
+    entry = cast(Optional[Entry], kp.find_entries(title='gh/hosts.yml', first=True))
+    if entry and entry.password:
+        hosts_path = gh_dir / 'hosts.yml'
+        hosts_path.write_text(entry.password)
+        hosts_path.chmod(0o600)
+        print("  - hosts.yml configured")
+    else:
+        print("  Warning: gh/hosts.yml entry not found or has no password")
+
+    print("GitHub CLI configuration complete")
+
+
 def setup_git_config(kp: PyKeePass):
     print("Setting up git configuration...")
 
@@ -228,6 +246,7 @@ def main():
     setup_gpg_key(kp)
     setup_gcloud_config(kp)
     setup_claude_code_env(kp)
+    setup_github_cli_config(kp)
     setup_git_config(kp)
 
     print("\nAll secrets configured successfully!")
