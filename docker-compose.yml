@@ -5,5 +5,6 @@ services:
     container_name: dev
     command: tail -f /dev/null
     volumes:
-      - ${HOME}/UbuntuSync:/UbuntuSync
+      - ${HOME}/General/.bash_history:/home/mjs/.bash_history
       - ${HOME}/Repos:/Repos
+      - ${HOME}/UbuntuSync:/UbuntuSync

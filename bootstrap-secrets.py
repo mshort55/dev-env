@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 """
 Bootstrap secrets from KeePass database into container.
-This script runs once on container creation to set up ephemeral secrets.
 """
 
 import os

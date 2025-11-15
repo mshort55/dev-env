@@ -43,5 +43,5 @@
   },
 
   "onCreateCommand": "pip3 install --no-cache-dir pykeepass && npm install -g @anthropic-ai/claude-code",
-  "postCreateCommand": "python3 /Repos/dev-env/bootstrap-secrets.py"
+  "postCreateCommand": "python3 /Repos/dev-env/general-setup.py && python3 /Repos/dev-env/bootstrap-secrets.py"
 }
