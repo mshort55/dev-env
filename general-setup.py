@@ -31,10 +31,39 @@ PROMPT_COMMAND="history -a; history -n; $PROMPT_COMMAND"
     print("  Enhanced bash history configured")
 
 
+def setup_completions():
+    print("Setting up shell completions...")
+
+    bashrc_path = Path.home() / '.bashrc'
+    bashrc_content = bashrc_path.read_text() if bashrc_path.exists() else ''
+
+    if '# Shell completions' in bashrc_content:
+        print("  Shell completions already configured, skipping")
+        return
+
+    completions = '''
+# Shell completions
+source <(kubectl completion bash)
+source <(oc completion bash)
+source /usr/share/google-cloud-sdk/completion.bash.inc
+eval "$(gh completion -s bash)"
+'''
+
+    with bashrc_path.open('a') as f:
+        f.write(completions)
+
+    print("  Shell completions configured")
+    print("    - kubectl completion")
+    print("    - oc completion")
+    print("    - gcloud completion")
+    print("    - gh completion")
+
+
 def main():
     print("\nStarting general environment setup...\n")
 
     setup_bash_history()
+    setup_completions()
 
     print("\nGeneral setup completed!\n")
 
