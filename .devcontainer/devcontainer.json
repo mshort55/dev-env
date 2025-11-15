@@ -1,5 +1,5 @@
 {
-  "name": "Dev Env",
+  "name": "mjs",
   "dockerComposeFile": [
     "../docker-compose.yml"
   ],
@@ -42,5 +42,6 @@
     "USER": "mjs"
   },
 
-  "postCreateCommand": "pip3 install --no-cache-dir pykeepass && python3 /Repos/dev-env/bootstrap-secrets.py && npm install -g @anthropic-ai/claude-code"
+  "onCreateCommand": "pip3 install --no-cache-dir pykeepass && npm install -g @anthropic-ai/claude-code",
+  "postCreateCommand": "python3 /Repos/dev-env/bootstrap-secrets.py"
 }
