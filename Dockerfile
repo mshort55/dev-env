@@ -18,12 +18,6 @@ RUN useradd -m -s /bin/bash -u 501 mjs && \
 
 USER mjs
 
-RUN git config --global user.email "mshort@redhat.com" && \
-    git config --global user.name "Matthew Short" && \
-    git config --global user.signingkey "5FC5E8CEE3AC461D" && \
-    git config --global commit.gpgsign true && \
-    git config --global tag.gpgsign true
-
 WORKDIR /UbuntuSync
 
 CMD ["/bin/bash"]

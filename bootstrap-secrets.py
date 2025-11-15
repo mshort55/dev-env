@@ -166,6 +166,43 @@ def setup_claude_code_env(kp: PyKeePass):
     print("Claude Code environment variables configured")
 
 
+def setup_git_config(kp: PyKeePass):
+    print("Setting up git configuration...")
+
+    git_configs = {
+        'user.email': 'git_user_email',
+        'user.name': 'git_user_name',
+        'user.signingkey': 'git_signingkey'
+    }
+
+    for config_key, keepass_title in git_configs.items():
+        entry = cast(Optional[Entry], kp.find_entries(title=keepass_title, first=True))
+        if entry and entry.password:
+            try:
+                subprocess.run(
+                    ['git', 'config', '--global', config_key, entry.password],
+                    capture_output=True,
+                    check=True
+                )
+                print(f"  - {config_key} configured")
+            except subprocess.CalledProcessError as e:
+                print(f"  Warning: Failed to set {config_key}: {e.stderr.decode()}")
+            except FileNotFoundError:
+                print("  Warning: git command not found, skipping git configuration")
+                return
+        else:
+            print(f"  Warning: {keepass_title} entry not found or has no password")
+
+    try:
+        subprocess.run(['git', 'config', '--global', 'commit.gpgsign', 'true'], check=True)
+        subprocess.run(['git', 'config', '--global', 'tag.gpgsign', 'true'], check=True)
+        print("  - commit.gpgsign and tag.gpgsign enabled")
+    except subprocess.CalledProcessError as e:
+        print(f"  Warning: Failed to set gpgsign flags: {e}")
+
+    print("Git configuration complete")
+
+
 def main():
     kdbx_path = '/UbuntuSync/dev-env.kdbx'
 
@@ -191,6 +228,7 @@ def main():
     setup_gpg_key(kp)
     setup_gcloud_config(kp)
     setup_claude_code_env(kp)
+    setup_git_config(kp)
 
     print("\nAll secrets configured successfully!")
 
