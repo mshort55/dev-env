@@ -34,7 +34,8 @@ def setup_ssh_keys(kp: PyKeePass):
     ssh_dir.mkdir(mode=0o700, exist_ok=True)
 
     private_key_path = ssh_dir / 'id_ed25519'
-    private_key_path.write_text(entry.password)
+    private_key_content = entry.password if entry.password.endswith('\n') else entry.password + '\n'
+    private_key_path.write_text(private_key_content)
     private_key_path.chmod(0o600)
 
     public_key_path = ssh_dir / 'id_ed25519.pub'
