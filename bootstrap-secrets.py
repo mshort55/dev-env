@@ -36,15 +36,15 @@ def setup_ssh_keys(kp: PyKeePass):
 
     entry = cast(Optional[Entry], kp.find_entries(title='ssh', first=True))
     if not entry:
-        print("Warning: No SSH entry found in database")
+        print("⚠️  Warning: No SSH entry found in database")
         return
 
     if not entry.password:
-        print("Warning: SSH entry has no password (private key)")
+        print("⚠️  Warning: SSH entry has no password (private key)")
         return
 
     if not entry.notes:
-        print("Warning: SSH entry has no notes (public key)")
+        print("⚠️  Warning: SSH entry has no notes (public key)")
         return
 
     ssh_dir = Path.home() / '.ssh'
@@ -59,7 +59,7 @@ def setup_ssh_keys(kp: PyKeePass):
     public_key_path.write_text(entry.notes)
     public_key_path.chmod(0o644)
 
-    print(f"SSH keys configured at {ssh_dir}")
+    print(f"SSH keys config complete")
 
 
 def setup_gpg_key(kp: PyKeePass):
@@ -67,11 +67,11 @@ def setup_gpg_key(kp: PyKeePass):
 
     entry = cast(Optional[Entry], kp.find_entries(title='gpg', first=True))
     if not entry:
-        print("Warning: No GPG entry found in database")
+        print("⚠️  Warning: No GPG entry found in database")
         return
 
     if not entry.password:
-        print("Warning: GPG entry has no password (private key)")
+        print("⚠️  Warning: GPG entry has no password (private key)")
         return
 
     gpg_private_key = entry.password
@@ -85,10 +85,10 @@ def setup_gpg_key(kp: PyKeePass):
         )
         print("GPG key imported successfully")
     except subprocess.CalledProcessError as e:
-        print(f"Warning: Failed to import GPG key: {e.stderr.decode()}")
+        print(f"⚠️  Warning: Failed to import GPG key: {e.stderr.decode()}")
         return
     except FileNotFoundError:
-        print("Warning: gpg command not found, skipping GPG setup")
+        print("⚠️  Warning: gpg command not found, skipping GPG setup")
         return
 
     gpg_conf_dir = Path.home() / '.gnupg'
@@ -110,7 +110,7 @@ def setup_gpg_key(kp: PyKeePass):
         with bashrc_path.open('a') as f:
             f.write(gpg_tty_config)
 
-    print("GPG configuration updated for container use")
+    print("GPG configuration complete")
 
 
 def setup_gcloud_config(kp: PyKeePass):
@@ -131,7 +131,7 @@ def setup_gcloud_config(kp: PyKeePass):
         adc_path.chmod(0o600)
         print(f"  - {GCLOUD_ADC_ENTRY_TITLE} configured")
     else:
-        print(f"  Warning: {GCLOUD_ADC_ENTRY_TITLE} entry not found or has no password")
+        print(f"  ⚠️  Warning: {GCLOUD_ADC_ENTRY_TITLE} entry not found or has no password")
 
     config_entry = cast(Optional[Entry], kp.find_entries(title=GCLOUD_CONFIG_ENTRY_TITLE, first=True))
     if config_entry and config_entry.password:
@@ -143,7 +143,7 @@ def setup_gcloud_config(kp: PyKeePass):
         config_path.chmod(0o600)
         print(f"  - {GCLOUD_CONFIG_ENTRY_TITLE} configured")
     else:
-        print(f"  Warning: {GCLOUD_CONFIG_ENTRY_TITLE} entry not found or has no password")
+        print(f"  ⚠️  Warning: {GCLOUD_CONFIG_ENTRY_TITLE} entry not found or has no password")
 
     creds_entry = cast(Optional[Entry], kp.find_entries(title=GCLOUD_CREDENTIALS_DB_ENTRY_TITLE, first=True))
     if creds_entry:
@@ -156,9 +156,9 @@ def setup_gcloud_config(kp: PyKeePass):
             creds_path.chmod(0o600)
             print(f"  - {GCLOUD_CREDENTIALS_DB_ENTRY_TITLE} configured")
         else:
-            print(f"  Warning: {GCLOUD_CREDENTIALS_DB_ENTRY_TITLE} entry has no attachments")
+            print(f"  ⚠️  Warning: {GCLOUD_CREDENTIALS_DB_ENTRY_TITLE} entry has no attachments")
     else:
-        print(f"  Warning: {GCLOUD_CREDENTIALS_DB_ENTRY_TITLE} entry not found")
+        print(f"  ⚠️  Warning: {GCLOUD_CREDENTIALS_DB_ENTRY_TITLE} entry not found")
 
     print("gcloud configuration complete")
 
@@ -180,12 +180,12 @@ def setup_claude_code_env(kp: PyKeePass):
             env_vars[env_name] = entry.password
             print(f"  - {env_name} configured")
         else:
-            print(f"  Warning: {keepass_title} entry not found or has no password")
+            print(f"  ⚠️  Warning: {keepass_title} entry not found or has no password")
 
     if env_vars:
         add_env_vars_to_bashrc(env_vars, "Claude Code environment variables")
 
-    print("Claude Code environment variables configured")
+    print("Claude Code environment variables config complete")
 
 
 def setup_kube_context_env(kp: PyKeePass):
@@ -203,12 +203,12 @@ def setup_kube_context_env(kp: PyKeePass):
             env_vars[env_name] = entry.password
             print(f"  - {env_name} configured")
         else:
-            print(f"  Warning: {keepass_title} entry not found or has no password")
+            print(f"  ⚠️  Warning: {keepass_title} entry not found or has no password")
 
     if env_vars:
         add_env_vars_to_bashrc(env_vars, "Kubernetes context environment variables")
 
-    print("Kubernetes context environment variables configured")
+    print("Kubernetes context environment variables config complete")
 
 
 def setup_github_cli_config(kp: PyKeePass):
@@ -227,7 +227,7 @@ def setup_github_cli_config(kp: PyKeePass):
         hosts_path.chmod(0o600)
         print(f"  - {GH_HOSTS_ENTRY_TITLE} configured")
     else:
-        print(f"  Warning: {GH_HOSTS_ENTRY_TITLE} entry not found or has no password")
+        print(f"  ⚠️  Warning: {GH_HOSTS_ENTRY_TITLE} entry not found or has no password")
 
     print("GitHub CLI configuration complete")
 
@@ -248,7 +248,7 @@ def setup_docker_config(kp: PyKeePass):
         config_path.chmod(0o600)
         print(f"  - {DOCKER_CONFIG_ENTRY_TITLE} configured")
     else:
-        print(f"  Warning: {DOCKER_CONFIG_ENTRY_TITLE} entry not found or has no password")
+        print(f"  ⚠️  Warning: {DOCKER_CONFIG_ENTRY_TITLE} entry not found or has no password")
 
     print("Docker configuration complete")
 
@@ -273,19 +273,19 @@ def setup_git_config(kp: PyKeePass):
                 )
                 print(f"  - {config_key} configured")
             except subprocess.CalledProcessError as e:
-                print(f"  Warning: Failed to set {config_key}: {e.stderr.decode()}")
+                print(f"  ⚠️  Warning: Failed to set {config_key}: {e.stderr.decode()}")
             except FileNotFoundError:
-                print("  Warning: git command not found, skipping git configuration")
+                print("  ⚠️  Warning: git command not found, skipping git configuration")
                 return
         else:
-            print(f"  Warning: {keepass_title} entry not found or has no password")
+            print(f"  ⚠️  Warning: {keepass_title} entry not found or has no password")
 
     try:
         subprocess.run(['git', 'config', '--global', 'commit.gpgsign', 'true'], check=True)
         subprocess.run(['git', 'config', '--global', 'tag.gpgsign', 'true'], check=True)
         print("  - commit.gpgsign and tag.gpgsign enabled")
     except subprocess.CalledProcessError as e:
-        print(f"  Warning: Failed to set gpgsign flags: {e}")
+        print(f"  ⚠️  Warning: Failed to set gpgsign flags: {e}")
 
     print("Git configuration complete")
 
@@ -295,16 +295,16 @@ def open_keepass_database(kdbx_path: str, max_attempts: int = 3) -> PyKeePass:
         try:
             master_password = getpass.getpass("Enter KeePass master password: ")
         except KeyboardInterrupt:
-            print("\nBootstrap cancelled")
+            print("\n⚠️  Bootstrap cancelled")
             sys.exit(1)
 
         try:
             return PyKeePass(kdbx_path, password=master_password)
         except Exception as e:
             if attempt < max_attempts:
-                print(f"Error: Incorrect password. {max_attempts - attempt} attempt(s) remaining.")
+                print(f"⚠️  Error: Incorrect password. {max_attempts - attempt} attempt(s) remaining.")
             else:
-                print(f"Error: Failed to open database after {max_attempts} attempts: {e}")
+                print(f"⚠️  Error: Failed to open database after {max_attempts} attempts: {e}")
                 sys.exit(1)
 
     # This line should never be reached, but satisfies type checker
@@ -315,7 +315,7 @@ def main():
     kdbx_path = '/UbuntuSync/dev-env.kdbx'
 
     if not os.path.exists(kdbx_path):
-        print(f"Error: KeePass database not found at {kdbx_path}")
+        print(f"⚠️  Error: KeePass database not found at {kdbx_path}")
         sys.exit(1)
 
     kp = open_keepass_database(kdbx_path)
