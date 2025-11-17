@@ -290,6 +290,27 @@ def setup_git_config(kp: PyKeePass):
     print("Git configuration complete")
 
 
+def open_keepass_database(kdbx_path: str, max_attempts: int = 3) -> PyKeePass:
+    for attempt in range(1, max_attempts + 1):
+        try:
+            master_password = getpass.getpass("Enter KeePass master password: ")
+        except KeyboardInterrupt:
+            print("\nBootstrap cancelled")
+            sys.exit(1)
+
+        try:
+            return PyKeePass(kdbx_path, password=master_password)
+        except Exception as e:
+            if attempt < max_attempts:
+                print(f"Error: Incorrect password. {max_attempts - attempt} attempt(s) remaining.")
+            else:
+                print(f"Error: Failed to open database after {max_attempts} attempts: {e}")
+                sys.exit(1)
+
+    # This line should never be reached, but satisfies type checker
+    raise RuntimeError("Unreachable: should have returned or exited")
+
+
 def main():
     kdbx_path = '/UbuntuSync/dev-env.kdbx'
 
@@ -297,18 +318,7 @@ def main():
         print(f"Error: KeePass database not found at {kdbx_path}")
         sys.exit(1)
 
-    try:
-        master_password = getpass.getpass("Enter KeePass master password: ")
-    except KeyboardInterrupt:
-        print("\nBootstrap cancelled")
-        sys.exit(1)
-
-    try:
-        kp = PyKeePass(kdbx_path, password=master_password)
-    except Exception as e:
-        print(f"Error: Failed to open database: {e}")
-        sys.exit(1)
-
+    kp = open_keepass_database(kdbx_path)
     print("\nSuccessfully opened KeePass database\n")
 
     setup_ssh_keys(kp)
