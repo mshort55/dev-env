@@ -7,6 +7,7 @@ RUN apt-get update && apt-get install -y \
     curl \
     git \
     gnupg \
+    locales \
     net-tools \
     podman \
     sudo \
@@ -25,6 +26,9 @@ RUN apt-get update && apt-get install -y \
     && rm -f /tmp/openshift-client.tar.gz /tmp/README.md \
     # Cleanup
     && apt-get clean && rm -rf /var/lib/apt/lists/*
+
+RUN sed -i -e 's/# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen && \
+    locale-gen en_US.UTF-8
 
 RUN useradd -m -s /bin/bash -u 501 mjs && \
     echo "mjs ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers

@@ -39,7 +39,9 @@
   "remoteUser": "mjs",
 
   "containerEnv": {
-    "USER": "mjs"
+    "USER": "mjs",
+    "LANG": "en_US.UTF-8",
+    "LC_ALL": "en_US.UTF-8"
   },
 
   "onCreateCommand": "pip3 install --no-cache-dir pykeepass && npm install -g @anthropic-ai/claude-code",
