@@ -39,6 +39,9 @@ The container automatically configures SSH keys, GPG, git, gcloud, GitHub CLI, a
 - **Dockerfile**: Base Ubuntu 24.04 image with all tools installed
 - **docker-compose.yml**: Mounts `~/UbuntuSync` and `~/Repos` into the container
 - **devcontainer.json**: VS Code dev container configuration
+- **general-setup.py**: Configures general shell environment:
+  - Enhanced bash history (50k entries, persistent across sessions)
+  - Shell completions (kubectl, oc, gcloud, gh)
 - **bootstrap-secrets.py**: Reads secrets from `/UbuntuSync/dev-env.kdbx` and configures:
   - SSH keys (`~/.ssh/id_ed25519`)
   - GPG keys (imported and configured)
