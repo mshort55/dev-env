@@ -1,10 +1,8 @@
 {
-  "name": "mjs",
   "dockerComposeFile": [
     "../docker-compose.yml"
   ],
   "service": "dev",
-  "workspaceFolder": "/UbuntuSync",
   "features": {
     "ghcr.io/devcontainers/features/python:1": {
       "version": "3.11"
@@ -36,13 +34,5 @@
     }
   },
 
-  "remoteUser": "mjs",
-
-  "containerEnv": {
-    "USER": "mjs",
-    "LANG": "en_US.UTF-8",
-    "LC_ALL": "en_US.UTF-8"
-  },
-
-  "postCreateCommand": "bash /Repos/dev-env/post-create.sh"
+  "postCreateCommand": "bash $DEV_ENV_DIR/post-create.sh"
 }

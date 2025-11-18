@@ -312,7 +312,10 @@ def open_keepass_database(kdbx_path: str, max_attempts: int = 3) -> PyKeePass:
 
 
 def main():
-    kdbx_path = '/UbuntuSync/dev-env.kdbx'
+    kdbx_path = os.environ.get('KEEPASS_DB_PATH')
+    if not kdbx_path:
+        print("⚠️  Error: KEEPASS_DB_PATH environment variable not set")
+        sys.exit(1)
 
     if not os.path.exists(kdbx_path):
         print(f"⚠️  Error: KeePass database not found at {kdbx_path}")
