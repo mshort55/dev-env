@@ -30,7 +30,7 @@
         "eamodio.gitlens",
         "golang.go",
         "esbenp.prettier-vscode",
-        "timonwong.shellch",
+        "timonwong.shellcheck",
         "vscodevim.vim"
       ]
     }
