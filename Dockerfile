@@ -18,7 +18,6 @@ RUN apt-get update && apt-get install -y \
     gnupg \
     locales \
     net-tools \
-    podman \
     sudo \
     ubuntu-standard \
     vim \

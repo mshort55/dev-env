@@ -44,6 +44,5 @@
     "LC_ALL": "en_US.UTF-8"
   },
 
-  "onCreateCommand": "pip3 install --no-cache-dir pykeepass && npm install -g @anthropic-ai/claude-code",
-  "postCreateCommand": "python3 /Repos/dev-env/general-setup.py && python3 /Repos/dev-env/bootstrap-secrets.py"
+  "postCreateCommand": "bash /Repos/dev-env/post-create.sh"
 }
