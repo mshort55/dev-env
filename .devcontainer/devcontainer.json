@@ -2,6 +2,7 @@
   "dockerComposeFile": [
     "../docker-compose.yml"
   ],
+  "workspaceFolder": "/UbuntuSync",
   "service": "dev",
   "features": {
     "ghcr.io/devcontainers/features/python:1": {
