@@ -3,7 +3,8 @@ FROM ubuntu:24.04@sha256:e96e81f410a9f9cae717e6cdd88cc2a499700ff0bb5061876ad2437
 
 ARG IMAGE_VERSION="1.0.0"
 ARG YQ_VERSION="4.48.2"
-ARG OPENSHIFT_VERSION="4.20.1"
+ARG OPENSHIFT_VERSION="4.20.5"
+ARG KIND_VERSION="0.30.0"
 ARG CONTAINER_USER
 ARG CONTAINER_UID
 ARG WORKSPACE_DIR_NAME
@@ -44,6 +45,10 @@ RUN curl -L https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/yq_
     && mv /tmp/yq_linux_arm64 /usr/local/bin/yq \
     && chmod +x /usr/local/bin/yq \
     && rm -f /tmp/yq.tar.gz
+
+# kind install
+RUN curl -L https://kind.sigs.k8s.io/dl/v${KIND_VERSION}/kind-linux-arm64 -o /usr/local/bin/kind \
+    && chmod +x /usr/local/bin/kind
 
 RUN sed -i -e 's/# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen && \
     locale-gen en_US.UTF-8
