@@ -3,6 +3,7 @@
 General setup for dev container environment.
 """
 
+import shutil
 from pathlib import Path
 
 
@@ -59,11 +60,33 @@ eval "$(gh completion -s bash)"
     print("    - gh completion")
 
 
+def setup_claude_commands():
+    print("Setting up Claude command files...")
+
+    source_dir = Path('/Repos/dev-env/claude_commands')
+    target_dir = Path.home() / '.claude' / 'commands'
+
+    target_dir.mkdir(parents=True, exist_ok=True)
+
+    copied_count = 0
+    for file_path in source_dir.iterdir():
+        if file_path.is_file():
+            shutil.copy(file_path, target_dir / file_path.name)
+            print(f"    - Copied {file_path.name}")
+            copied_count += 1
+
+    if copied_count == 0:
+        print("  No command files found")
+    else:
+        print(f"  Copied {copied_count} command file(s)")
+
+
 def main():
     print("\nStarting general environment setup...\n")
 
     setup_bash_history()
     setup_completions()
+    setup_claude_commands()
 
     print("\nGeneral setup completed!\n")
 
