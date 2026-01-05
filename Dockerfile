@@ -1,10 +1,11 @@
-# Ubuntu 24.04 LTS - Digest updated: 2025-11-17
-FROM ubuntu:24.04@sha256:e96e81f410a9f9cae717e6cdd88cc2a499700ff0bb5061876ad24377fcc517d7
+# Ubuntu 24.04 LTS
+# docker inspect ubuntu:24.04 --format='{{.Created}}'
+# 2025-10-16T19:26:58.895610113Z
+FROM ubuntu@sha256:c35e29c9450151419d9448b0fd75374fec4fff364a27f176fb458d472dfc9e54
 
-ARG IMAGE_VERSION="1.0.0"
-ARG YQ_VERSION="4.48.2"
-ARG OPENSHIFT_VERSION="4.20.5"
-ARG KIND_VERSION="0.30.0"
+ARG YQ_VERSION="4.50.1"
+ARG OPENSHIFT_VERSION="4.20.8"
+ARG KIND_VERSION="0.31.0"
 ARG CONTAINER_USER
 ARG CONTAINER_UID
 ARG WORKSPACE_DIR_NAME
@@ -32,7 +33,7 @@ RUN curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | gpg --dearmor -
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # oc & kubectl install
-RUN curl -L https://mirror.openshift.com/pub/openshift-v4/clients/ocp/stable/openshift-client-linux-arm64-${OPENSHIFT_VERSION}.tar.gz -o /tmp/openshift-client.tar.gz \
+RUN curl -L https://mirror.openshift.com/pub/openshift-v4/clients/ocp/${OPENSHIFT_VERSION}/openshift-client-linux-arm64.tar.gz -o /tmp/openshift-client.tar.gz \
     && tar -xzf /tmp/openshift-client.tar.gz -C /tmp \
     && mv /tmp/oc /usr/local/bin/oc \
     && mv /tmp/kubectl /usr/local/bin/kubectl \
