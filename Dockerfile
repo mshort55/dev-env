@@ -16,6 +16,7 @@ ENV DEBIAN_FRONTEND=noninteractive \
 
 # Base system packages install
 RUN apt-get update && apt-get install -y \
+    apache2-utils \
     curl \
     git \
     gnupg \

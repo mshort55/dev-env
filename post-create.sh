@@ -3,6 +3,7 @@ set -e
 
 echo "Running post-create commands..."
 
+sudo apt update
 pip3 install --no-cache-dir -r "${DEV_ENV_DIR}/requirements.txt"
 # claude code install
 # shellcheck source=/dev/null
