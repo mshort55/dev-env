@@ -20,6 +20,7 @@ RUN apt-get update && apt-get install -y \
     curl \
     git \
     gnupg \
+    iputils-ping \
     locales \
     net-tools \
     sudo \
