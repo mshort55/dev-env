@@ -4,6 +4,7 @@ General setup for dev container environment.
 """
 
 import shutil
+import subprocess
 from pathlib import Path
 
 
@@ -81,11 +82,72 @@ def setup_claude_commands():
         print(f"  Copied {copied_count} command file(s)")
 
 
+def setup_shell_paths():
+    print("Setting up shell PATH...")
+
+    bashrc_path = Path.home() / '.bashrc'
+    bashrc_content = bashrc_path.read_text() if bashrc_path.exists() else ''
+
+    if '# User bin paths' in bashrc_content:
+        print("  PATH already configured, skipping")
+        return
+
+    path_config = '''
+# User bin paths
+export PATH="$HOME/.local/bin:$HOME/go/bin:$PATH"
+'''
+
+    with bashrc_path.open('a') as f:
+        f.write(path_config)
+
+    print("  PATH configured successfully")
+
+
+def install_claude_code():
+    print("Installing Claude Code CLI...")
+
+    install_cmd = 'curl -fsSL https://claude.ai/install.sh | bash'
+    result = subprocess.run(install_cmd, shell=True)
+
+    if result.returncode == 0:
+        print("  Claude Code CLI installed successfully")
+    else:
+        print("  ⚠️  Warning: Claude Code installation failed")
+
+
+def install_go_tools():
+    print("Installing Go tools...")
+
+    tools = [
+        ('github.com/onsi/ginkgo/v2/ginkgo', 'Ginkgo'),
+    ]
+
+    for tool_path, description in tools:
+        tool_name = tool_path.split('/')[-1]
+        print(f"  Installing {description} ({tool_name})...")
+
+        result = subprocess.run(
+            ['go', 'install', f'{tool_path}@latest'],
+            capture_output=True,
+            text=True
+        )
+
+        if result.returncode == 0:
+            print(f"    {tool_name} installed successfully")
+        else:
+            print(f"    ⚠️  Warning: {tool_name} installation failed")
+            if result.stderr:
+                print(f"    ⚠️  Error: {result.stderr}")
+
+
 def main():
     print("\nStarting general environment setup...\n")
 
     setup_bash_history()
     setup_completions()
+    setup_shell_paths()
+    install_claude_code()
+    install_go_tools()
     setup_claude_commands()
 
     print("\nGeneral setup completed!\n")
