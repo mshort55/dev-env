@@ -14,8 +14,10 @@ ENV DEBIAN_FRONTEND=noninteractive \
     LANG=en_US.UTF-8 \
     LC_ALL=en_US.UTF-8
 
-# Base system packages install
-RUN apt-get update && apt-get install -y \
+# Base system packages install + full package upgrade
+RUN apt-get update && \
+    apt-get -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" upgrade && \
+    apt-get install -y \
     apache2-utils \
     curl \
     git \
