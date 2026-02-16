@@ -26,6 +26,7 @@ RUN apt-get update && \
     iputils-ping \
     locales \
     net-tools \
+    openssh-client \
     sudo \
     ubuntu-standard \
     vim && \
