@@ -24,6 +24,7 @@ RUN apt-get update && \
     git \
     gnupg \
     iputils-ping \
+    less \
     locales \
     net-tools \
     openssh-client \
