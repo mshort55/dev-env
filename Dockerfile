@@ -19,6 +19,7 @@ RUN apt-get update && \
     apt-get -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" upgrade && \
     apt-get install -y --no-install-recommends \
     apache2-utils \
+    bash-completion \
     ca-certificates \
     curl \
     git \
