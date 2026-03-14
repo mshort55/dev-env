@@ -140,6 +140,71 @@ def install_go_tools():
                 print(f"    ⚠️  Error: {result.stderr}")
 
 
+def install_binaries():
+    print("Installing binaries...")
+
+    binaries_dir = Path.home() / 'Binaries'
+
+    if not binaries_dir.exists():
+        print("  ⚠️  Warning: Binaries directory not found, skipping")
+        return
+
+    binaries = [
+        ('hcp_acm216.tar.gz', 'hcp'),
+    ]
+
+    for archive_name, binary_name in binaries:
+        archive_path = binaries_dir / archive_name
+
+        if not archive_path.exists():
+            print(f"  ⚠️  Warning: {archive_name} not found, skipping")
+            continue
+
+        print(f"  Installing {binary_name} from {archive_name}...")
+
+        result = subprocess.run(
+            ['tar', 'xvzf', str(archive_path)],
+            cwd=binaries_dir,
+            capture_output=True,
+            text=True
+        )
+
+        if result.returncode != 0:
+            print(f"    ⚠️  Error: Failed to extract {archive_name}")
+            if result.stderr:
+                print(f"    ⚠️  Error: {result.stderr}")
+            continue
+
+        binary_path = binaries_dir / binary_name
+
+        if not binary_path.exists():
+            print(f"    ⚠️  Error: Extracted binary '{binary_name}' not found")
+            continue
+
+        result = subprocess.run(
+            ['chmod', '+x', str(binary_path)],
+            capture_output=True,
+            text=True
+        )
+
+        if result.returncode != 0:
+            print(f"    ⚠️  Error: Failed to make {binary_name} executable")
+            continue
+
+        result = subprocess.run(
+            ['sudo', 'mv', str(binary_path), '/usr/local/bin/.'],
+            capture_output=True,
+            text=True
+        )
+
+        if result.returncode == 0:
+            print(f"    {binary_name} installed successfully")
+        else:
+            print(f"    ⚠️  Error: Failed to move {binary_name} to /usr/local/bin")
+            if result.stderr:
+                print(f"    ⚠️  Error: {result.stderr}")
+
+
 def main():
     print("\nStarting general environment setup...\n")
 
@@ -148,6 +213,7 @@ def main():
     setup_shell_paths()
     install_claude_code()
     install_go_tools()
+    install_binaries()
     setup_claude_commands()
 
     print("\nGeneral setup completed!\n")
