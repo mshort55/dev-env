@@ -6,6 +6,7 @@ FROM ubuntu@sha256:c35e29c9450151419d9448b0fd75374fec4fff364a27f176fb458d472dfc9
 ARG YQ_VERSION="4.50.1"
 ARG OPENSHIFT_VERSION="4.20.8"
 ARG KIND_VERSION="0.31.0"
+ARG HCP_VERSION="2.8.3-13"
 ARG CONTAINER_USER
 ARG CONTAINER_UID
 ARG WORKSPACE_DIR_NAME
@@ -27,6 +28,7 @@ RUN apt-get update && \
     iputils-ping \
     less \
     locales \
+    nano \
     net-tools \
     openssh-client \
     sudo \
@@ -48,8 +50,10 @@ RUN \
     curl -fsSL https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/yq_linux_arm64.tar.gz | tar -xz --transform='s/yq_linux_arm64/yq/' -C /usr/local/bin ./yq_linux_arm64 && \
     # kind
     curl -fsSL https://kind.sigs.k8s.io/dl/v${KIND_VERSION}/kind-linux-arm64 -o /usr/local/bin/kind && \
+    # hcp-cli
+    curl -fsSL https://developers.redhat.com/content-gateway/file/pub/mce/clients/hcp-cli/${HCP_VERSION}/hcp-cli-${HCP_VERSION}-linux-arm64.tar.gz | tar -xz -C /usr/local/bin && \
     # finalize and clean up
-    chmod +x /usr/local/bin/oc /usr/local/bin/kubectl /usr/local/bin/yq /usr/local/bin/kind && \
+    chmod +x /usr/local/bin/oc /usr/local/bin/kubectl /usr/local/bin/yq /usr/local/bin/kind /usr/local/bin/hcp && \
     apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/*
 
 RUN useradd -m -s /bin/bash -u ${CONTAINER_UID} ${CONTAINER_USER} && \

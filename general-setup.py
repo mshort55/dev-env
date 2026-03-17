@@ -213,7 +213,7 @@ def main():
     setup_shell_paths()
     install_claude_code()
     install_go_tools()
-    install_binaries()
+    # install_binaries()
     setup_claude_commands()
 
     print("\nGeneral setup completed!\n")
