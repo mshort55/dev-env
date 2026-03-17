@@ -23,6 +23,7 @@ RUN apt-get update && \
     bash-completion \
     ca-certificates \
     curl \
+    gettext \
     git \
     gnupg \
     iputils-ping \
