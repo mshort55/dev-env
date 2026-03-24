@@ -43,22 +43,41 @@ def setup_completions():
         print("  Shell completions already configured, skipping")
         return
 
-    completions = '''
-# Shell completions
-source <(kubectl completion bash)
-source <(oc completion bash)
-source /usr/share/google-cloud-sdk/completion.bash.inc
-eval "$(gh completion -s bash)"
-'''
+    completions = ['# Shell completions\n']
 
-    with bashrc_path.open('a') as f:
-        f.write(completions)
+    add_command_completion(completions, 'kubectl', 'source <({command} completion bash)\n')
+    add_command_completion(completions, 'oc', 'source <({command} completion bash)\n')
+    add_command_completion(completions, 'gh', 'eval "$({command} completion -s bash)"\n')
+    add_file_completion(completions, '/usr/share/google-cloud-sdk/completion.bash.inc', 'gcloud completion')
 
-    print("  Shell completions configured")
-    print("    - kubectl completion")
-    print("    - oc completion")
-    print("    - gcloud completion")
-    print("    - gh completion")
+    if len(completions) > 1:
+        with bashrc_path.open('a') as f:
+            f.write('\n')
+            f.writelines(completions)
+        print("  Shell completions configured")
+    else:
+        print("  No completions available to configure")
+
+
+def add_command_completion(completions, command, completion_template):
+    if shutil.which(command):
+        completions.append(completion_template.format(command=command))
+        print(f"    - {command} completion")
+        return True
+    else:
+        print(f"  ⚠️  Warning: {command} not found, skipping completion")
+        return False
+
+
+def add_file_completion(completions, file_path, display_name):
+    path = Path(file_path) if isinstance(file_path, str) else file_path
+    if path.exists():
+        completions.append(f'source {file_path}\n')
+        print(f"    - {display_name}")
+        return True
+    else:
+        print(f"  ⚠️  Warning: {display_name} file not found, skipping")
+        return False
 
 
 def setup_claude_commands():
@@ -66,6 +85,10 @@ def setup_claude_commands():
 
     source_dir = Path('/Repos/dev-env/claude_commands')
     target_dir = Path.home() / '.claude' / 'commands'
+
+    if not source_dir.exists():
+        print("  ⚠️  Warning: Claude commands directory not found, skipping")
+        return
 
     target_dir.mkdir(parents=True, exist_ok=True)
 
@@ -117,6 +140,10 @@ def install_claude_code():
 
 def install_go_tools():
     print("Installing Go tools...")
+
+    if not shutil.which('go'):
+        print("  ⚠️  Warning: go command not found, skipping Go tools installation")
+        return
 
     tools = [
         ('github.com/onsi/ginkgo/v2/ginkgo', 'Ginkgo'),
