@@ -10,6 +10,7 @@ import subprocess
 from pathlib import Path
 from typing import cast, Optional
 from pykeepass import PyKeePass
+from pykeepass.attachment import Attachment
 from pykeepass.entry import Entry
 
 
@@ -51,7 +52,7 @@ def setup_ssh_keys(kp: PyKeePass):
     ssh_dir.mkdir(mode=0o700, exist_ok=True)
 
     private_key_path = ssh_dir / 'id_ed25519'
-    private_key_content = entry.password if entry.password.endswith('\n') else entry.password + '\n'
+    private_key_content = cast(str, entry.password if entry.password.endswith('\n') else entry.password + '\n')
     private_key_path.write_text(private_key_content)
     private_key_path.chmod(0o600)
 
@@ -74,7 +75,7 @@ def setup_gpg_key(kp: PyKeePass):
         print("⚠️  Warning: GPG entry has no password (private key)")
         return
 
-    gpg_private_key = entry.password
+    gpg_private_key = cast(str, entry.password)
 
     try:
         subprocess.run(
@@ -148,8 +149,8 @@ def setup_gcloud_config(kp: PyKeePass):
     creds_entry = cast(Optional[Entry], kp.find_entries(title=GCLOUD_CREDENTIALS_DB_ENTRY_TITLE, first=True))
     if creds_entry:
         if creds_entry.attachments:
-            attachment = creds_entry.attachments[0]
-            creds_data = attachment.data
+            attachment = cast(Attachment, creds_entry.attachments[0])
+            creds_data = cast(bytes, attachment.data)
             creds_filename = Path(GCLOUD_CREDENTIALS_DB_ENTRY_TITLE).name
             creds_path = gcloud_dir / creds_filename
             creds_path.write_bytes(creds_data)

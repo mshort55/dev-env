@@ -59,7 +59,7 @@ def setup_completions():
         print("  No completions available to configure")
 
 
-def add_command_completion(completions, command, completion_template):
+def add_command_completion(completions: list[str], command: str, completion_template: str) -> bool:
     if shutil.which(command):
         completions.append(completion_template.format(command=command))
         print(f"    - {command} completion")
@@ -69,8 +69,8 @@ def add_command_completion(completions, command, completion_template):
         return False
 
 
-def add_file_completion(completions, file_path, display_name):
-    path = Path(file_path) if isinstance(file_path, str) else file_path
+def add_file_completion(completions: list[str], file_path: str, display_name: str) -> bool:
+    path = Path(file_path)
     if path.exists():
         completions.append(f'source {file_path}\n')
         print(f"    - {display_name}")
