@@ -1,7 +1,7 @@
 services:
   dev:
     build:
-      context: .
+      context: .devcontainer/dev
       args:
         - CONTAINER_USER
         - CONTAINER_UID
