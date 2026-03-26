@@ -19,3 +19,22 @@ services:
       - ${HOST_BINARIES_DIR}:/home/${CONTAINER_USER}/Binaries
       - ${HOST_REPOS_DIR}:/${REPOS_DIR_NAME}
       - ${HOST_WORKSPACE_DIR}:/${WORKSPACE_DIR_NAME}
+
+  ruflo:
+    build:
+      context: .devcontainer/ruflo
+    image: ruflo-mcp:latest
+    container_name: ruflo
+    command: npx claude-flow mcp start -t http -p 3000
+    environment:
+      - CLAUDE_FLOW_V3_ENABLED=true
+      - CLAUDE_FLOW_HOOKS_ENABLED=true
+      - NODE_ENV=production
+    volumes:
+      - ${HOST_RUFLO_DIR}/state:/app/.claude-flow
+      - ${HOST_RUFLO_DIR}/data:/app/data
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:3000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
