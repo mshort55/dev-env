@@ -3,20 +3,13 @@
 # org.opencontainers.image.created: 2026-03-26T05:35:33Z
 FROM node@sha256:3cb200bfcdbde6e13f7c9306d7f50fa2489dc8d85d9a162a131dffc0b1fe429f
 
-ARG RUFLO_VERSION="3.5.48"
+ARG CONTAINER_USER
+ARG CONTAINER_UID
 
-WORKDIR /app
+WORKDIR /opt/ruflo
 
-# Install with exact version pin and no install scripts for security
-RUN npm install --ignore-scripts "@claude-flow/cli@${RUFLO_VERSION}" && \
-    npm audit --omit=dev && \
-    rm -rf /root/.npm /tmp/*
+RUN adduser -u ${CONTAINER_UID} -D ${CONTAINER_USER}
 
-# Run as non-root
-RUN adduser -D -u 1001 ruflo && \
-    chown -R ruflo:ruflo /app
+USER ${CONTAINER_USER}
 
-USER ruflo
-EXPOSE 3000
-
-CMD ["npx", "claude-flow", "mcp", "start", "-t", "http", "-p", "3000"]
+COPY --chown=${CONTAINER_USER}:${CONTAINER_USER} --chmod=755 post-create.sh /usr/local/bin/ruflo-post-create.sh

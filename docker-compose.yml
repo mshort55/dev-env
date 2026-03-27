@@ -23,18 +23,16 @@ services:
   ruflo:
     build:
       context: .devcontainer/ruflo
-    image: ruflo-mcp:latest
+      args:
+        - CONTAINER_USER
+        - CONTAINER_UID
+    image: dev-env-ruflo:latest
     container_name: ruflo
-    command: npx claude-flow mcp start -t http -p 3000
+    command: tail -f /dev/null
     environment:
       - CLAUDE_FLOW_V3_ENABLED=true
       - CLAUDE_FLOW_HOOKS_ENABLED=true
       - NODE_ENV=production
+      - RUFLO_VERSION=3.5.48
     volumes:
-      - ${HOST_RUFLO_DIR}/state:/app/.claude-flow
-      - ${HOST_RUFLO_DIR}/data:/app/data
-    healthcheck:
-      test: ["CMD", "wget", "-q", "--spider", "http://localhost:3000/health"]
-      interval: 10s
-      timeout: 5s
-      retries: 3
+      - ${HOST_RUFLO_DIR}:/opt/ruflo

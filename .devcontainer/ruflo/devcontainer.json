@@ -3,5 +3,6 @@
     "../../docker-compose.yml"
   ],
   "service": "ruflo",
-  "workspaceFolder": "/app"
+  "workspaceFolder": "/opt/ruflo",
+  "postCreateCommand": "sh /usr/local/bin/ruflo-post-create.sh"
 }
