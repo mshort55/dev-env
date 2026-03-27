@@ -26,6 +26,7 @@ services:
       args:
         - CONTAINER_USER
         - CONTAINER_UID
+        - RUFLO_DIR_NAME
     image: dev-env-ruflo:latest
     container_name: ruflo
     command: tail -f /dev/null
@@ -34,5 +35,6 @@ services:
       - CLAUDE_FLOW_HOOKS_ENABLED=true
       - NODE_ENV=production
       - RUFLO_VERSION=3.5.48
+      - RUFLO_DIR_NAME
     volumes:
-      - ${HOST_RUFLO_DIR}:/opt/ruflo
+      - ${HOST_RUFLO_DIR}:/opt/${RUFLO_DIR_NAME}
