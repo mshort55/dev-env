@@ -39,7 +39,7 @@ RUN apk add --no-cache \
     # python deps
     pip3 install --no-cache-dir --break-system-packages -r /tmp/requirements.txt && \
     # cleanup
-    apk del curl bash py3-pip && \
+    apk del curl py3-pip && \
     rm -rf /tmp/* /root/.cache /root/.config
 
 WORKDIR /opt/${RUFLO_DIR_NAME}

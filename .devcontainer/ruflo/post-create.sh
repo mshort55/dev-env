@@ -32,6 +32,11 @@ else
     echo "⚠️  KeePass database not found at ${KEEPASS_DB_PATH}, skipping secrets bootstrap"
 fi
 
+# Symlink repos dir into ruflo workspace - this helps agents get to repos
+if [ ! -L "/opt/${RUFLO_DIR_NAME}/${REPOS_DIR_NAME}" ]; then
+    ln -s "/${REPOS_DIR_NAME}" "/opt/${RUFLO_DIR_NAME}/${REPOS_DIR_NAME}"
+fi
+
 git config --global user.name "Ruflo Agent"
 git config --global user.email "ruflo@agent.local"
 git config --global commit.gpgsign false
