@@ -7,19 +7,23 @@ ARG CONTAINER_USER
 ARG CONTAINER_UID
 ARG RUFLO_DIR_NAME
 
-RUN apk add --no-cache \
-    git \
-    python3
+ENV PATH="/home/${CONTAINER_USER}/.local/bin:/usr/local/bin:${PATH}"
 
 COPY requirements.txt /tmp/requirements.txt
-RUN apk add --no-cache curl bash py3-pip && \
+
+RUN apk add --no-cache \
+    git \
+    python3 \
+    py3-pip \
+    curl \
+    bash && \
     # gcloud
     curl -fsSL https://sdk.cloud.google.com | bash -s -- --disable-prompts --install-dir=/usr/local/lib && \
     ln -s /usr/local/lib/google-cloud-sdk/bin/gcloud /usr/local/bin/gcloud && \
     # claude code
     curl -fsSL https://claude.ai/install.sh | bash && \
-    # pykeepass
-    pip3 install --no-cache-dir -r /tmp/requirements.txt && \
+    # python deps
+    pip3 install --no-cache-dir --break-system-packages -r /tmp/requirements.txt && \
     # cleanup
     apk del curl bash py3-pip && \
     rm -rf /tmp/*
