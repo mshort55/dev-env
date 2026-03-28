@@ -4,6 +4,7 @@ Bootstrap secrets from KeePass database into container.
 """
 
 import os
+import shutil
 import sys
 import getpass
 import subprocess
@@ -14,13 +15,13 @@ from pykeepass.attachment import Attachment
 from pykeepass.entry import Entry
 
 
-def add_env_vars_to_bashrc(env_vars: dict[str, str], section_name: str):
-    bashrc_path = Path.home() / '.bashrc'
-    bashrc_content = bashrc_path.read_text() if bashrc_path.exists() else ''
+def add_env_vars_to_shell_profile(env_vars: dict[str, str], section_name: str):
+    profile_path = Path.home() / ('.bashrc' if shutil.which('bash') else '.ashrc')
+    profile_content = profile_path.read_text() if profile_path.exists() else ''
 
     section_comment = f'# {section_name}\n'
 
-    if section_comment.strip() in bashrc_content:
+    if section_comment.strip() in profile_content:
         return
 
     env_lines = [f'\n{section_comment}']
@@ -28,7 +29,7 @@ def add_env_vars_to_bashrc(env_vars: dict[str, str], section_name: str):
     for env_name, env_value in env_vars.items():
         env_lines.append(f'export {env_name}={env_value}\n')
 
-    with bashrc_path.open('a') as f:
+    with profile_path.open('a') as f:
         f.writelines(env_lines)
 
 
@@ -178,7 +179,7 @@ def setup_env_vars_from_keepass(kp: PyKeePass, env_var_mappings: dict[str, str],
             print(f"  ⚠️  Warning: {keepass_title} entry not found or has no password")
 
     if env_vars:
-        add_env_vars_to_bashrc(env_vars, section_name)
+        add_env_vars_to_shell_profile(env_vars, section_name)
 
     print(f"{section_name} config complete")
 

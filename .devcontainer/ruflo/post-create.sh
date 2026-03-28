@@ -16,6 +16,14 @@ if [ ! -f "/opt/${RUFLO_DIR_NAME}/.claude-flow/config.yaml" ]; then
     npx ruflo init --yes
 fi
 
+# Initialize git repo if not already initialized
+if [ ! -d "/opt/${RUFLO_DIR_NAME}/.git" ]; then
+    echo "Initializing git repository in /opt/${RUFLO_DIR_NAME}..."
+    git init "/opt/${RUFLO_DIR_NAME}"
+    git config --global init.defaultBranch main
+    echo node_modules >> .gitignore
+fi
+
 if [ -n "${KEEPASS_DB_PATH}" ] && [ -f "${KEEPASS_DB_PATH}" ]; then
     python3 "${DEV_ENV_DIR}/.devcontainer/ruflo/bootstrap-secrets-ruflo.py"
 elif [ -z "${KEEPASS_DB_PATH}" ]; then

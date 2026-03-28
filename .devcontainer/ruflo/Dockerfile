@@ -7,7 +7,12 @@ ARG CONTAINER_USER
 ARG CONTAINER_UID
 ARG RUFLO_DIR_NAME
 
-ENV PATH="/home/${CONTAINER_USER}/.local/bin:/usr/local/bin:${PATH}"
+RUN adduser -u ${CONTAINER_UID} -D ${CONTAINER_USER}
+
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    CLOUDSDK_CORE_DISABLE_PROMPTS=1 \
+    PATH=$PATH:/usr/local/lib/google-cloud-sdk/bin \
+    ENV=/home/${CONTAINER_USER}/.ashrc
 
 COPY requirements.txt /tmp/requirements.txt
 
@@ -18,17 +23,24 @@ RUN apk add --no-cache \
     curl \
     bash && \
     # gcloud
-    curl -fsSL https://sdk.cloud.google.com | bash -s -- --disable-prompts --install-dir=/usr/local/lib && \
-    ln -s /usr/local/lib/google-cloud-sdk/bin/gcloud /usr/local/bin/gcloud && \
+    curl -fSL https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-cli-linux-arm.tar.gz -o /tmp/gcloud.tar.gz && \
+    mkdir -p /usr/local/lib && \
+    tar -xzf /tmp/gcloud.tar.gz -C /usr/local/lib && \
+    # remove unwanted gcloud components
+    rm -rf /usr/local/lib/google-cloud-sdk/bin/bq \
+           /usr/local/lib/google-cloud-sdk/bin/gsutil \
+           /usr/local/lib/google-cloud-sdk/bin/anthos \
+           /usr/local/lib/google-cloud-sdk/platform/gsutil \
+           /usr/local/lib/google-cloud-sdk/platform/bq && \
     # claude code
     curl -fsSL https://claude.ai/install.sh | bash && \
+    mv /root/.local/share/claude /usr/local/share/claude && \
+    ln -s /usr/local/share/claude/versions/$(ls /usr/local/share/claude/versions | head -n 1) /usr/local/bin/claude && \
     # python deps
     pip3 install --no-cache-dir --break-system-packages -r /tmp/requirements.txt && \
     # cleanup
     apk del curl bash py3-pip && \
-    rm -rf /tmp/*
-
-RUN adduser -u ${CONTAINER_UID} -D ${CONTAINER_USER}
+    rm -rf /tmp/* /root/.cache /root/.config
 
 WORKDIR /opt/${RUFLO_DIR_NAME}
 
