@@ -22,7 +22,8 @@ services:
 
   ruflo:
     build:
-      context: .devcontainer/ruflo
+      context: .
+      dockerfile: .devcontainer/ruflo/Dockerfile
       args:
         - CONTAINER_USER
         - CONTAINER_UID
@@ -36,5 +37,10 @@ services:
       - NODE_ENV=production
       - RUFLO_VERSION=3.5.48
       - RUFLO_DIR_NAME
+      - DEV_ENV_DIR
+      - KEEPASS_DB_PATH
+      - REPOS_DIR_NAME
+      - WORKSPACE_DIR_NAME
     volumes:
       - ${HOST_RUFLO_DIR}:/opt/${RUFLO_DIR_NAME}
+      - ${HOST_REPOS_DIR}:/${REPOS_DIR_NAME}

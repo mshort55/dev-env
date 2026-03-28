@@ -7,10 +7,25 @@ ARG CONTAINER_USER
 ARG CONTAINER_UID
 ARG RUFLO_DIR_NAME
 
-WORKDIR /opt/${RUFLO_DIR_NAME}
+RUN apk add --no-cache \
+    git \
+    python3
+
+COPY requirements.txt /tmp/requirements.txt
+RUN apk add --no-cache curl bash py3-pip && \
+    # gcloud
+    curl -fsSL https://sdk.cloud.google.com | bash -s -- --disable-prompts --install-dir=/usr/local/lib && \
+    ln -s /usr/local/lib/google-cloud-sdk/bin/gcloud /usr/local/bin/gcloud && \
+    # claude code
+    curl -fsSL https://claude.ai/install.sh | bash && \
+    # pykeepass
+    pip3 install --no-cache-dir -r /tmp/requirements.txt && \
+    # cleanup
+    apk del curl bash py3-pip && \
+    rm -rf /tmp/*
 
 RUN adduser -u ${CONTAINER_UID} -D ${CONTAINER_USER}
 
-USER ${CONTAINER_USER}
+WORKDIR /opt/${RUFLO_DIR_NAME}
 
-COPY --chown=${CONTAINER_USER}:${CONTAINER_USER} --chmod=755 post-create.sh /usr/local/bin/ruflo-post-create.sh
+USER ${CONTAINER_USER}

@@ -4,5 +4,5 @@
   ],
   "service": "ruflo",
   "workspaceFolder": "/opt/Ruflo",
-  "postCreateCommand": "sh /usr/local/bin/ruflo-post-create.sh"
+  "postCreateCommand": "sh $DEV_ENV_DIR/.devcontainer/ruflo/post-create.sh"
 }
