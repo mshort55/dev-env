@@ -13,7 +13,7 @@ fi
 # Initialize ruflo on first run
 if [ ! -f "/opt/${RUFLO_DIR_NAME}/.claude-flow/config.yaml" ]; then
     echo "First run detected, initializing ruflo..."
-    npx ruflo init --yes
+    npx ruflo init --full
 fi
 
 # Initialize git repo if not already initialized
@@ -41,7 +41,7 @@ git config --global user.name "Ruflo Agent"
 git config --global user.email "ruflo@agent.local"
 git config --global commit.gpgsign false
 
-# Git: block all pushes (no credentials here)
+# Git: block all pushes
 git config --global url."no-push://".pushInsteadOf "git@github.com:"
 git config --global url."no-push://".pushInsteadOf "https://github.com/"
 git config --global url."no-push://".pushInsteadOf "ssh://git@github.com/"
