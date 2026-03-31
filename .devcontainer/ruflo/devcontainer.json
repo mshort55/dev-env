@@ -1,6 +1,6 @@
 {
   "dockerComposeFile": [
-    "../../docker-compose.yml"
+    "ruflo-compose.yml"
   ],
   "service": "ruflo",
   "workspaceFolder": "/opt/Ruflo",
