@@ -1,5 +1,6 @@
 {
   "dockerComposeFile": [
+    "../../docker-compose.env-bridge.yml",
     "ruflo-compose.yml"
   ],
   "service": "ruflo",
