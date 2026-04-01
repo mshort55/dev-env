@@ -4,10 +4,16 @@ set -e
 echo "Running ruflo post-create commands..."
 
 # Install ruflo on first run
-if [ ! -d "/opt/${RUFLO_DIR_NAME}/node_modules" ]; then
+if [ ! -d "/opt/${RUFLO_DIR_NAME}/node_modules/ruflo" ]; then
     echo "Installing ruflo..."
     npm install --ignore-scripts "ruflo@${RUFLO_VERSION}" && \
     npm audit --omit=dev
+fi
+
+# Install skills on first run
+if [ ! -d "/opt/${RUFLO_DIR_NAME}/node_modules/skills" ]; then
+    echo "Installing skills..."
+    npm install --ignore-scripts "skills@${SKILLS_VERSION}"
 fi
 
 # Initialize ruflo on first run
@@ -37,6 +43,7 @@ if [ ! -L "/opt/${RUFLO_DIR_NAME}/${REPOS_DIR_NAME}" ]; then
     ln -s "/${REPOS_DIR_NAME}" "/opt/${RUFLO_DIR_NAME}/${REPOS_DIR_NAME}"
 fi
 
+# Git configs
 git config --global user.name "Ruflo Agent"
 git config --global user.email "ruflo@agent.local"
 git config --global commit.gpgsign false
