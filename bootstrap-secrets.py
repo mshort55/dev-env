@@ -206,16 +206,6 @@ def setup_kube_context_env(kp: PyKeePass):
     )
 
 
-def setup_jira_env(kp: PyKeePass):
-    setup_env_vars_from_keepass(
-        kp,
-        {
-            'JIRA_ACCESS_TOKEN': 'jira_env_JIRA_ACCESS_TOKEN'
-        },
-        "Jira environment variables"
-    )
-
-
 def setup_github_cli_config(kp: PyKeePass):
     print("Setting up GitHub CLI configuration...")
 
