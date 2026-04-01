@@ -324,7 +324,6 @@ def main():
     setup_gcloud_config(kp)
     setup_claude_code_env(kp)
     setup_kube_context_env(kp)
-    setup_jira_env(kp)
     setup_github_cli_config(kp)
     setup_docker_config(kp)
     setup_git_config(kp)
