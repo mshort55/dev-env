@@ -3,6 +3,7 @@
 General setup for dev container environment.
 """
 
+import os
 import shutil
 import subprocess
 from pathlib import Path
@@ -114,6 +115,17 @@ def setup_shell_paths():
     if '# User bin paths' in bashrc_content:
         print("  PATH already configured, skipping")
         return
+
+    extra_paths = [
+        str(Path.home() / '.local' / 'bin'),
+        str(Path.home() / 'go' / 'bin'),
+    ]
+
+    current_path = os.environ.get('PATH', '')
+    for p in extra_paths:
+        if p not in current_path:
+            current_path = f'{p}:{current_path}'
+    os.environ['PATH'] = current_path
 
     path_config = '''
 # User bin paths
@@ -232,6 +244,35 @@ def install_binaries():
                 print(f"    ⚠️  Error: {result.stderr}")
 
 
+def setup_claude_mcp_servers():
+    print("Setting up Claude MCP servers...")
+
+    servers: list[tuple[str, str, list[str]]] = [
+        ('atlassian', 'mcp-remote', ['https://mcp.atlassian.com/v1/mcp']),
+    ]
+
+    for name, package, args in servers:
+        try:
+            result = subprocess.run(
+                ['claude', 'mcp', 'add', name, 'npx', package, *args],
+                capture_output=True,
+                text=True,
+            )
+            if result.returncode == 0:
+                print(f"  - {name} MCP server added")
+            else:
+                stderr = result.stderr.strip()
+                if 'already exists' in stderr.lower():
+                    print(f"  - {name} MCP server already configured")
+                else:
+                    print(f"  ⚠️  Warning: Failed to add {name} MCP server: {stderr}")
+        except FileNotFoundError:
+            print("  ⚠️  Warning: claude command not found, skipping MCP server setup")
+            return
+
+    print("Claude MCP servers configuration complete")
+
+
 def main():
     print("\nStarting general environment setup...\n")
 
@@ -242,6 +283,7 @@ def main():
     install_go_tools()
     # install_binaries()
     setup_claude_commands()
+    setup_claude_mcp_servers()
 
     print("\nGeneral setup completed!\n")
 
