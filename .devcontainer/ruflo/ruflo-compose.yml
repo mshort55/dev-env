@@ -14,8 +14,9 @@ services:
       - CLAUDE_FLOW_V3_ENABLED=true
       - CLAUDE_FLOW_HOOKS_ENABLED=true
       - NODE_ENV=production
-      - RUFLO_VERSION=3.5.48
+      - RUFLO_VERSION=3.5.51
       - SKILLS_VERSION=1.4.7
+      - TYPESCRIPT_VERSION=6.0.2
       - RUFLO_DIR_NAME
       - DEV_ENV_DIR
       - KEEPASS_DB_PATH

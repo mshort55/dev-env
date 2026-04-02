@@ -3,18 +3,17 @@ set -e
 
 echo "Running ruflo post-create commands..."
 
-# Install ruflo on first run
-if [ ! -d "/opt/${RUFLO_DIR_NAME}/node_modules/ruflo" ]; then
-    echo "Installing ruflo..."
-    npm install --ignore-scripts "ruflo@${RUFLO_VERSION}" && \
-    npm audit --omit=dev
-fi
+# npm installations
+echo "Installing ruflo..."
+npm install --ignore-scripts "ruflo@${RUFLO_VERSION}"
 
-# Install skills on first run
-if [ ! -d "/opt/${RUFLO_DIR_NAME}/node_modules/skills" ]; then
-    echo "Installing skills..."
-    npm install --ignore-scripts "skills@${SKILLS_VERSION}"
-fi
+echo "Installing skills..."
+npm install --ignore-scripts "skills@${SKILLS_VERSION}"
+
+echo "Installing typescript..."
+npm install --ignore-scripts "typescript@${TYPESCRIPT_VERSION}"
+    
+npm audit --omit=dev
 
 # Initialize ruflo on first run
 if [ ! -f "/opt/${RUFLO_DIR_NAME}/.claude-flow/config.yaml" ]; then
