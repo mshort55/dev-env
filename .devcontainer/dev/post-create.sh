@@ -9,6 +9,9 @@ sudo rm -f /etc/apt/sources.list.d/yarn.list
 sudo apt update
 pip3 install --no-cache-dir -r "${DEV_ENV_DIR}/requirements.txt"
 
+# jira mcp server (must be installed before general-setup adds it to claude)
+pip install -e /Repos/jira-mcp-server_stolostron
+
 python3 "${DEV_ENV_DIR}/general-setup.py"
 
 if [ -n "${KEEPASS_DB_PATH}" ] && [ -f "${KEEPASS_DB_PATH}" ]; then

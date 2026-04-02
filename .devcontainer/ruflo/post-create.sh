@@ -6,6 +6,7 @@ echo "Running ruflo post-create commands..."
 # npm installations
 echo "Installing ruflo..."
 npm install --ignore-scripts "ruflo@${RUFLO_VERSION}"
+npm install --ignore-scripts "claude-flow@${RUFLO_VERSION}"
 
 echo "Installing skills..."
 npm install --ignore-scripts "skills@${SKILLS_VERSION}"

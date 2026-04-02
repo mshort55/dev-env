@@ -206,6 +206,18 @@ def setup_kube_context_env(kp: PyKeePass):
     )
 
 
+def setup_jira_env(kp: PyKeePass):
+    setup_env_vars_from_keepass(
+        kp,
+        {
+            'JIRA_ACCESS_TOKEN': 'jira_mcp_env_JIRA_ACCESS_TOKEN',
+            'JIRA_EMAIL': 'jira_mcp_env_JIRA_EMAIL',
+            'JIRA_SERVER_URL': 'jira_mcp_env_JIRA_SERVER_URL'
+        },
+        "Jira environment variables"
+    )
+
+
 def setup_github_cli_config(kp: PyKeePass):
     print("Setting up GitHub CLI configuration...")
 
@@ -324,6 +336,7 @@ def main():
     setup_gcloud_config(kp)
     setup_claude_code_env(kp)
     setup_kube_context_env(kp)
+    setup_jira_env(kp)
     setup_github_cli_config(kp)
     setup_docker_config(kp)
     setup_git_config(kp)

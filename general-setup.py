@@ -247,14 +247,15 @@ def install_binaries():
 def setup_claude_mcp_servers():
     print("Setting up Claude MCP servers...")
 
-    servers: list[tuple[str, str, list[str]]] = [
-        ('atlassian', 'mcp-remote', ['https://mcp.atlassian.com/v1/mcp']),
+    servers: list[tuple[str, list[str]]] = [
+        ('atlassian',       ['atlassian', 'npx', 'mcp-remote', 'https://mcp.atlassian.com/v1/mcp']),
+        ('jira-mcp-server', ['--scope', 'user', 'jira-mcp-server', 'python', '--', '-m', 'jira_mcp_server.main']),
     ]
 
-    for name, package, args in servers:
+    for name, cmd_args in servers:
         try:
             result = subprocess.run(
-                ['claude', 'mcp', 'add', name, 'npx', package, *args],
+                ['claude', 'mcp', 'add', *cmd_args],
                 capture_output=True,
                 text=True,
             )
