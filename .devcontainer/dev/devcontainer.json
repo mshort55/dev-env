@@ -24,7 +24,6 @@
   "customizations": {
     "vscode": {
       "extensions": [
-        "anthropic.claude-code",
         "ms-python.python",
         "ms-python.debugpy",
         "dinhani.copy-on-select",
