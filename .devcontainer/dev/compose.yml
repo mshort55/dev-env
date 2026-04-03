@@ -4,9 +4,19 @@ services:
       context: .
       dockerfile: .devcontainer/dev/Dockerfile
       args:
-        - CONTAINER_USER
+        - BUF_VERSION
         - CONTAINER_UID
+        - CONTAINER_USER
+        - GINKGO_VERSION
+        - GO_VERSION
+        - GOPLS_VERSION
+        - HCP_VERSION
+        - KIND_VERSION
+        - NODE_VERSION
+        - OPENSHIFT_VERSION
+        - RUST_VERSION
         - WORKSPACE_DIR_NAME
+        - YQ_VERSION
     image: dev-env:latest
     container_name: dev
     command: tail -f /dev/null

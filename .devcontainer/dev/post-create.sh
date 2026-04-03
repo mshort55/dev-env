@@ -1,5 +1,6 @@
 #!/bin/bash
 set -e
+source "${DEV_ENV_DIR}/scripts/common.sh"
 
 setup_bash_history() {
   cat >> ~/.bashrc << 'EOF'
@@ -54,7 +55,7 @@ install_python_deps() {
 
 bootstrap_secrets() {
   if [ -n "${KEEPASS_DB_PATH}" ] && [ -f "${KEEPASS_DB_PATH}" ]; then
-    python3 "${DEV_ENV_DIR}/bootstrap-secrets.py"
+    python3 "${DEV_ENV_DIR}/scripts/bootstrap-secrets.py"
   fi
 }
 
@@ -67,6 +68,7 @@ main() {
   setup_claude_commands
   setup_claude_mcp_servers
   bootstrap_secrets
+  enable_gopls_plugin
 }
 
 main

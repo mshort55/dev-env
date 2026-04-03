@@ -3,8 +3,9 @@
 # org.opencontainers.image.created: 2026-03-26T05:35:33Z
 FROM node@sha256:3cb200bfcdbde6e13f7c9306d7f50fa2489dc8d85d9a162a131dffc0b1fe429f
 
-ARG GO_VERSION="1.25.0"
-ARG BUF_VERSION="1.67.0"
+ARG BUF_VERSION
+ARG GO_VERSION
+ARG GOPLS_VERSION
 ARG CONTAINER_USER
 ARG CONTAINER_UID
 ARG RUFLO_DIR_NAME
@@ -19,6 +20,7 @@ RUN apk add --no-cache \
     bash \
     curl \
     git \
+    jq \
     make \
     python3 \
     py3-pip
@@ -44,6 +46,8 @@ RUN \
     curl -fsSL https://claude.ai/install.sh | bash && \
     mv /root/.local/share/claude /usr/local/share/claude && \
     ln -s /usr/local/share/claude/versions/$(ls /usr/local/share/claude/versions | head -n 1) /usr/local/bin/claude && \
+    # gopls (for claude code)
+    GOBIN=/usr/local/bin go install golang.org/x/tools/gopls@v"${GOPLS_VERSION}" && \
     # python deps (keepass/crypto)
     pip3 install --no-cache-dir --break-system-packages -r /tmp/requirements.txt && \
     # cleanup

@@ -4,8 +4,11 @@ services:
       context: .
       dockerfile: .devcontainer/ruflo/Dockerfile
       args:
-        - CONTAINER_USER
+        - BUF_VERSION
         - CONTAINER_UID
+        - CONTAINER_USER
+        - GO_VERSION
+        - GOPLS_VERSION
         - RUFLO_DIR_NAME
     image: dev-env-ruflo:latest
     container_name: ruflo
@@ -14,9 +17,9 @@ services:
       - CLAUDE_FLOW_V3_ENABLED=true
       - CLAUDE_FLOW_HOOKS_ENABLED=true
       - NODE_ENV=production
-      - RUFLO_VERSION=3.5.51
-      - SKILLS_VERSION=1.4.7
-      - TYPESCRIPT_VERSION=6.0.2
+      - RUFLO_VERSION
+      - SKILLS_VERSION
+      - TYPESCRIPT_VERSION
       - RUFLO_DIR_NAME
       - DEV_ENV_DIR
       - KEEPASS_DB_PATH

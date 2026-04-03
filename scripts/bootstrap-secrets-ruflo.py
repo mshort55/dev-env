@@ -14,9 +14,9 @@ from pykeepass import PyKeePass
 
 
 def load_bootstrap_secrets() -> types.ModuleType:
-    dev_env_dir = Path(__file__).parent.parent.parent
-    spec = importlib.util.spec_from_file_location("bootstrap_secrets", dev_env_dir / "bootstrap-secrets.py")
-    assert spec and spec.loader, f"Could not load bootstrap-secrets.py from {dev_env_dir}"
+    scripts_dir = Path(__file__).parent
+    spec = importlib.util.spec_from_file_location("bootstrap_secrets", scripts_dir / "bootstrap-secrets.py")
+    assert spec and spec.loader, f"Could not load bootstrap-secrets.py from {scripts_dir}"
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
     return module

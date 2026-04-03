@@ -1,7 +1,7 @@
 {
   "dockerComposeFile": [
     "../../docker-compose.env-bridge.yml",
-    "dev-compose.yml"
+    "compose.yml"
   ],
   "service": "dev",
   "workspaceFolder": "/UbuntuSync",

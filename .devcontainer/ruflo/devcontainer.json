@@ -1,7 +1,7 @@
 {
   "dockerComposeFile": [
     "../../docker-compose.env-bridge.yml",
-    "ruflo-compose.yml"
+    "compose.yml"
   ],
   "service": "ruflo",
   "workspaceFolder": "/opt/Ruflo",

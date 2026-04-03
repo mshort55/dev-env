@@ -1,5 +1,6 @@
-#!/bin/sh
+#!/bin/bash
 set -e
+source "${DEV_ENV_DIR}/scripts/common.sh"
 
 install_npm_packages() {
   npm install --ignore-scripts "ruflo@${RUFLO_VERSION}"
@@ -41,7 +42,7 @@ symlink_repos() {
 
 bootstrap_secrets() {
   if [ -n "${KEEPASS_DB_PATH}" ] && [ -f "${KEEPASS_DB_PATH}" ]; then
-    python3 "${DEV_ENV_DIR}/.devcontainer/ruflo/bootstrap-secrets-ruflo.py"
+    python3 "${DEV_ENV_DIR}/scripts/bootstrap-secrets-ruflo.py"
   fi
 }
 
@@ -53,6 +54,7 @@ main() {
   block_git_push
   symlink_repos
   bootstrap_secrets
+  enable_gopls_plugin
 }
 
 main
