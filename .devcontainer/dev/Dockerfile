@@ -11,6 +11,7 @@ ARG YQ_VERSION="4.50.1"
 ARG OPENSHIFT_VERSION="4.20.8"
 ARG KIND_VERSION="0.31.0"
 ARG HCP_VERSION="2.8.3-13"
+ARG BUF_VERSION="1.67.0"
 ARG CONTAINER_USER
 ARG CONTAINER_UID
 ARG WORKSPACE_DIR_NAME
@@ -36,6 +37,7 @@ RUN apt-get update && \
     iputils-ping \
     less \
     locales \
+    make \
     nano \
     net-tools \
     openssh-client \
@@ -76,6 +78,8 @@ RUN \
     curl -fsSL https://kind.sigs.k8s.io/dl/v${KIND_VERSION}/kind-linux-arm64 -o /usr/local/bin/kind && \
     # hcp-cli
     curl -fsSL https://developers.redhat.com/content-gateway/file/pub/mce/clients/hcp-cli/${HCP_VERSION}/hcp-cli-${HCP_VERSION}-linux-arm64.tar.gz | tar -xz -C /usr/local/bin && \
+    # buf
+    curl -fsSL "https://github.com/bufbuild/buf/releases/download/v${BUF_VERSION}/buf-Linux-aarch64.tar.gz" | tar -xz -C /usr/local --strip-components 1 && \
     # aws-cli
     curl -fsSL https://awscli.amazonaws.com/awscli-exe-linux-aarch64.zip -o awscliv2.zip && \
     unzip -q awscliv2.zip && \

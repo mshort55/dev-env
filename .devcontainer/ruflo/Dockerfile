@@ -4,6 +4,7 @@
 FROM node@sha256:3cb200bfcdbde6e13f7c9306d7f50fa2489dc8d85d9a162a131dffc0b1fe429f
 
 ARG GO_VERSION="1.25.0"
+ARG BUF_VERSION="1.67.0"
 ARG CONTAINER_USER
 ARG CONTAINER_UID
 ARG RUFLO_DIR_NAME
@@ -18,6 +19,7 @@ RUN apk add --no-cache \
     bash \
     curl \
     git \
+    make \
     python3 \
     py3-pip
 
@@ -36,6 +38,8 @@ RUN \
            /usr/local/lib/google-cloud-sdk/bin/anthos \
            /usr/local/lib/google-cloud-sdk/platform/gsutil \
            /usr/local/lib/google-cloud-sdk/platform/bq && \
+    # buf
+    curl -fsSL "https://github.com/bufbuild/buf/releases/download/v${BUF_VERSION}/buf-Linux-aarch64.tar.gz" | tar -xz -C /usr/local --strip-components 1 && \
     # claude code
     curl -fsSL https://claude.ai/install.sh | bash && \
     mv /root/.local/share/claude /usr/local/share/claude && \
