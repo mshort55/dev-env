@@ -5,14 +5,18 @@
   ],
   "service": "ruflo",
   "workspaceFolder": "/opt/Ruflo",
-  "postCreateCommand": "sh $DEV_ENV_DIR/.devcontainer/ruflo/post-create.sh",
   "customizations": {
     "vscode": {
       "extensions": [
         "dinhani.copy-on-select",
         "eamodio.gitlens",
+        "golang.go",
+        "ms-python.python",
+        "ms-python.debugpy",
         "vscodevim.vim"
       ]
     }
-  }
+  },
+  "postCreateCommand": "bash $DEV_ENV_DIR/.devcontainer/ruflo/post-create.sh"
+
 }

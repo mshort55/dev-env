@@ -3,39 +3,26 @@
     "../../docker-compose.env-bridge.yml",
     "dev-compose.yml"
   ],
-  "workspaceFolder": "/UbuntuSync",
   "service": "dev",
+  "workspaceFolder": "/UbuntuSync",
   "features": {
-    "ghcr.io/devcontainers/features/python:1": {
-      "version": "3.11"
-    },
-    "ghcr.io/devcontainers/features/go:1": {
-      "version": "1.25"
-    },
-    "ghcr.io/devcontainers/features/node:1": {
-      "version": "24.11.1"
-    },
-    "ghcr.io/devcontainers/features/rust:1": {
-      "version": "1.93.1"
-    },
-    "ghcr.io/devcontainers/features/github-cli:1": {},
     "ghcr.io/devcontainers/features/docker-in-docker:2": {}
   },
   "customizations": {
     "vscode": {
       "extensions": [
+        "dbaeumer.vscode-eslint",
+        "dinhani.copy-on-select",
+        "eamodio.gitlens",
+        "esbenp.prettier-vscode",
+        "github.vscode-pull-request-github",
+        "golang.go",
         "ms-python.python",
         "ms-python.debugpy",
-        "dinhani.copy-on-select",
-        "dbaeumer.vscode-eslint",
-        "github.vscode-pull-request-github",
-        "eamodio.gitlens",
-        "golang.go",
-        "esbenp.prettier-vscode",
-        "timonwong.shellcheck",
-        "vscodevim.vim",
         "rust-lang.rust-analyzer",
-        "vadimcn.vscode-lldb"
+        "timonwong.shellcheck",
+        "vadimcn.vscode-lldb",
+        "vscodevim.vim"
       ],
       "settings": {
         "python.analysis.typeCheckingMode": "standard",

@@ -25,19 +25,12 @@ EOF
 }
 
 setup_shell_paths() {
+  export PATH="$HOME/.local/bin:$HOME/go/bin:$PATH"
   cat >> ~/.bashrc << 'EOF'
 
 # User bin paths
 export PATH="$HOME/.local/bin:$HOME/go/bin:$PATH"
 EOF
-}
-
-install_claude_code() {
-  curl -fsSL https://claude.ai/install.sh | bash
-}
-
-install_go_tools() {
-  go install github.com/onsi/ginkgo/v2/ginkgo@latest
 }
 
 setup_claude_commands() {
@@ -47,7 +40,7 @@ setup_claude_commands() {
 
 setup_claude_mcp_servers() {
   claude mcp add atlassian npx mcp-remote https://mcp.atlassian.com/v1/mcp
-  claude mcp add --scope user jira-mcp-server python -- -m jira_mcp_server.main
+  claude mcp add --scope user jira-mcp-server python3 -- -m jira_mcp_server.main
 }
 
 fix_apt_sources() {
@@ -56,8 +49,7 @@ fix_apt_sources() {
 }
 
 install_python_deps() {
-  pip3 install --no-cache-dir -r "${DEV_ENV_DIR}/requirements.txt"
-  pip install -e /Repos/jira-mcp-server_stolostron
+  pip3 install --break-system-packages -e /Repos/jira-mcp-server_stolostron
 }
 
 bootstrap_secrets() {
@@ -68,12 +60,10 @@ bootstrap_secrets() {
 
 main() {
   fix_apt_sources
+  setup_shell_paths
   install_python_deps
   setup_bash_history
   setup_completions
-  setup_shell_paths
-  install_claude_code
-  install_go_tools
   setup_claude_commands
   setup_claude_mcp_servers
   bootstrap_secrets
