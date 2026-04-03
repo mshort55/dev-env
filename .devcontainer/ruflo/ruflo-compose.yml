@@ -33,7 +33,6 @@ services:
       - ALL
     security_opt:
       - no-new-privileges:true
-    pids_limit: 256
 
 networks:
   ruflo-net:
