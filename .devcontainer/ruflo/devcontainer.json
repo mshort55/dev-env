@@ -4,6 +4,14 @@
     "ruflo-compose.yml"
   ],
   "service": "ruflo",
+  "features": {
+    "ghcr.io/devcontainers/features/python:1": {
+      "version": "3.11"
+    },
+    "ghcr.io/devcontainers/features/go:1": {
+      "version": "1.25"
+    }
+  },
   "workspaceFolder": "/opt/Ruflo",
   "postCreateCommand": "sh $DEV_ENV_DIR/.devcontainer/ruflo/post-create.sh",
   "customizations": {

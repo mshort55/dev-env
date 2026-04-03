@@ -23,6 +23,7 @@ RUN apt-get update && \
     bash-completion \
     ca-certificates \
     curl \
+    dbus-x11 \
     gettext \
     git \
     gnupg \
