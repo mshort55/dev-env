@@ -26,6 +26,7 @@ RUN apt-get update && \
     dbus-x11 \
     gettext \
     git \
+    gnome-keyring \
     gnupg \
     iputils-ping \
     less \
