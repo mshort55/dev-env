@@ -34,6 +34,7 @@ RUN apt-get update && \
     nano \
     net-tools \
     openssh-client \
+    sqlite3 \
     sudo \
     ubuntu-standard \
     unzip \
