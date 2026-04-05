@@ -34,8 +34,8 @@ bootstrap_secrets() {
 main() {
   init_git
   symlink_repos
-  init_gastown
   bootstrap_secrets
+  init_gastown
   disable_gpg_signing
   configure_claude_code
 }
