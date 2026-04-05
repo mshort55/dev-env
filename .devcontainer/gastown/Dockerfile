@@ -10,6 +10,7 @@ ARG CONTAINER_UID
 ARG DOLT_VERSION
 ARG GASTOWN_DIR_NAME
 ARG GASTOWN_VERSION
+ARG GH_VERSION
 ARG GO_VERSION
 ARG GOPLS_VERSION
 
@@ -52,6 +53,8 @@ RUN \
     # gastown (gt) - must use 'make build' (go install produces unsigned binary rejected on macOS)
     git clone --depth 1 --branch v${GASTOWN_VERSION} https://github.com/steveyegge/gastown.git /tmp/gastown && \
     cd /tmp/gastown && make build && cp gt /usr/local/bin/gt && cd / && \
+    # gh (github cli)
+    curl -fsSL "https://github.com/cli/cli/releases/download/v${GH_VERSION}/gh_${GH_VERSION}_linux_arm64.tar.gz" | tar -xz -C /usr/local --strip-components 1 && \
     # beads (bd)
     GOBIN=/usr/local/bin go install github.com/steveyegge/beads/cmd/bd@v${BEADS_VERSION} && \
     # claude code

@@ -43,6 +43,8 @@ def main():
 
     bootstrap_secrets.setup_gcloud_config(kp)
     bootstrap_secrets.setup_claude_code_env(kp)
+    bootstrap_secrets.setup_github_cli_config(kp)
+    bootstrap_secrets.setup_git_config(kp)
 
     print("\nGastown secrets configured successfully!")
 

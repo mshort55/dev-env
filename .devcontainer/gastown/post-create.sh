@@ -9,16 +9,9 @@ init_git() {
   fi
 }
 
-setup_git_config() {
-  git config --global user.name "Gastown Agent"
-  git config --global user.email "gastown@agent.local"
+disable_gpg_signing() {
   git config --global commit.gpgsign false
-}
-
-block_git_push() {
-  git config --global url."no-push://".pushInsteadOf "git@github.com:"
-  git config --global url."no-push://".pushInsteadOf "https://github.com/"
-  git config --global url."no-push://".pushInsteadOf "ssh://git@github.com/"
+  git config --global tag.gpgsign false
 }
 
 symlink_repos() {
@@ -26,8 +19,9 @@ symlink_repos() {
 }
 
 init_gastown() {
-  if [ ! -d "/opt/${GASTOWN_DIR_NAME}/gt" ]; then
+  if [ ! -f "/opt/${GASTOWN_DIR_NAME}/gt/mayor/town.json" ]; then
     gt install "/opt/${GASTOWN_DIR_NAME}/gt" --shell
+    cd "/opt/${GASTOWN_DIR_NAME}/gt" && gt git-init && cd -
   fi
 }
 
@@ -39,11 +33,10 @@ bootstrap_secrets() {
 
 main() {
   init_git
-  setup_git_config
-  block_git_push
   symlink_repos
   init_gastown
   bootstrap_secrets
+  disable_gpg_signing
   enable_gopls_plugin
 }
 
