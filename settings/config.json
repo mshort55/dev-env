@@ -1,0 +1,18 @@
+{
+  "type": "rig-settings",
+  "version": 1,
+  "merge_queue": {
+    "enabled": false,
+    "merge_strategy": "pr",
+    "require_review": true,
+    "on_conflict": "",
+    "retry_flaky_tests": 0,
+    "poll_interval": "",
+    "max_concurrent": 0,
+    "judgment_enabled": true,
+    "review_depth": "deep"
+  },
+  "namepool": {
+    "style": "minerals"
+  }
+}
