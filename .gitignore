@@ -4,3 +4,20 @@
 .dolt/
 *.db
 .beads-credential-key
+
+# Gas Town (added by gt)
+.beads/
+.claude/
+.logs/
+.runtime/
+__pycache__/
+AGENTS.md
+# CLAUDE.md
+CLAUDE.local.md
+config.json
+mayor/
+plugins/
+refinery/
+settings/
+state.json
+witness/
