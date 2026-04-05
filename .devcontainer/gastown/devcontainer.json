@@ -3,8 +3,8 @@
     "../../docker-compose.env-bridge.yml",
     "compose.yml"
   ],
-  "service": "ruflo",
-  "workspaceFolder": "/opt/Ruflo",
+  "service": "gastown",
+  "workspaceFolder": "/opt/Gastown",
   "customizations": {
     "vscode": {
       "extensions": [
@@ -17,5 +17,5 @@
       ]
     }
   },
-  "postCreateCommand": "bash $DEV_ENV_DIR/.devcontainer/ruflo/post-create.sh"
+  "postCreateCommand": "bash $DEV_ENV_DIR/.devcontainer/gastown/post-create.sh"
 }

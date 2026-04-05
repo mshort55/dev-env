@@ -37,7 +37,7 @@ block_git_push() {
 }
 
 symlink_repos() {
-  ln -sf "/${REPOS_DIR_NAME}" "/opt/${RUFLO_DIR_NAME}/${REPOS_DIR_NAME}"
+  ln -sfn "/${REPOS_DIR_NAME}" "/opt/${RUFLO_DIR_NAME}/${REPOS_DIR_NAME}"
 }
 
 bootstrap_secrets() {
