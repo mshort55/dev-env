@@ -12,6 +12,7 @@ ARG GASTOWN_DIR_NAME
 ARG GASTOWN_VERSION
 ARG GH_VERSION
 ARG GO_VERSION
+ARG NODE_VERSION
 ARG GOPLS_VERSION
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
@@ -29,7 +30,8 @@ RUN apk add --no-cache \
     python3 \
     py3-pip \
     sqlite \
-    tmux
+    tmux \
+    xz
 
 COPY requirements.txt /tmp/requirements.txt
 
@@ -37,6 +39,8 @@ COPY requirements.txt /tmp/requirements.txt
 RUN \
     # go
     curl -fsSL https://go.dev/dl/go${GO_VERSION}.linux-arm64.tar.gz | tar -xz -C /usr/local && \
+    # node.js
+    curl -fsSL https://nodejs.org/dist/v${NODE_VERSION}/node-v${NODE_VERSION}-linux-arm64.tar.xz | tar -xJ --strip-components=1 -C /usr/local && \
     # gcloud
     curl -fSL https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-cli-linux-arm.tar.gz -o /tmp/gcloud.tar.gz && \
     mkdir -p /usr/local/lib && \
