@@ -1,7 +1,7 @@
-# Alpine 3.23.3 (arm64v8)
-# docker manifest inspect --verbose alpine:latest
-# org.opencontainers.image.created: 2026-01-28T01:17:47Z
-FROM alpine@sha256:1529d13528ed05668b2038ffab807ac8633ad6adfe6be8901adda62411f70d29
+# Node 24 on Alpine 3.23 (arm64v8)
+# docker manifest inspect --verbose node:24-alpine
+# org.opencontainers.image.created: 2026-03-26T05:35:33Z
+FROM node@sha256:3cb200bfcdbde6e13f7c9306d7f50fa2489dc8d85d9a162a131dffc0b1fe429f
 
 ARG BEADS_VERSION
 ARG BUF_VERSION
@@ -12,7 +12,6 @@ ARG GASTOWN_DIR_NAME
 ARG GASTOWN_VERSION
 ARG GH_VERSION
 ARG GO_VERSION
-ARG NODE_VERSION
 ARG GOPLS_VERSION
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
@@ -30,8 +29,7 @@ RUN apk add --no-cache \
     python3 \
     py3-pip \
     sqlite \
-    tmux \
-    xz
+    tmux
 
 COPY requirements.txt /tmp/requirements.txt
 
@@ -39,8 +37,6 @@ COPY requirements.txt /tmp/requirements.txt
 RUN \
     # go
     curl -fsSL https://go.dev/dl/go${GO_VERSION}.linux-arm64.tar.gz | tar -xz -C /usr/local && \
-    # node.js
-    curl -fsSL https://nodejs.org/dist/v${NODE_VERSION}/node-v${NODE_VERSION}-linux-arm64.tar.xz | tar -xJ --strip-components=1 -C /usr/local && \
     # gcloud
     curl -fSL https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-cli-linux-arm.tar.gz -o /tmp/gcloud.tar.gz && \
     mkdir -p /usr/local/lib && \

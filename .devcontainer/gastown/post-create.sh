@@ -2,6 +2,10 @@
 set -e
 source "${DEV_ENV_DIR}/scripts/common.sh"
 
+install_npm_packages() {
+  npm install --ignore-scripts "skills@${SKILLS_VERSION}"
+}
+
 init_git() {
   if [ ! -d "/opt/${GASTOWN_DIR_NAME}/.git" ]; then
     git config --global init.defaultBranch main
@@ -32,6 +36,7 @@ bootstrap_secrets() {
 }
 
 main() {
+  install_npm_packages
   init_git
   symlink_repos
   bootstrap_secrets

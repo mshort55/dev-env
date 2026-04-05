@@ -14,15 +14,16 @@ services:
         - GH_VERSION
         - GO_VERSION
         - GOPLS_VERSION
-        - NODE_VERSION
     image: dev-env-gastown:latest
     container_name: gastown
     command: tail -f /dev/null
     environment:
+      - NODE_ENV=production
       - GASTOWN_DIR_NAME
       - DEV_ENV_DIR
       - KEEPASS_DB_PATH
       - REPOS_DIR_NAME
+      - SKILLS_VERSION
     volumes:
       - ${HOST_GASTOWN_HOME_DIR}:/home/${CONTAINER_USER}
       - ${HOST_GASTOWN_DIR}:/opt/${GASTOWN_DIR_NAME}
