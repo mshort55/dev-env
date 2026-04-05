@@ -68,7 +68,7 @@ main() {
   setup_claude_commands
   setup_claude_mcp_servers
   bootstrap_secrets
-  enable_gopls_plugin
+  configure_claude_code
 }
 
 main

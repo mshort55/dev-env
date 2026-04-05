@@ -54,7 +54,7 @@ main() {
   block_git_push
   symlink_repos
   bootstrap_secrets
-  enable_gopls_plugin
+  configure_claude_code
 }
 
 main

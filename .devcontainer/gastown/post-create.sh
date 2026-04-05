@@ -37,7 +37,7 @@ main() {
   init_gastown
   bootstrap_secrets
   disable_gpg_signing
-  enable_gopls_plugin
+  configure_claude_code
 }
 
 main
