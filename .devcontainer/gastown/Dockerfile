@@ -29,6 +29,7 @@ RUN apk add --no-cache \
     python3 \
     py3-pip \
     sqlite \
+    tini \
     tmux
 
 COPY requirements.txt /tmp/requirements.txt
