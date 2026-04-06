@@ -27,6 +27,7 @@ RUN apk add --no-cache \
     git \
     jq \
     make \
+    poppler-utils \
     python3 \
     py3-pip \
     sqlite \
