@@ -9,6 +9,8 @@ configure_claude_code() {
     jq '
       # Enable Go language server plugin
       .enabledPlugins["gopls-lsp@claude-plugins-official"] = true |
+      # Enable superpowers plugin
+      .enabledPlugins["superpowers@claude-plugins-official"] = true |
       # Disable Co-Authored-By line in commit messages
       .includeCoAuthoredBy = false
     ' "$CLAUDE_CODE_SETTINGS_PATH" > tmp.json
