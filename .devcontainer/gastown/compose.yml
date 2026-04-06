@@ -14,6 +14,7 @@ services:
         - GH_VERSION
         - GO_VERSION
         - GOPLS_VERSION
+        - MULTICLAUDE_VERSION
     image: dev-env-gastown:latest
     container_name: gastown
     command: tail -f /dev/null

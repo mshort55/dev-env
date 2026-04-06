@@ -13,6 +13,7 @@ ARG GASTOWN_VERSION
 ARG GH_VERSION
 ARG GO_VERSION
 ARG GOPLS_VERSION
+ARG MULTICLAUDE_VERSION
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     CLOUDSDK_CORE_DISABLE_PROMPTS=1 \
@@ -61,6 +62,8 @@ RUN \
     curl -fsSL https://claude.ai/install.sh | bash && \
     mv /root/.local/share/claude /usr/local/share/claude && \
     ln -s /usr/local/share/claude/versions/$(ls /usr/local/share/claude/versions | head -n 1) /usr/local/bin/claude && \
+    # multiclaude
+    GOBIN=/usr/local/bin go install github.com/dlorenc/multiclaude/cmd/multiclaude@v"${MULTICLAUDE_VERSION}" && \
     # gopls (for claude code)
     GOBIN=/usr/local/bin go install golang.org/x/tools/gopls@v"${GOPLS_VERSION}" && \
     # python deps (keepass/crypto)
