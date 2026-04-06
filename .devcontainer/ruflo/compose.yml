@@ -12,7 +12,9 @@ services:
         - RUFLO_DIR_NAME
     image: dev-env-ruflo:latest
     container_name: ruflo
+    init: true
     command: tail -f /dev/null
+    pids_limit: 8192
     environment:
       - CLAUDE_FLOW_V3_ENABLED=true
       - CLAUDE_FLOW_HOOKS_ENABLED=true

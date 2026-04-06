@@ -16,7 +16,9 @@ services:
         - GOPLS_VERSION
     image: dev-env-gastown:latest
     container_name: gastown
+    init: true
     command: tail -f /dev/null
+    pids_limit: 8192
     environment:
       - NODE_ENV=production
       - GASTOWN_DIR_NAME

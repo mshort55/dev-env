@@ -19,7 +19,9 @@ services:
         - YQ_VERSION
     image: dev-env:latest
     container_name: dev
+    init: true
     command: tail -f /dev/null
+    pids_limit: 8192
     environment:
       - USER=${CONTAINER_USER}
       - DEV_ENV_DIR
