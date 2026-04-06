@@ -30,6 +30,7 @@ services:
       - ${HOST_BINARIES_DIR}:/home/${CONTAINER_USER}/Binaries
       - ${HOST_REPOS_DIR}:/${REPOS_DIR_NAME}
       - ${HOST_WORKSPACE_DIR}:/${WORKSPACE_DIR_NAME}
+    pids_limit: 8192
     networks:
       - dev-net
 

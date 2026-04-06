@@ -23,7 +23,8 @@ RUN apk add --no-cache \
     jq \
     make \
     python3 \
-    py3-pip
+    py3-pip \
+    tini
 
 COPY requirements.txt /tmp/requirements.txt
 
@@ -57,5 +58,7 @@ RUN \
 RUN adduser -u ${CONTAINER_UID} -s /bin/bash -D ${CONTAINER_USER}
 
 WORKDIR /opt/${RUFLO_DIR_NAME}
+
+ENTRYPOINT ["/sbin/tini", "--"]
 
 USER ${CONTAINER_USER}

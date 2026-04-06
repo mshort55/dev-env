@@ -47,6 +47,7 @@ RUN apt-get update && \
     python3-venv \
     sqlite3 \
     sudo \
+    tini \
     ubuntu-standard \
     unzip \
     vim && \
@@ -114,4 +115,5 @@ RUN \
 
 WORKDIR /${WORKSPACE_DIR_NAME}
 
+ENTRYPOINT ["/usr/bin/tini", "--"]
 CMD ["/bin/bash"]

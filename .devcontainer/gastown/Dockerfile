@@ -29,6 +29,7 @@ RUN apk add --no-cache \
     python3 \
     py3-pip \
     sqlite \
+    tini \
     tmux
 
 COPY requirements.txt /tmp/requirements.txt
@@ -72,5 +73,7 @@ RUN \
 RUN adduser -u ${CONTAINER_UID} -s /bin/bash -D ${CONTAINER_USER}
 
 WORKDIR /opt/${GASTOWN_DIR_NAME}
+
+ENTRYPOINT ["/sbin/tini", "--"]
 
 USER ${CONTAINER_USER}
