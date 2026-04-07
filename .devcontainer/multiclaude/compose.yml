@@ -10,6 +10,7 @@ services:
         - GH_VERSION
         - GO_VERSION
         - GOPLS_VERSION
+        - MULTICLAUDE_DIR_NAME
         - MULTICLAUDE_VERSION
     image: dev-env-multiclaude:latest
     container_name: multiclaude
@@ -22,7 +23,7 @@ services:
       - REPOS_DIR_NAME
       - SKILLS_VERSION
     volumes:
-      - ${HOST_MULTICLAUDE_WORKSPACE_DIR}:/home/${CONTAINER_USER}/${MULTICLAUDE_DIR_NAME}
+      - ${HOST_MULTICLAUDE_WORKSPACE_DIR}:/${MULTICLAUDE_DIR_NAME}
       - ${HOST_MULTICLAUDE_CLAUDE_DIR}:/home/${CONTAINER_USER}/.claude
       - ${HOST_MULTICLAUDE_DIR}:/home/${CONTAINER_USER}/.multiclaude
       - ${HOST_REPOS_DIR}:/${REPOS_DIR_NAME}

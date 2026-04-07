@@ -4,7 +4,7 @@
     "compose.yml"
   ],
   "service": "multiclaude",
-  "workspaceFolder": "/home/${localEnv:CONTAINER_USER}/${localEnv:MULTICLAUDE_DIR_NAME}",
+  "workspaceFolder": "/Multiclaude",
   "customizations": {
     "vscode": {
       "extensions": [

@@ -12,7 +12,7 @@ disable_gpg_signing() {
 }
 
 symlink_repos() {
-  ln -sfn "/${REPOS_DIR_NAME}" "${HOME}/${MULTICLAUDE_DIR_NAME}/${REPOS_DIR_NAME}"
+  ln -sfn "/${REPOS_DIR_NAME}" "/${MULTICLAUDE_DIR_NAME}/${REPOS_DIR_NAME}"
 }
 
 bootstrap_secrets() {
