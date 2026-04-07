@@ -16,11 +16,13 @@ services:
     command: tail -f /dev/null
     environment:
       - NODE_ENV=production
+      - MULTICLAUDE_DIR_NAME
       - DEV_ENV_DIR
       - KEEPASS_DB_PATH
       - REPOS_DIR_NAME
       - SKILLS_VERSION
     volumes:
+      - ${HOST_MULTICLAUDE_WORKSPACE_DIR}:/home/${CONTAINER_USER}/${MULTICLAUDE_DIR_NAME}
       - ${HOST_CLAUDE_DIR}:/home/${CONTAINER_USER}/.claude
       - ${HOST_MULTICLAUDE_DIR}:/home/${CONTAINER_USER}/.multiclaude
       - ${HOST_REPOS_DIR}:/${REPOS_DIR_NAME}
