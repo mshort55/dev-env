@@ -4,6 +4,7 @@ services:
       context: .
       dockerfile: .devcontainer/multiclaude/Dockerfile
       args:
+        - BUF_VERSION
         - CONTAINER_UID
         - CONTAINER_USER
         - GH_VERSION

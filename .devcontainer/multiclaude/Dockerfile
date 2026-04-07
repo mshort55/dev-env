@@ -3,6 +3,7 @@
 # org.opencontainers.image.created: 2026-03-26T05:35:33Z
 FROM node@sha256:3cb200bfcdbde6e13f7c9306d7f50fa2489dc8d85d9a162a131dffc0b1fe429f
 
+ARG BUF_VERSION
 ARG CONTAINER_USER
 ARG CONTAINER_UID
 ARG GH_VERSION
@@ -21,6 +22,7 @@ RUN apk add --no-cache \
     curl \
     git \
     jq \
+    make \
     poppler-utils \
     python3 \
     py3-pip \
@@ -42,6 +44,8 @@ RUN \
            /usr/local/lib/google-cloud-sdk/bin/anthos \
            /usr/local/lib/google-cloud-sdk/platform/gsutil \
            /usr/local/lib/google-cloud-sdk/platform/bq && \
+    # buf
+    curl -fsSL "https://github.com/bufbuild/buf/releases/download/v${BUF_VERSION}/buf-Linux-aarch64.tar.gz" | tar -xz -C /usr/local --strip-components 1 && \
     # gh (github cli)
     curl -fsSL "https://github.com/cli/cli/releases/download/v${GH_VERSION}/gh_${GH_VERSION}_linux_arm64.tar.gz" | tar -xz -C /usr/local --strip-components 1 && \
     # claude code
