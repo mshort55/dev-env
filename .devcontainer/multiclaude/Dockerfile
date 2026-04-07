@@ -3,13 +3,8 @@
 # org.opencontainers.image.created: 2026-03-26T05:35:33Z
 FROM node@sha256:3cb200bfcdbde6e13f7c9306d7f50fa2489dc8d85d9a162a131dffc0b1fe429f
 
-ARG BEADS_VERSION
-ARG BUF_VERSION
 ARG CONTAINER_USER
 ARG CONTAINER_UID
-ARG DOLT_VERSION
-ARG GASTOWN_DIR_NAME
-ARG GASTOWN_VERSION
 ARG GH_VERSION
 ARG GO_VERSION
 ARG GOPLS_VERSION
@@ -26,7 +21,6 @@ RUN apk add --no-cache \
     curl \
     git \
     jq \
-    make \
     poppler-utils \
     python3 \
     py3-pip \
@@ -48,17 +42,8 @@ RUN \
            /usr/local/lib/google-cloud-sdk/bin/anthos \
            /usr/local/lib/google-cloud-sdk/platform/gsutil \
            /usr/local/lib/google-cloud-sdk/platform/bq && \
-    # buf
-    curl -fsSL "https://github.com/bufbuild/buf/releases/download/v${BUF_VERSION}/buf-Linux-aarch64.tar.gz" | tar -xz -C /usr/local --strip-components 1 && \
-    # dolt
-    curl -fsSL "https://github.com/dolthub/dolt/releases/download/v${DOLT_VERSION}/dolt-linux-arm64.tar.gz" | tar -xz -C /usr/local --strip-components 1 && \
-    # gastown (gt) - must use 'make build' (go install produces unsigned binary rejected on macOS)
-    git clone --depth 1 --branch v${GASTOWN_VERSION} https://github.com/steveyegge/gastown.git /tmp/gastown && \
-    cd /tmp/gastown && make build && cp gt /usr/local/bin/gt && cd / && \
     # gh (github cli)
     curl -fsSL "https://github.com/cli/cli/releases/download/v${GH_VERSION}/gh_${GH_VERSION}_linux_arm64.tar.gz" | tar -xz -C /usr/local --strip-components 1 && \
-    # beads (bd)
-    GOBIN=/usr/local/bin go install github.com/steveyegge/beads/cmd/bd@v${BEADS_VERSION} && \
     # claude code
     curl -fsSL https://claude.ai/install.sh | bash && \
     mv /root/.local/share/claude /usr/local/share/claude && \
@@ -75,6 +60,6 @@ RUN \
 
 RUN adduser -u ${CONTAINER_UID} -s /bin/bash -D ${CONTAINER_USER}
 
-WORKDIR /opt/${GASTOWN_DIR_NAME}
+WORKDIR /home/${CONTAINER_USER}
 
 USER ${CONTAINER_USER}

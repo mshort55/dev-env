@@ -3,8 +3,8 @@
     "../../docker-compose.env-bridge.yml",
     "compose.yml"
   ],
-  "service": "gastown",
-  "workspaceFolder": "/opt/Gastown",
+  "service": "multiclaude",
+  "workspaceFolder": "/home/${localEnv:CONTAINER_USER}",
   "customizations": {
     "vscode": {
       "extensions": [
@@ -17,5 +17,5 @@
       ]
     }
   },
-  "postCreateCommand": "bash $DEV_ENV_DIR/.devcontainer/gastown/post-create.sh"
+  "postCreateCommand": "bash $DEV_ENV_DIR/.devcontainer/multiclaude/post-create.sh"
 }

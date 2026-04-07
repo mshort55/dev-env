@@ -1,37 +1,31 @@
 services:
-  gastown:
+  multiclaude:
     build:
       context: .
-      dockerfile: .devcontainer/gastown/Dockerfile
+      dockerfile: .devcontainer/multiclaude/Dockerfile
       args:
-        - BEADS_VERSION
-        - BUF_VERSION
         - CONTAINER_UID
         - CONTAINER_USER
-        - DOLT_VERSION
-        - GASTOWN_DIR_NAME
-        - GASTOWN_VERSION
         - GH_VERSION
         - GO_VERSION
         - GOPLS_VERSION
         - MULTICLAUDE_VERSION
-    image: dev-env-gastown:latest
-    container_name: gastown
+    image: dev-env-multiclaude:latest
+    container_name: multiclaude
     command: tail -f /dev/null
     environment:
       - NODE_ENV=production
-      - GASTOWN_DIR_NAME
       - DEV_ENV_DIR
       - KEEPASS_DB_PATH
       - REPOS_DIR_NAME
       - SKILLS_VERSION
     volumes:
-      - ${HOST_GASTOWN_HOME_DIR}:/home/${CONTAINER_USER}
-      - ${HOST_GASTOWN_DIR}:/opt/${GASTOWN_DIR_NAME}
+      - ${HOST_CLAUDE_DIR}:/home/${CONTAINER_USER}/.claude
+      - ${HOST_MULTICLAUDE_DIR}:/home/${CONTAINER_USER}/.multiclaude
       - ${HOST_REPOS_DIR}:/${REPOS_DIR_NAME}
       - ${HOST_KEEPASS_DB_PATH}:${KEEPASS_DB_PATH}:ro
     networks:
-      - gastown-net
+      - multiclaude-net
     init: true
     pids_limit: -1
     cap_drop:
@@ -40,4 +34,4 @@ services:
       - no-new-privileges:true
 
 networks:
-  gastown-net:
+  multiclaude-net:

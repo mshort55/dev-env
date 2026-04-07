@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Gastown-specific secrets bootstrap. Only configures what gastown needs.
+Multiclaude container secrets bootstrap. Only configures what multiclaude needs.
 Imports shared functions from the dev-env bootstrap-secrets.py.
 """
 
@@ -46,7 +46,7 @@ def main():
     bootstrap_secrets.setup_github_cli_config(kp)
     bootstrap_secrets.setup_git_config(kp)
 
-    print("\nGastown secrets configured successfully!")
+    print("\nMulticlaude secrets configured successfully!")
 
 
 if __name__ == '__main__':
