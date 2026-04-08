@@ -54,10 +54,10 @@ RUN \
     curl -fsSL https://claude.ai/install.sh | bash && \
     mv /root/.local/share/claude /usr/local/share/claude && \
     ln -s /usr/local/share/claude/versions/$(ls /usr/local/share/claude/versions | head -n 1) /usr/local/bin/claude && \
-    # multiclaude
-    GOBIN=/usr/local/bin go install github.com/dlorenc/multiclaude/cmd/multiclaude@v"${MULTICLAUDE_VERSION}" && \
     # gopls (for claude code)
     GOBIN=/usr/local/bin go install golang.org/x/tools/gopls@v"${GOPLS_VERSION}" && \
+    # multiclaude
+    GOBIN=/usr/local/bin go install github.com/dlorenc/multiclaude/cmd/multiclaude@v"${MULTICLAUDE_VERSION}" && \
     # python deps (keepass/crypto)
     pip3 install --no-cache-dir --break-system-packages -r /tmp/requirements.txt && \
     # cleanup
