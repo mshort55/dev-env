@@ -18,6 +18,7 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 # Base system packages
 RUN apk add --no-cache \
     bash \
+    build-base \
     curl \
     git \
     jq \
