@@ -15,6 +15,7 @@ ARG NODE_VERSION
 ARG OPENSHIFT_VERSION
 ARG RUST_VERSION
 ARG YQ_VERSION
+ARG ZELLIJ_VERSION
 
 ARG WORKSPACE_DIR_NAME
 
@@ -29,6 +30,7 @@ RUN apt-get update && \
     apt-get install -y --no-install-recommends \
     apache2-utils \
     bash-completion \
+    build-essential \
     ca-certificates \
     curl \
     dbus-x11 \
@@ -110,7 +112,9 @@ RUN \
     # ginkgo
     go install github.com/onsi/ginkgo/v2/ginkgo@v${GINKGO_VERSION} && \
     # gopls (for claude code)
-    go install golang.org/x/tools/gopls@v"${GOPLS_VERSION}"
+    go install golang.org/x/tools/gopls@v"${GOPLS_VERSION}" && \
+    # zellij
+    cargo install --locked zellij@${ZELLIJ_VERSION}
 
 WORKDIR /${WORKSPACE_DIR_NAME}
 
