@@ -48,7 +48,7 @@ setup_claude_commands() {
 }
 
 setup_claude_mcp_servers() {
-  claude mcp add atlassian npx mcp-remote https://mcp.atlassian.com/v1/mcp
+  # claude mcp add atlassian npx mcp-remote https://mcp.atlassian.com/v1/mcp
   claude mcp add --scope user jira-mcp-server python3 -- -m jira_mcp_server.main
 }
 

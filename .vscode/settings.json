@@ -1,0 +1,9 @@
+{
+  "terminal.integrated.profiles.linux": {
+    "zellij": {
+      "path": "zellij",
+      "args": ["attach", "dev-env", "--create"]
+    }
+  },
+  "terminal.integrated.defaultProfile.linux": "zellij"
+}
