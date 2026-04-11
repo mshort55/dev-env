@@ -15,6 +15,7 @@ ARG NODE_VERSION
 ARG OPENSHIFT_VERSION
 ARG RUST_VERSION
 ARG YQ_VERSION
+ARG ATUIN_VERSION
 ARG ZELLIJ_VERSION
 
 ARG WORKSPACE_DIR_NAME
@@ -89,6 +90,10 @@ RUN \
     unzip -q awscliv2.zip && \
     ./aws/install && \
     rm -rf awscliv2.zip aws && \
+    # atuin
+    curl -fsSL "https://github.com/atuinsh/atuin/releases/download/v${ATUIN_VERSION}/atuin-aarch64-unknown-linux-gnu.tar.gz" | tar -xz -C /usr/local/bin --strip-components=1 && \
+    # zellij
+    curl -fsSL "https://github.com/zellij-org/zellij/releases/download/v${ZELLIJ_VERSION}/zellij-no-web-aarch64-unknown-linux-musl.tar.gz" | tar -xz -C /usr/local/bin && \
     # python deps (keepass/crypto)
     pip3 install --no-cache-dir --break-system-packages -r /tmp/requirements.txt && \
     rm /tmp/requirements.txt && \
@@ -106,15 +111,13 @@ ENV PATH="/home/${CONTAINER_USER}/.cargo/bin:$PATH"
 # User level software
 RUN \
     # rust
-    curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain ${RUST_VERSION} && \
+    curl -fsSL https://sh.rustup.rs | sh -s -- -y --default-toolchain ${RUST_VERSION} && \
     # claude code
     curl -fsSL https://claude.ai/install.sh | bash && \
     # ginkgo
     go install github.com/onsi/ginkgo/v2/ginkgo@v${GINKGO_VERSION} && \
     # gopls (for claude code)
-    go install golang.org/x/tools/gopls@v"${GOPLS_VERSION}" && \
-    # zellij
-    cargo install --locked zellij@${ZELLIJ_VERSION}
+    go install golang.org/x/tools/gopls@v"${GOPLS_VERSION}"
 
 WORKDIR /${WORKSPACE_DIR_NAME}
 

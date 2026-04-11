@@ -34,6 +34,16 @@ export PATH="$HOME/.local/bin:$HOME/go/bin:$PATH"
 EOF
 }
 
+setup_atuin() {
+  curl -fsSL https://raw.githubusercontent.com/rcaloras/bash-preexec/master/bash-preexec.sh -o ~/.bash-preexec.sh
+  cat >> ~/.bashrc << 'EOF'
+
+# Atuin shell history
+[[ -f ~/.bash-preexec.sh ]] && source ~/.bash-preexec.sh
+eval "$(atuin init bash)"
+EOF
+}
+
 setup_clc() {
   cat >> ~/.bashrc << EOF
 
@@ -73,6 +83,7 @@ main() {
   install_python_deps
   setup_bash_history
   setup_completions
+  setup_atuin
   setup_clc
   setup_claude_commands
   setup_claude_mcp_servers
