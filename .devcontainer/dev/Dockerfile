@@ -46,6 +46,7 @@ RUN apt-get update && \
     nano \
     net-tools \
     openssh-client \
+    poppler-utils \
     python3-pip \
     python3-venv \
     sqlite3 \
