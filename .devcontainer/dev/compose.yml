@@ -21,6 +21,7 @@ services:
         - ZELLIJ_VERSION
     image: dev-env:latest
     container_name: dev
+    userns_mode: "keep-id"
     command: tail -f /dev/null
     environment:
       - USER=${CONTAINER_USER}
