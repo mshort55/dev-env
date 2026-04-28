@@ -115,6 +115,8 @@ RUN \
     curl -fsSL https://sh.rustup.rs | sh -s -- -y --default-toolchain ${RUST_VERSION} && \
     # claude code
     curl -fsSL https://claude.ai/install.sh | bash && \
+    # cursor agent cli
+    curl https://cursor.com/install -fsS | bash && \
     # ginkgo
     go install github.com/onsi/ginkgo/v2/ginkgo@v${GINKGO_VERSION} && \
     # gopls (for claude code)

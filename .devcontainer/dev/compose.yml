@@ -30,6 +30,7 @@ services:
     volumes:
       - ${HOST_GENERAL_DIR}/.bash_history:/home/${CONTAINER_USER}/.bash_history
       - ${HOST_DEV_CLAUDE_DIR}:/home/${CONTAINER_USER}/.claude
+      - ${HOST_DEV_CURSOR_DIR}:/home/${CONTAINER_USER}/.cursor
       - ${HOST_DEV_ATUIN_CONFIG_DIR}:/home/${CONTAINER_USER}/.config/atuin
       - ${HOST_DEV_ATUIN_DATA_DIR}:/home/${CONTAINER_USER}/.local/share/atuin
       - ${HOST_DEV_ZELLIJ_CONFIG_DIR}:/home/${CONTAINER_USER}/.config/zellij
