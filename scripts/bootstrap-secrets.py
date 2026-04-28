@@ -4,6 +4,7 @@ Bootstrap secrets from KeePass database into container.
 """
 
 import os
+import shlex
 import shutil
 import sys
 import getpass
@@ -17,20 +18,29 @@ from pykeepass.entry import Entry
 
 def add_env_vars_to_shell_profile(env_vars: dict[str, str], section_name: str):
     profile_path = Path.home() / ('.bashrc' if shutil.which('bash') else '.ashrc')
-    profile_content = profile_path.read_text() if profile_path.exists() else ''
+    profile_lines = profile_path.read_text().splitlines(keepends=True) if profile_path.exists() else []
 
-    section_comment = f'# {section_name}\n'
-
-    if section_comment.strip() in profile_content:
-        return
-
-    env_lines = [f'\n{section_comment}']
+    section_comment = f'# {section_name}'
+    section_lines = [f'{section_comment}\n']
 
     for env_name, env_value in env_vars.items():
-        env_lines.append(f'export {env_name}={env_value}\n')
+        section_lines.append(f'export {env_name}={shlex.quote(env_value)}\n')
 
-    with profile_path.open('a') as f:
-        f.writelines(env_lines)
+    for idx, line in enumerate(profile_lines):
+        if line.rstrip('\n') == section_comment:
+            end_idx = idx + 1
+            while end_idx < len(profile_lines) and profile_lines[end_idx].startswith('export '):
+                end_idx += 1
+            profile_lines[idx:end_idx] = section_lines
+            break
+    else:
+        if profile_lines and not profile_lines[-1].endswith('\n'):
+            profile_lines[-1] = f'{profile_lines[-1]}\n'
+        if profile_lines and profile_lines[-1].strip():
+            profile_lines.append('\n')
+        profile_lines.extend(section_lines)
+
+    profile_path.write_text(''.join(profile_lines))
 
 
 def setup_ssh_keys(kp: PyKeePass):
@@ -196,14 +206,34 @@ def setup_claude_code_env(kp: PyKeePass):
     )
 
 
+def normalize_shell_command_value(value: str) -> str:
+    normalized_value = value.strip()
+    if len(normalized_value) >= 2 and normalized_value[0] == normalized_value[-1] and normalized_value[0] in {"'", '"'}:
+        return normalized_value[1:-1]
+    return normalized_value
+
+
 def setup_kube_context_env(kp: PyKeePass):
-    setup_env_vars_from_keepass(
-        kp,
-        {
-            'THREE_NODE': 'kube_env_THREE_NODE'
-        },
-        "Kubernetes context environment variables"
-    )
+    print("Setting up Kubernetes context environment variables...")
+
+    env_vars = {}
+
+    for env_name, keepass_title in {
+        'THREE_NODE': 'kube_env_THREE_NODE',
+        'KC': 'kube_env_KC',
+        'OME': 'kube_env_OME'
+    }.items():
+        entry = cast(Optional[Entry], kp.find_entries(title=keepass_title, first=True))
+        if entry and entry.password:
+            env_vars[env_name] = normalize_shell_command_value(entry.password)
+            print(f"  - {env_name} configured")
+        else:
+            print(f"  ⚠️  Warning: {keepass_title} entry not found or has no password")
+
+    if env_vars:
+        add_env_vars_to_shell_profile(env_vars, "Kubernetes context environment variables")
+
+    print("Kubernetes context environment variables config complete")
 
 
 def setup_jira_env(kp: PyKeePass):

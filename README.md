@@ -73,6 +73,10 @@ The container automatically configures SSH keys, GPG, git, gcloud, GitHub CLI, a
   - Claude Code environment variables
   - Kubernetes context variables
 
+Kubernetes cluster targets are loaded from KeePass entries named `kube_env_THREE_NODE`, `kube_env_KC`, and `kube_env_OME`, then exported into your shell as `THREE_NODE`, `KC`, and `OME`.
+Those KeePass values can be stored either as raw `oc login ...` commands or wrapped in a single pair of shell quotes; the bootstrap normalizes both forms.
+After adding or changing those KeePass entries, rerun `python3 scripts/bootstrap-secrets.py` inside the container to refresh your shell profile.
+
 ## Host Setup (macOS with Podman)
 
 1. Install Podman Desktop
