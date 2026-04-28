@@ -2,54 +2,60 @@
 
 ## Project Overview
 
-Personal development container infrastructure that provisions isolated, containerized dev environments. Two container types exist:
+Personal development container infrastructure centered on a single active dev container in `.devcontainer/dev/`.
 
-- **Dev container** (`.devcontainer/dev/`) — Full Ubuntu 24.04 workstation with Python 3.11, Go 1.24, Node.js 24.11.1, and CLI tools (gcloud, kubectl, oc, gh, aws, kind, yq, hcp)
-- **Ruflo container** (`.devcontainer/ruflo/`) — Lightweight Node 24 Alpine container for AI agent orchestration with push-blocking and minimal secrets
+Retired `multiclaude` and `ruflo` assets are preserved under `archive/` using the same repository-relative layout they originally had, so they are easy to restore later.
 
 ## Architecture
 
 ```
 dev-env/
 ├── .devcontainer/
-│   ├── dev/                    # Human developer container
-│   │   ├── Dockerfile          # Ubuntu 24.04 + all dev tools
-│   │   ├── devcontainer.json   # VS Code features: Python, Go, Node, Rust
-│   │   ├── post-create.sh      # Runs general-setup.py + bootstrap-secrets.py
-│   │   └── dev-compose.yml     # Volume mounts for host directories
-│   └── ruflo/                  # AI agent container
-│       ├── Dockerfile          # Node 24 Alpine (lightweight)
-│       ├── devcontainer.json   # VS Code Ruflo workspace config
-│       ├── post-create.sh      # ruflo init, git setup, symlinks, push-blocking
-│       ├── ruflo-compose.yml   # Agent-specific env vars and mounts
-│       └── bootstrap-secrets-ruflo.py  # Minimal secrets (gcloud + Claude only)
-├── claude_commands/            # Custom Claude Code slash commands
-│   ├── commit-summary.md       # Generate PR summaries from commits
-│   ├── multicluster-role-assignment-release.md  # Release CI setup (8-step)
-│   └── update-jira.md          # Update Jira tickets from PR status
-├── bootstrap-secrets.py        # Full secrets extraction from KeePass DB
-├── general-setup.py            # Shell env setup (history, completions, PATH, tools)
-├── docker-compose.env-bridge.yml  # Loads .env vars for compose services
-├── requirements.txt            # Python deps for KeePass/crypto
-└── .env                        # User-specific config (not in git)
+│   └── dev/
+│       ├── Dockerfile              # Ubuntu 24.04 workstation image
+│       ├── compose.yml             # Active compose service definition
+│       ├── devcontainer.json       # VS Code container entrypoint
+│       └── post-create.sh          # Shell/tooling/bootstrap setup
+├── archive/
+│   ├── .devcontainer/
+│   │   ├── multiclaude/            # Archived multiclaude container config
+│   │   └── ruflo/                  # Archived ruflo container config
+│   ├── scripts/
+│   │   ├── bootstrap-secrets-multiclaude.py
+│   │   └── bootstrap-secrets-ruflo.py
+│   └── README.md                   # Restore notes for archived stacks
+├── claude_commands/                # Custom Claude Code slash commands
+├── scripts/
+│   ├── bootstrap-secrets.py        # Active KeePass bootstrap
+│   ├── clc.sh                      # Claude session helper
+│   └── common.sh                   # Shared shell helpers
+├── docker-compose.env-bridge.yml   # Loads `.env` for compose
+├── requirements.txt                # Python deps for KeePass integration
+└── .env                            # User-specific config (gitignored)
 ```
 
 ## How It Works
 
 ### Startup Flow
 
-1. VS Code opens repo → "Reopen in Container"
-2. Docker builds image from Dockerfile (tools, runtimes)
-3. Compose mounts host directories (repos, binaries, persistent config)
-4. `post-create.sh` runs automatically:
-   - **Dev**: `general-setup.py` (shell config) → `bootstrap-secrets.py` (all credentials from KeePass)
-   - **Ruflo**: npm install → `ruflo init --full` → `bootstrap-secrets-ruflo.py` (minimal secrets) → git push-blocking
+1. VS Code opens the repo and reopens in the `dev` container.
+2. Docker builds `.devcontainer/dev/Dockerfile`.
+3. Compose mounts host directories defined in `.env`.
+4. `.devcontainer/dev/post-create.sh` runs to:
+   - fix apt source drift
+   - install the local Jira MCP dependency
+   - configure shell paths, history, completions, and Atuin
+   - wire in `clc.sh` and custom Claude commands
+   - bootstrap secrets from KeePass when available
+   - apply Claude Code settings via `scripts/common.sh`
+
+Archived `multiclaude` and `ruflo` definitions are kept only for future restoration. They are not part of the active startup path.
 
 ### Secrets Management
 
-Credentials are extracted at startup from a KeePass `.kdbx` database (path set via `KEEPASS_DB_PATH` env var). The user is prompted for their master password.
+Credentials are extracted at startup from a KeePass `.kdbx` database when `KEEPASS_DB_PATH` points to an existing file.
 
-**bootstrap-secrets.py** (dev container — full set):
+`scripts/bootstrap-secrets.py` configures:
 
 | KeePass Entry | Destination | Purpose |
 |---------------|-------------|---------|
@@ -59,67 +65,64 @@ Credentials are extracted at startup from a KeePass `.kdbx` database (path set v
 | `.config/gcloud/*` (3 entries) | `~/.config/gcloud/` | Google Cloud auth |
 | `.config/gh/hosts.yml` | `~/.config/gh/` | GitHub CLI auth |
 | `.docker/config.json` | `~/.docker/` | Docker registry auth |
-| `claude_env_*` | `.bashrc` exports | Claude Code config |
-| `jira_env_*` | `.bashrc` exports | Jira API access |
-| `kube_env_*` | `.bashrc` exports | Kubernetes contexts |
+| `claude_env_*` | shell profile exports | Claude Code config |
+| `jira_mcp_env_*` | shell profile exports | Jira API access |
+| `kube_env_*` | shell profile exports | Kubernetes contexts |
 
-**bootstrap-secrets-ruflo.py** (ruflo container — minimal):
-- Only extracts gcloud config and Claude Code env vars
-- No SSH, GPG, Docker, GitHub CLI, or Jira credentials
+### Environment Variables (`.env`)
 
-### Environment Variables (.env)
+The active `.env` surface now covers only the live dev container:
 
-All container config lives in `.env` (not committed). Key variables:
+- `GENERAL_DIR_NAME`, `REPOS_DIR_NAME`, `WORKSPACE_DIR_NAME`, `BINARIES_DIR_NAME`
+- `HOST_GENERAL_DIR`, `HOST_REPOS_DIR`, `HOST_WORKSPACE_DIR`, `HOST_BINARIES_DIR`
+- `HOST_DEV_*` directories for Claude, Cursor, Atuin, and Zellij persistence
+- `CONTAINER_USER`, `CONTAINER_UID`
+- `DEV_ENV_DIR`, `KEEPASS_DB_PATH`
+- shared tool versions still used by `.devcontainer/dev/`
 
-- `CONTAINER_USER` / `CONTAINER_UID` — Container user identity
-- `HOST_GENERAL_DIR` — Persistent files (bash history, .claude config)
-- `HOST_REPOS_DIR` — Git repositories directory
-- `HOST_WORKSPACE_DIR` — Synced workspace (contains KeePass DB)
-- `HOST_BINARIES_DIR` — Pre-built binary archives
-- `HOST_RUFLO_DIR` / `HOST_RUFLO_CLAUDE_DIR` — Ruflo installation and config
-- `KEEPASS_DB_PATH` — KeePass database location inside container
-- `RUFLO_VERSION` — Ruflo npm package version
+Retired `ruflo` and `multiclaude` variables live in a commented `Archived` section at the bottom of `.env` and `.env.example`.
 
 ### Docker Compose Pattern
 
-The env-bridge pattern separates concerns:
-- `docker-compose.env-bridge.yml` — Loads `.env` variables (shared)
-- `dev-compose.yml` — Dev container service definition
-- `ruflo-compose.yml` — Ruflo container service definition
+The compose setup separates shared env loading from the active service definition:
+
+- `docker-compose.env-bridge.yml` - shared `.env` loader
+- `.devcontainer/dev/compose.yml` - active dev container
+- `archive/.devcontainer/*/compose.yml` - preserved retired definitions
 
 ## Behavioral Rules
 
-- NEVER hardcode secrets, API keys, or credentials — all secrets come from KeePass
-- NEVER modify `.env` without explicit user approval — it contains host-specific paths
-- NEVER push from the Ruflo container — git push is blocked by design (`no-push://` redirect)
-- Always test bootstrap scripts with missing KeePass entries — they must degrade gracefully
-- Keep bootstrap-secrets-ruflo.py minimal — the Ruflo container should have the smallest secret surface possible
+- NEVER hardcode secrets, API keys, or credentials - all secrets come from KeePass
+- NEVER modify `.env` without explicit user approval - it contains host-specific paths
+- Always test bootstrap scripts with missing KeePass entries - they must degrade gracefully
+- Keep archived `multiclaude` and `ruflo` files under `archive/` with their original relative layout so restoration stays obvious
 
 ## Key Design Decisions
 
-1. **Two containers, two trust levels**: Dev gets all secrets; Ruflo gets only what agents need
-2. **KeePass as single source of truth**: No secrets in files, images, or env — extracted fresh each startup
-3. **Graceful degradation**: Missing KeePass DB or entries produce warnings, not failures
-4. **Push-blocking for agents**: Ruflo's git config redirects all pushes to `no-push://` to prevent accidental commits from AI agents
-5. **Persistent volumes**: Bash history, `.claude` config, and binaries survive container rebuilds via host mounts
+1. **Single active container**: the repo now optimizes for the day-to-day `dev` environment only
+2. **KeePass as single source of truth**: no secrets are committed to the repo or baked into images
+3. **Graceful degradation**: missing KeePass files or entries warn instead of crashing unrelated setup
+4. **Archive instead of delete**: retired agent/container setups stay in-repo under `archive/` so they can be restored without guesswork
+5. **Persistent host mounts**: shell history, Claude config, Cursor config, and tool caches survive rebuilds
 
 ## Claude Commands
 
-Custom commands are copied to `~/.claude/commands/` during setup (via `general-setup.py`):
+Custom commands are copied to `~/.claude/commands/` during dev container setup:
 
-- `/commit-summary` — Generates a markdown PR summary from recent git commits
-- `/multicluster-role-assignment-release` — 8-step CI configuration for release branches (version format: "2.16" in configs, "216" in Prow contexts, "release-2.16" for branches)
-- `/update-jira` — Fetches PR details, generates status comment, posts to Jira ticket with user approval
+- `/commit-summary` - Generates a markdown PR summary from recent git commits
+- `/multicluster-role-assignment-release` - 8-step CI configuration for release branches
+- `/update-jira` - Fetches PR details, generates a status comment, and prepares a Jira update
 
-## Working with bootstrap-secrets.py
+## Working with `scripts/bootstrap-secrets.py`
 
-When modifying the secrets bootstrap:
-- Each `setup_*` function is independent — failures in one don't affect others
-- `add_env_vars_to_shell_profile()` appends to `.bashrc` (Alpine: `.ashrc`) with section comment headers
-- SSH keys: password field = private key, notes field = public key
-- gcloud `credentials.db` is a binary file stored as a KeePass attachment (not in password field)
-- GPG setup includes configuring `gpg-agent` for loopback pinentry mode
+When modifying the active secrets bootstrap:
 
-## Dependencies (requirements.txt)
+- Each `setup_*` function is independent, so one failure does not block the rest
+- `add_env_vars_to_shell_profile()` appends to `.bashrc` (or `.ashrc` when bash is unavailable)
+- SSH keys use the KeePass password field for the private key and notes for the public key
+- gcloud `credentials.db` is stored as a KeePass attachment
+- GPG setup enables loopback pinentry for non-interactive use
 
-All for KeePass integration: `pykeepass` (KDBX reader), `pycryptodomex` (crypto), `argon2-cffi` (password hashing), `lxml` (XML parsing), `construct` (binary parsing), `pyotp` (OTP support).
+## Dependencies (`requirements.txt`)
+
+All Python dependencies support KeePass access and related crypto/parsing: `pykeepass`, `pycryptodomex`, `argon2-cffi`, `lxml`, `construct`, and `pyotp`.
