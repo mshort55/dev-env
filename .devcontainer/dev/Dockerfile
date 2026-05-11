@@ -9,6 +9,7 @@ ARG CONTAINER_USER
 ARG GINKGO_VERSION
 ARG GOPLS_VERSION
 ARG GO_VERSION
+ARG GRPCURL_VERSION
 ARG HCP_VERSION
 ARG KIND_VERSION
 ARG NODE_VERSION
@@ -53,7 +54,8 @@ RUN apt-get update && \
     sudo \
     ubuntu-standard \
     unzip \
-    vim && \
+    vim \
+    xxd && \
     sed -i -e 's/# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen && \
     locale-gen en_US.UTF-8 && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
@@ -87,6 +89,8 @@ RUN \
     curl -fsSL https://kind.sigs.k8s.io/dl/v${KIND_VERSION}/kind-linux-arm64 -o /usr/local/bin/kind && \
     # hcp-cli
     curl -fsSL https://developers.redhat.com/content-gateway/file/pub/mce/clients/hcp-cli/${HCP_VERSION}/hcp-cli-${HCP_VERSION}-linux-arm64.tar.gz | tar -xz -C /usr/local/bin && \
+    # grpcurl
+    curl -fsSL "https://github.com/fullstorydev/grpcurl/releases/download/v${GRPCURL_VERSION}/grpcurl_${GRPCURL_VERSION}_linux_arm64.tar.gz" | tar -xz --no-same-owner -C /usr/local/bin grpcurl && \
     # buf
     curl -fsSL "https://github.com/bufbuild/buf/releases/download/v${BUF_VERSION}/buf-Linux-aarch64.tar.gz" | tar -xz -C /usr/local --strip-components 1 && \
     # aws-cli
@@ -102,7 +106,7 @@ RUN \
     pip3 install --no-cache-dir --break-system-packages -r /tmp/requirements.txt && \
     rm /tmp/requirements.txt && \
     # finalize and clean up
-    chmod +x /usr/local/bin/oc /usr/local/bin/kubectl /usr/local/bin/yq /usr/local/bin/kind /usr/local/bin/hcp && \
+    chmod +x /usr/local/bin/oc /usr/local/bin/kubectl /usr/local/bin/yq /usr/local/bin/kind /usr/local/bin/hcp /usr/local/bin/grpcurl && \
     apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/*
 
 RUN useradd -m -s /bin/bash -u ${CONTAINER_UID} ${CONTAINER_USER} && \

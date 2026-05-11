@@ -11,6 +11,7 @@ services:
         - GINKGO_VERSION
         - GO_VERSION
         - GOPLS_VERSION
+        - GRPCURL_VERSION
         - HCP_VERSION
         - KIND_VERSION
         - NODE_VERSION
