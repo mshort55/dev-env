@@ -98,6 +98,10 @@ RUN \
     unzip -q awscliv2.zip && \
     ./aws/install && \
     rm -rf awscliv2.zip aws && \
+    # aws sam cli
+    curl -fsSL https://github.com/aws/aws-sam-cli/releases/latest/download/aws-sam-cli-linux-arm64.zip -o awssamcli.zip && \
+    unzip awssamcli.zip -d sam-installation && \
+    sudo ./sam-installation/install && \
     # atuin
     curl -fsSL "https://github.com/atuinsh/atuin/releases/download/v${ATUIN_VERSION}/atuin-aarch64-unknown-linux-gnu.tar.gz" | tar -xz -C /usr/local/bin --strip-components=1 && \
     # zellij
