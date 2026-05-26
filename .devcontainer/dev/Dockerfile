@@ -52,6 +52,7 @@ RUN apt-get update && \
     python3-venv \
     sqlite3 \
     sudo \
+    tree \
     ubuntu-standard \
     unzip \
     vim \
