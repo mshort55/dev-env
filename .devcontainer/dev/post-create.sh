@@ -45,7 +45,7 @@ EOF
 }
 
 setup_clc() {
-  cat >> ~/.bashrc << EOF
+  cat >> ~/.bashrc << 'EOF'
 
 # Claude session manager
 source "${DEV_ENV_DIR}/scripts/clc.sh"
@@ -77,6 +77,24 @@ bootstrap_secrets() {
   fi
 }
 
+setup_and_unlock_dummy_keyring() {
+  cat >> ~/.bashrc << 'EOF'
+
+# --- Headless Keyring Auto-Start ---
+# 1. Launch D-Bus if not already running in this session
+if [ -z "$DBUS_SESSION_BUS_ADDRESS" ] && type dbus-launch >/dev/null 2>&1; then
+    eval "$(dbus-launch --sh-syntax)"
+fi
+
+# 2. Start and unlock gnome-keyring if it isn't already active
+if [ -n "$DBUS_SESSION_BUS_ADDRESS" ] && type gnome-keyring-daemon >/dev/null 2>&1; then
+    eval "$(echo "" | gnome-keyring-daemon --unlock 2>/dev/null)"
+    eval "$(echo "" | gnome-keyring-daemon --start 2>/dev/null)"
+fi
+# -----------------------------------
+EOF
+}
+
 main() {
   fix_apt_sources
   setup_shell_paths
@@ -89,6 +107,7 @@ main() {
   setup_claude_mcp_servers
   bootstrap_secrets
   configure_claude_code
+  setup_and_unlock_dummy_keyring
 }
 
 main
