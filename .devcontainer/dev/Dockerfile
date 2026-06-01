@@ -1,7 +1,7 @@
 # Ubuntu 24.04 LTS
 # docker inspect ubuntu:24.04 --format='{{.Created}}'
-# 2025-10-16T19:26:58.895610113Z
-FROM ubuntu@sha256:c35e29c9450151419d9448b0fd75374fec4fff364a27f176fb458d472dfc9e54
+# 2026-04-10T06:56:54.752442228Z
+FROM ubuntu@sha256:c4a8d5503dfb2a3eb8ab5f807da5bc69a85730fb49b5cfca2330194ebcc41c7b
 
 ARG BUF_VERSION
 ARG CONTAINER_UID
@@ -12,6 +12,7 @@ ARG GO_VERSION
 ARG GRPCURL_VERSION
 ARG HCP_VERSION
 ARG KIND_VERSION
+ARG KUSTOMIZE_VERSION
 ARG NODE_VERSION
 ARG OPENSHIFT_VERSION
 ARG RUST_VERSION
@@ -66,9 +67,9 @@ COPY requirements.txt /tmp/requirements.txt
 # Other software installations
 RUN \
     # go
-    curl -fsSL https://go.dev/dl/go${GO_VERSION}.linux-arm64.tar.gz | tar -xz -C /usr/local && \
+    curl -fsSL "https://go.dev/dl/go${GO_VERSION}.linux-arm64.tar.gz" | tar -xz -C /usr/local && \
     # node.js
-    curl -fsSL https://nodejs.org/dist/v${NODE_VERSION}/node-v${NODE_VERSION}-linux-arm64.tar.xz | tar -xJ --strip-components=1 -C /usr/local && \
+    curl -fsSL "https://nodejs.org/dist/v${NODE_VERSION}/node-v${NODE_VERSION}-linux-arm64.tar.xz" | tar -xJ --strip-components=1 -C /usr/local && \
     # gcloud-cli
     curl -fsSL https://packages.cloud.google.com/apt/doc/apt-key.gpg | gpg --dearmor -o /usr/share/keyrings/cloud.google.gpg && \
     echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main" | tee /etc/apt/sources.list.d/google-cloud-sdk.list && \
@@ -83,13 +84,15 @@ RUN \
     curl -1sLf 'https://dl.cloudsmith.io/public/task/task/setup.deb.sh' | bash && \
     apt-get update && apt-get install -y task && \
     # oc & kubectl
-    curl -fsSL https://mirror.openshift.com/pub/openshift-v4/clients/ocp/${OPENSHIFT_VERSION}/openshift-client-linux-arm64.tar.gz | tar -xz -C /usr/local/bin oc kubectl && \
+    curl -fsSL "https://mirror.openshift.com/pub/openshift-v4/clients/ocp/${OPENSHIFT_VERSION}/openshift-client-linux-arm64.tar.gz" | tar -xz -C /usr/local/bin oc kubectl && \
     # yq
-    curl -fsSL https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/yq_linux_arm64.tar.gz | tar -xz --transform='s/yq_linux_arm64/yq/' -C /usr/local/bin ./yq_linux_arm64 && \
+    curl -fsSL "https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/yq_linux_arm64.tar.gz" | tar -xz --transform='s/yq_linux_arm64/yq/' -C /usr/local/bin ./yq_linux_arm64 && \
     # kind
-    curl -fsSL https://kind.sigs.k8s.io/dl/v${KIND_VERSION}/kind-linux-arm64 -o /usr/local/bin/kind && \
+    curl -fsSL "https://kind.sigs.k8s.io/dl/v${KIND_VERSION}/kind-linux-arm64" -o /usr/local/bin/kind && \
+    # kustomize
+    curl -fsSL "https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize/v${KUSTOMIZE_VERSION}/kustomize_v${KUSTOMIZE_VERSION}_linux_arm64.tar.gz" | tar -xz -C /usr/local/bin kustomize && \
     # hcp-cli
-    curl -fsSL https://developers.redhat.com/content-gateway/file/pub/mce/clients/hcp-cli/${HCP_VERSION}/hcp-cli-${HCP_VERSION}-linux-arm64.tar.gz | tar -xz -C /usr/local/bin && \
+    curl -fsSL "https://developers.redhat.com/content-gateway/file/pub/mce/clients/hcp-cli/${HCP_VERSION}/hcp-cli-${HCP_VERSION}-linux-arm64.tar.gz" | tar -xz -C /usr/local/bin && \
     # grpcurl
     curl -fsSL "https://github.com/fullstorydev/grpcurl/releases/download/v${GRPCURL_VERSION}/grpcurl_${GRPCURL_VERSION}_linux_arm64.tar.gz" | tar -xz --no-same-owner -C /usr/local/bin grpcurl && \
     # buf
@@ -130,9 +133,9 @@ RUN \
     # cursor agent cli
     curl https://cursor.com/install -fsS | bash && \
     # ginkgo
-    go install github.com/onsi/ginkgo/v2/ginkgo@v${GINKGO_VERSION} && \
+    go install "github.com/onsi/ginkgo/v2/ginkgo@v${GINKGO_VERSION}" && \
     # gopls (for claude code)
-    go install golang.org/x/tools/gopls@v"${GOPLS_VERSION}"
+    go install "golang.org/x/tools/gopls@v${GOPLS_VERSION}"
 
 WORKDIR /${WORKSPACE_DIR_NAME}
 

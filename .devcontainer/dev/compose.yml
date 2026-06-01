@@ -14,6 +14,7 @@ services:
         - GRPCURL_VERSION
         - HCP_VERSION
         - KIND_VERSION
+        - KUSTOMIZE_VERSION
         - NODE_VERSION
         - OPENSHIFT_VERSION
         - RUST_VERSION
