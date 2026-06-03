@@ -69,7 +69,7 @@ RUN \
     # go
     curl -fsSL "https://go.dev/dl/go${GO_VERSION}.linux-arm64.tar.gz" | tar -xz -C /usr/local && \
     # node.js
-    curl -fsSL "https://nodejs.org/dist/v${NODE_VERSION}/node-v${NODE_VERSION}-linux-arm64.tar.xz" | tar -xJ --strip-components=1 -C /usr/local && \
+    # curl -fsSL "https://nodejs.org/dist/v${NODE_VERSION}/node-v${NODE_VERSION}-linux-arm64.tar.xz" | tar -xJ --strip-components=1 -C /usr/local && \
     # gcloud-cli
     curl -fsSL https://packages.cloud.google.com/apt/doc/apt-key.gpg | gpg --dearmor -o /usr/share/keyrings/cloud.google.gpg && \
     echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main" | tee /etc/apt/sources.list.d/google-cloud-sdk.list && \
@@ -92,7 +92,7 @@ RUN \
     # kustomize
     curl -fsSL "https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize/v${KUSTOMIZE_VERSION}/kustomize_v${KUSTOMIZE_VERSION}_linux_arm64.tar.gz" | tar -xz -C /usr/local/bin kustomize && \
     # hcp-cli
-    curl -fsSL "https://developers.redhat.com/content-gateway/file/pub/mce/clients/hcp-cli/${HCP_VERSION}/hcp-cli-${HCP_VERSION}-linux-arm64.tar.gz" | tar -xz -C /usr/local/bin && \
+    # curl -fsSL "https://developers.redhat.com/content-gateway/file/pub/mce/clients/hcp-cli/${HCP_VERSION}/hcp-cli-${HCP_VERSION}-linux-arm64.tar.gz" | tar -xz -C /usr/local/bin && \
     # grpcurl
     curl -fsSL "https://github.com/fullstorydev/grpcurl/releases/download/v${GRPCURL_VERSION}/grpcurl_${GRPCURL_VERSION}_linux_arm64.tar.gz" | tar -xz --no-same-owner -C /usr/local/bin grpcurl && \
     # buf
@@ -103,9 +103,9 @@ RUN \
     ./aws/install && \
     rm -rf awscliv2.zip aws && \
     # aws sam cli
-    curl -fsSL https://github.com/aws/aws-sam-cli/releases/latest/download/aws-sam-cli-linux-arm64.zip -o awssamcli.zip && \
-    unzip awssamcli.zip -d sam-installation && \
-    sudo ./sam-installation/install && \
+    # curl -fsSL https://github.com/aws/aws-sam-cli/releases/latest/download/aws-sam-cli-linux-arm64.zip -o awssamcli.zip && \
+    # unzip awssamcli.zip -d sam-installation && \
+    # sudo ./sam-installation/install && \
     # atuin
     curl -fsSL "https://github.com/atuinsh/atuin/releases/download/v${ATUIN_VERSION}/atuin-aarch64-unknown-linux-gnu.tar.gz" | tar -xz -C /usr/local/bin --strip-components=1 && \
     # zellij
@@ -114,7 +114,7 @@ RUN \
     pip3 install --no-cache-dir --break-system-packages -r /tmp/requirements.txt && \
     rm /tmp/requirements.txt && \
     # finalize and clean up
-    chmod +x /usr/local/bin/oc /usr/local/bin/kubectl /usr/local/bin/yq /usr/local/bin/kind /usr/local/bin/hcp /usr/local/bin/grpcurl && \
+    chmod +x /usr/local/bin/kind && \
     apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/*
 
 RUN useradd -m -s /bin/bash -u ${CONTAINER_UID} ${CONTAINER_USER} && \
@@ -127,7 +127,7 @@ ENV PATH="/home/${CONTAINER_USER}/.cargo/bin:$PATH"
 # User level software
 RUN \
     # rust
-    curl -fsSL https://sh.rustup.rs | sh -s -- -y --default-toolchain ${RUST_VERSION} && \
+    # curl -fsSL https://sh.rustup.rs | sh -s -- -y --default-toolchain ${RUST_VERSION} && \
     # claude code
     curl -fsSL https://claude.ai/install.sh | bash && \
     # cursor agent cli

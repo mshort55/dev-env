@@ -11,20 +11,19 @@
   "customizations": {
     "vscode": {
       "extensions": [
-        "dbaeumer.vscode-eslint",
+        "alefragnani.project-manager",
         "dinhani.copy-on-select",
         "eamodio.gitlens",
-        "esbenp.prettier-vscode",
         "github.vscode-pull-request-github",
         "golang.go",
         "ms-python.python",
         "ms-python.debugpy",
-        "rust-lang.rust-analyzer",
         "timonwong.shellcheck",
-        "vadimcn.vscode-lldb",
         "vscodevim.vim"
       ],
       "settings": {
+        "extensions.autoUpdate": false,
+        "extensions.autoCheckUpdates": false,
         "python.analysis.typeCheckingMode": "standard",
         "python.analysis.diagnosticSeverityOverrides": {
           "reportMissingParameterType": "error",
