@@ -30,7 +30,6 @@ services:
       - DEV_ENV_DIR
       - KEEPASS_DB_PATH
     volumes:
-      - ${HOST_GENERAL_DIR}/.bash_history:/home/${CONTAINER_USER}/.bash_history
       - ${HOST_DEV_CLAUDE_DIR}:/home/${CONTAINER_USER}/.claude
       - ${HOST_DEV_CURSOR_DIR}:/home/${CONTAINER_USER}/.cursor
       - ${HOST_DEV_ATUIN_CONFIG_DIR}:/home/${CONTAINER_USER}/.config/atuin

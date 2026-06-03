@@ -2,18 +2,6 @@
 set -e
 source "${DEV_ENV_DIR}/scripts/common.sh"
 
-setup_bash_history() {
-  cat >> ~/.bashrc << 'EOF'
-
-# Enhanced bash history
-export HISTSIZE=50000
-export HISTFILESIZE=50000
-export HISTCONTROL=ignoredups:erasedups
-shopt -s histappend
-PROMPT_COMMAND="history -a; history -n; $PROMPT_COMMAND"
-EOF
-}
-
 setup_completions() {
   cat >> ~/.bashrc << 'EOF'
 
@@ -99,7 +87,6 @@ main() {
   fix_apt_sources
   setup_shell_paths
   install_python_deps
-  setup_bash_history
   setup_completions
   setup_atuin
   setup_clc
