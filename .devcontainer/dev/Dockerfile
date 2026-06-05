@@ -15,6 +15,7 @@ ARG KIND_VERSION
 ARG KUSTOMIZE_VERSION
 ARG NODE_VERSION
 ARG OPENSHIFT_VERSION
+ARG PODMAN_VERSION
 ARG RUST_VERSION
 ARG YQ_VERSION
 ARG ATUIN_VERSION
@@ -95,6 +96,9 @@ RUN \
     # curl -fsSL "https://developers.redhat.com/content-gateway/file/pub/mce/clients/hcp-cli/${HCP_VERSION}/hcp-cli-${HCP_VERSION}-linux-arm64.tar.gz" | tar -xz -C /usr/local/bin && \
     # grpcurl
     curl -fsSL "https://github.com/fullstorydev/grpcurl/releases/download/v${GRPCURL_VERSION}/grpcurl_${GRPCURL_VERSION}_linux_arm64.tar.gz" | tar -xz --no-same-owner -C /usr/local/bin grpcurl && \
+    # podman (remote client only — routes to host podman via mounted socket)
+    curl -fsSL "https://github.com/containers/podman/releases/download/v${PODMAN_VERSION}/podman-remote-static-linux_arm64.tar.gz" | tar -xz --strip-components=1 -C /usr/local/bin bin/podman-remote-static-linux_arm64 && \
+    mv /usr/local/bin/podman-remote-static-linux_arm64 /usr/local/bin/podman && \
     # buf
     curl -fsSL "https://github.com/bufbuild/buf/releases/download/v${BUF_VERSION}/buf-Linux-aarch64.tar.gz" | tar -xz -C /usr/local --strip-components 1 && \
     # aws-cli

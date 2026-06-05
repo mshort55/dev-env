@@ -17,6 +17,7 @@ services:
         - KUSTOMIZE_VERSION
         - NODE_VERSION
         - OPENSHIFT_VERSION
+        - PODMAN_VERSION
         - RUST_VERSION
         - WORKSPACE_DIR_NAME
         - YQ_VERSION
@@ -29,6 +30,7 @@ services:
       - USER=${CONTAINER_USER}
       - DEV_ENV_DIR
       - KEEPASS_DB_PATH
+      - CONTAINER_HOST=unix:///var/run/podman/podman.sock
     volumes:
       - ${HOST_DEV_CLAUDE_DIR}:/home/${CONTAINER_USER}/.claude
       - ${HOST_DEV_CURSOR_DIR}:/home/${CONTAINER_USER}/.cursor
@@ -39,6 +41,7 @@ services:
       - ${HOST_BINARIES_DIR}:/home/${CONTAINER_USER}/Binaries
       - ${HOST_REPOS_DIR}:/${REPOS_DIR_NAME}
       - ${HOST_WORKSPACE_DIR}:/${WORKSPACE_DIR_NAME}
+      - ${HOST_PODMAN_SOCK}:/var/run/podman/podman.sock
     networks:
       - dev-net
 
