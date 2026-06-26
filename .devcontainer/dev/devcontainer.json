@@ -11,15 +11,16 @@
   "customizations": {
     "vscode": {
       "extensions": [
-        "alefragnani.project-manager",
-        "dinhani.copy-on-select",
-        "eamodio.gitlens",
-        "github.vscode-pull-request-github",
-        "golang.go",
-        "ms-python.python",
-        "ms-python.debugpy",
-        "timonwong.shellcheck",
-        "vscodevim.vim"
+        "alefragnani.project-manager@13.1.0",
+        "dinhani.copy-on-select@0.0.7",
+        "eamodio.gitlens@18.0.0",
+        "github.vscode-pull-request-github@0.146.0",
+        "golang.go@0.52.2",
+        "ms-python.python@2026.4.0",
+        "ms-python.debugpy@2026.6.0",
+        "timonwong.shellcheck@0.39.5",
+        "tooltitudeteam.tooltitude-pb@1.26.0",
+        "vscodevim.vim@1.32.4"
       ],
       "settings": {
         "extensions.autoUpdate": false,
