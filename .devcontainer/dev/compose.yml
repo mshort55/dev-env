@@ -13,6 +13,7 @@ services:
         - GOPLS_VERSION
         - GRPCURL_VERSION
         - HCP_VERSION
+        - JQ_VERSION
         - KIND_VERSION
         - KUSTOMIZE_VERSION
         - NODE_VERSION
@@ -44,6 +45,8 @@ services:
       - ${HOST_PODMAN_SOCK}:/var/run/podman/podman.sock
     networks:
       - dev-net
+    cap_add:
+      - NET_RAW
 
 networks:
   dev-net:

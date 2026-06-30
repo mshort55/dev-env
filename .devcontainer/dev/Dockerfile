@@ -3,6 +3,7 @@
 # 2026-04-10T06:56:54.752442228Z
 FROM ubuntu@sha256:c4a8d5503dfb2a3eb8ab5f807da5bc69a85730fb49b5cfca2330194ebcc41c7b
 
+ARG ATUIN_VERSION
 ARG BUF_VERSION
 ARG CONTAINER_UID
 ARG CONTAINER_USER
@@ -11,6 +12,7 @@ ARG GOPLS_VERSION
 ARG GO_VERSION
 ARG GRPCURL_VERSION
 ARG HCP_VERSION
+ARG JQ_VERSION
 ARG KIND_VERSION
 ARG KUSTOMIZE_VERSION
 ARG NODE_VERSION
@@ -18,7 +20,6 @@ ARG OPENSHIFT_VERSION
 ARG PODMAN_VERSION
 ARG RUST_VERSION
 ARG YQ_VERSION
-ARG ATUIN_VERSION
 ARG ZELLIJ_VERSION
 
 ARG WORKSPACE_DIR_NAME
@@ -88,6 +89,8 @@ RUN \
     curl -fsSL "https://mirror.openshift.com/pub/openshift-v4/clients/ocp/${OPENSHIFT_VERSION}/openshift-client-linux-arm64.tar.gz" | tar -xz -C /usr/local/bin oc kubectl && \
     # yq
     curl -fsSL "https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/yq_linux_arm64.tar.gz" | tar -xz --transform='s/yq_linux_arm64/yq/' -C /usr/local/bin ./yq_linux_arm64 && \
+    # jq
+    curl -fsSL "https://github.com/jqlang/jq/releases/download/jq-1.8.2/jq-linux-arm64" -o /usr/local/bin/jq && \
     # kind
     curl -fsSL "https://kind.sigs.k8s.io/dl/v${KIND_VERSION}/kind-linux-arm64" -o /usr/local/bin/kind && \
     # kustomize
@@ -118,7 +121,7 @@ RUN \
     pip3 install --no-cache-dir --break-system-packages -r /tmp/requirements.txt && \
     rm /tmp/requirements.txt && \
     # finalize and clean up
-    chmod +x /usr/local/bin/kind && \
+    chmod +x /usr/local/bin/kind /usr/local/bin/jq && \
     apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/*
 
 RUN useradd -m -s /bin/bash -u ${CONTAINER_UID} ${CONTAINER_USER} && \
