@@ -47,6 +47,8 @@ services:
       - dev-net
     cap_add:
       - NET_RAW
+    security_opt:
+      - label=disable
 
 networks:
   dev-net:
