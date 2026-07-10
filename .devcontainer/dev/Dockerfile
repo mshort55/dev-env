@@ -35,6 +35,7 @@ RUN apt-get update && \
     apt-get install -y --no-install-recommends \
     apache2-utils \
     bash-completion \
+    bubblewrap \
     build-essential \
     ca-certificates \
     curl \
@@ -139,6 +140,8 @@ RUN \
     curl -fsSL https://claude.ai/install.sh | bash && \
     # cursor agent cli
     curl https://cursor.com/install -fsS | bash && \
+    # openai codex cli
+    curl -fsSL https://chatgpt.com/codex/install.sh | sh && \
     # ginkgo
     go install "github.com/onsi/ginkgo/v2/ginkgo@v${GINKGO_VERSION}" && \
     # gopls (for claude code)

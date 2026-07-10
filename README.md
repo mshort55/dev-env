@@ -17,6 +17,11 @@ Personal development container with pre-configured tools, languages, and secrets
 - Docker-in-Docker
 - Git, Vim, Podman
 
+**Agent CLIs:**
+- Claude Code
+- Cursor Agent
+- OpenAI Codex
+
 **VS Code Extensions:**
 - Claude Code
 - Python + debugpy
@@ -39,7 +44,7 @@ The `.env` file contains all configuration for the dev container. You may need t
 - `WORKSPACE_DIR_NAME` - Name for workspace sync directory (used on both host and container)
 
 **Host Paths:**
-- `HOST_GENERAL_DIR` - Local directory containing persistent files (bash history, Claude config)
+- `HOST_GENERAL_DIR` - Local directory containing persistent files (bash history, Claude/Cursor/Codex config)
 - `HOST_REPOS_DIR` - Local directory containing your git repositories
 - `HOST_WORKSPACE_DIR` - Local directory containing your KeePass database and synced files
 

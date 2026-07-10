@@ -75,7 +75,7 @@ The active `.env` surface now covers only the live dev container:
 
 - `GENERAL_DIR_NAME`, `REPOS_DIR_NAME`, `WORKSPACE_DIR_NAME`, `BINARIES_DIR_NAME`
 - `HOST_GENERAL_DIR`, `HOST_REPOS_DIR`, `HOST_WORKSPACE_DIR`, `HOST_BINARIES_DIR`
-- `HOST_DEV_*` directories for Claude, Cursor, Atuin, and Zellij persistence
+- `HOST_DEV_*` directories for Claude, Cursor, Codex, Atuin, and Zellij persistence
 - `CONTAINER_USER`, `CONTAINER_UID`
 - `DEV_ENV_DIR`, `KEEPASS_DB_PATH`
 - shared tool versions still used by `.devcontainer/dev/`
@@ -103,7 +103,7 @@ The compose setup separates shared env loading from the active service definitio
 2. **KeePass as single source of truth**: no secrets are committed to the repo or baked into images
 3. **Graceful degradation**: missing KeePass files or entries warn instead of crashing unrelated setup
 4. **Archive instead of delete**: retired agent/container setups stay in-repo under `archive/` so they can be restored without guesswork
-5. **Persistent host mounts**: shell history, Claude config, Cursor config, and tool caches survive rebuilds
+5. **Persistent host mounts**: shell history, Claude config, Cursor config, Codex config, and tool caches survive rebuilds
 
 ## Claude Commands
 
