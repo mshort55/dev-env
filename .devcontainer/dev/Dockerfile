@@ -29,15 +29,20 @@ ENV DEBIAN_FRONTEND=noninteractive \
     LC_ALL=en_US.UTF-8 \
     PATH="/usr/local/go/bin:$HOME/.local/bin:$PATH"
 
-# Base system package installations, package upgrades
-RUN apt-get update && \
+# Base system package installations, package upgrades.
+# HTTP to ports.ubuntu.com:80 times out on some networks; the base image has no
+# CA store, so bootstrap ca-certificates over HTTPS with verify disabled once,
+# then continue with normal verified apt.
+RUN sed -i 's|http://ports.ubuntu.com|https://ports.ubuntu.com|g' /etc/apt/sources.list.d/ubuntu.sources && \
+    apt-get -o Acquire::https::Verify-Peer=false -o Acquire::https::Verify-Host=false update && \
+    apt-get -o Acquire::https::Verify-Peer=false -o Acquire::https::Verify-Host=false install -y --no-install-recommends ca-certificates && \
+    apt-get update && \
     apt-get -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" upgrade && \
     apt-get install -y --no-install-recommends \
     apache2-utils \
     bash-completion \
     bubblewrap \
     build-essential \
-    ca-certificates \
     curl \
     dbus-x11 \
     gettext \

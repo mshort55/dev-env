@@ -5,6 +5,14 @@
   ],
   "service": "dev",
   "workspaceFolder": "/UbuntuSync",
+  "features": {
+    "ghcr.io/devcontainers/features/docker-in-docker:4.0.0": {
+      "version": "29.6.2",
+      "moby": true,
+      "installDockerBuildx": true,
+      "enableNonRootDocker": true
+    }
+  },
   "customizations": {
     "vscode": {
       "extensions": [
