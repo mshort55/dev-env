@@ -145,17 +145,17 @@ def setup_gcloud_config(kp: PyKeePass):
     else:
         print(f"  ⚠️  Warning: {GCLOUD_ADC_ENTRY_TITLE} entry not found or has no password")
 
-    config_entry = cast(Optional[Entry], kp.find_entries(title=GCLOUD_CONFIG_ENTRY_TITLE, first=True))
-    if config_entry and config_entry.password:
-        config_parts = Path(GCLOUD_CONFIG_ENTRY_TITLE).parts
-        config_dir = gcloud_dir / config_parts[-2]
-        config_dir.mkdir(mode=0o700, exist_ok=True)
-        config_path = config_dir / config_parts[-1]
-        config_path.write_text(config_entry.password)
-        config_path.chmod(0o600)
-        print(f"  - {GCLOUD_CONFIG_ENTRY_TITLE} configured")
-    else:
-        print(f"  ⚠️  Warning: {GCLOUD_CONFIG_ENTRY_TITLE} entry not found or has no password")
+    # config_entry = cast(Optional[Entry], kp.find_entries(title=GCLOUD_CONFIG_ENTRY_TITLE, first=True))
+    # if config_entry and config_entry.password:
+    #     config_parts = Path(GCLOUD_CONFIG_ENTRY_TITLE).parts
+    #     config_dir = gcloud_dir / config_parts[-2]
+    #     config_dir.mkdir(mode=0o700, exist_ok=True)
+    #     config_path = config_dir / config_parts[-1]
+    #     config_path.write_text(config_entry.password)
+    #     config_path.chmod(0o600)
+    #     print(f"  - {GCLOUD_CONFIG_ENTRY_TITLE} configured")
+    # else:
+    #     print(f"  ⚠️  Warning: {GCLOUD_CONFIG_ENTRY_TITLE} entry not found or has no password")
 
     creds_entry = cast(Optional[Entry], kp.find_entries(title=GCLOUD_CREDENTIALS_DB_ENTRY_TITLE, first=True))
     if creds_entry:
