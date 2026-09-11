@@ -27,7 +27,6 @@ dev-env/
 ├── claude_commands/                # Custom Claude Code slash commands
 ├── scripts/
 │   ├── bootstrap-secrets.py        # Active KeePass bootstrap
-│   ├── clc.sh                      # Claude session helper
 │   └── common.sh                   # Shared shell helpers
 ├── docker-compose.env-bridge.yml   # Loads `.env` for compose
 ├── requirements.txt                # Python deps for KeePass integration
@@ -45,7 +44,6 @@ dev-env/
    - fix apt source drift
    - install the local Jira MCP dependency
    - configure shell paths, history, completions, and Atuin
-   - wire in `clc.sh` and custom Claude commands
    - bootstrap secrets from KeePass when available
    - apply Claude Code settings via `scripts/common.sh`
 

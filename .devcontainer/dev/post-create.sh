@@ -32,14 +32,6 @@ eval "$(atuin init bash)"
 EOF
 }
 
-setup_clc() {
-  cat >> ~/.bashrc << 'EOF'
-
-# Claude session manager
-source "${DEV_ENV_DIR}/scripts/clc.sh"
-EOF
-}
-
 setup_claude_commands() {
   mkdir -p ~/.claude/commands
   cp "${DEV_ENV_DIR}/claude_commands/"* ~/.claude/commands/
@@ -162,7 +154,6 @@ main() {
   install_python_deps
   setup_completions
   setup_atuin
-  setup_clc
   setup_claude_commands
   setup_claude_mcp_servers
   bootstrap_secrets

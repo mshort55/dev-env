@@ -51,6 +51,8 @@ RUN sed -i 's|http://ports.ubuntu.com|https://ports.ubuntu.com|g' /etc/apt/sourc
     gnupg \
     iputils-ping \
     less \
+    libasound2t64 \
+    libgbm1 \
     locales \
     make \
     nano \
