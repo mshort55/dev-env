@@ -6,8 +6,8 @@
   "service": "dev",
   "workspaceFolder": "/UbuntuSync",
   "features": {
-    "ghcr.io/devcontainers/features/docker-in-docker:4.0.0": {
-      "version": "29.6.2",
+    "ghcr.io/devcontainers/features/docker-in-docker:4.1.1": {
+      "version": "29.8.1",
       "moby": true,
       "installDockerBuildx": true,
       "enableNonRootDocker": true
@@ -16,16 +16,23 @@
   "customizations": {
     "vscode": {
       "extensions": [
-        "alefragnani.project-manager@13.1.0",
+        "alefragnani.project-manager@13.1.1",
+        "dbaeumer.vscode-eslint@3.0.34",
         "dinhani.copy-on-select@0.0.7",
-        "eamodio.gitlens@18.0.0",
-        "github.vscode-pull-request-github@0.146.0",
-        "golang.go@0.52.2",
-        "ms-python.python@2026.4.0",
+        "eamodio.gitlens@19.2.0",
+        "esbenp.prettier-vscode@12.4.0",
+        "github.vscode-pull-request-github@0.166.1",
+        "golang.go@0.56.1",
+        "mikestead.dotenv@1.0.1",
         "ms-python.debugpy@2026.6.0",
-        "timonwong.shellcheck@0.39.5",
-        "tooltitudeteam.tooltitude-pb@1.26.0",
-        "vscodevim.vim@1.32.4"
+        "ms-python.python@2026.4.0",
+        "nrwl.angular-console@18.101.1",
+        "redhat.vscode-yaml@1.24.0",
+        "stylelint.vscode-stylelint@2.2.1",
+        "timonwong.shellcheck@0.40.1",
+        "tooltitudeteam.tooltitude-pb@1.29.4",
+        "vscodevim.vim@1.32.4",
+        "yoavbls.pretty-ts-errors@0.8.7"
       ],
       "settings": {
         "extensions.autoUpdate": false,

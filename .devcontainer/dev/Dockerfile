@@ -1,7 +1,7 @@
 # Ubuntu 24.04 LTS
 # docker inspect ubuntu:24.04 --format='{{.Created}}'
-# 2026-04-10T06:56:54.752442228Z
-FROM ubuntu@sha256:c4a8d5503dfb2a3eb8ab5f807da5bc69a85730fb49b5cfca2330194ebcc41c7b
+# 2026-09-11T11:53:37.343727408Z
+FROM ubuntu@sha256:008173c23f95b170204355c12626cb5a965d779a7e1283b09e9cffbb1bf33ca3
 
 ARG ATUIN_VERSION
 ARG BUF_VERSION
@@ -90,15 +90,12 @@ RUN \
     chmod go+r /etc/apt/keyrings/githubcli-archive-keyring.gpg && \
     echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" > /etc/apt/sources.list.d/github-cli.list && \
     apt-get update && apt-get install -y gh && \
-    # task
-    curl -1sLf 'https://dl.cloudsmith.io/public/task/task/setup.deb.sh' | bash && \
-    apt-get update && apt-get install -y task && \
     # oc & kubectl
     curl -fsSL "https://mirror.openshift.com/pub/openshift-v4/clients/ocp/${OPENSHIFT_VERSION}/openshift-client-linux-arm64.tar.gz" | tar -xz -C /usr/local/bin oc kubectl && \
     # yq
     curl -fsSL "https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/yq_linux_arm64.tar.gz" | tar -xz --transform='s/yq_linux_arm64/yq/' -C /usr/local/bin ./yq_linux_arm64 && \
     # jq
-    curl -fsSL "https://github.com/jqlang/jq/releases/download/jq-1.8.2/jq-linux-arm64" -o /usr/local/bin/jq && \
+    curl -fsSL "https://github.com/jqlang/jq/releases/download/jq-${JQ_VERSION}/jq-linux-arm64" -o /usr/local/bin/jq && \
     # kind
     curl -fsSL "https://kind.sigs.k8s.io/dl/v${KIND_VERSION}/kind-linux-arm64" -o /usr/local/bin/kind && \
     # kustomize
