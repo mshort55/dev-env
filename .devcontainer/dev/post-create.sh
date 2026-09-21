@@ -32,11 +32,6 @@ eval "$(atuin init bash)"
 EOF
 }
 
-setup_claude_commands() {
-  mkdir -p ~/.claude/commands
-  cp "${DEV_ENV_DIR}/claude_commands/"* ~/.claude/commands/
-}
-
 setup_claude_mcp_servers() {
   # claude mcp add atlassian npx mcp-remote https://mcp.atlassian.com/v1/mcp
   claude mcp add --scope user jira-mcp-server python3 -- -m jira_mcp_server.main
@@ -154,10 +149,8 @@ main() {
   install_python_deps
   setup_completions
   setup_atuin
-  setup_claude_commands
   setup_claude_mcp_servers
   bootstrap_secrets
-  configure_claude_code
   setup_and_unlock_dummy_keyring
 }
 

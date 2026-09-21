@@ -24,7 +24,6 @@ dev-env/
 │   │   ├── bootstrap-secrets-multiclaude.py
 │   │   └── bootstrap-secrets-ruflo.py
 │   └── README.md                   # Restore notes for archived stacks
-├── claude_commands/                # Custom Claude Code slash commands
 ├── scripts/
 │   ├── bootstrap-secrets.py        # Active KeePass bootstrap
 │   └── common.sh                   # Shared shell helpers
@@ -102,14 +101,6 @@ The compose setup separates shared env loading from the active service definitio
 3. **Graceful degradation**: missing KeePass files or entries warn instead of crashing unrelated setup
 4. **Archive instead of delete**: retired agent/container setups stay in-repo under `archive/` so they can be restored without guesswork
 5. **Persistent host mounts**: shell history, Claude config, Cursor config, Codex config, and tool caches survive rebuilds
-
-## Claude Commands
-
-Custom commands are copied to `~/.claude/commands/` during dev container setup:
-
-- `/commit-summary` - Generates a markdown PR summary from recent git commits
-- `/multicluster-role-assignment-release` - 8-step CI configuration for release branches
-- `/update-jira` - Fetches PR details, generates a status comment, and prepares a Jira update
 
 ## Working with `scripts/bootstrap-secrets.py`
 
