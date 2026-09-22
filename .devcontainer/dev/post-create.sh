@@ -14,12 +14,29 @@ EOF
 }
 
 setup_shell_paths() {
-  export PATH="$HOME/.local/bin:$HOME/go/bin:$PATH"
-  cat >> ~/.bashrc << 'EOF'
+  local npm_clis_bin=""
+  if [ -n "${WORKSPACE_DIR_NAME:-}" ]; then
+    npm_clis_bin="/${WORKSPACE_DIR_NAME}/npm-clis/node_modules/.bin"
+  fi
+  export PATH="${npm_clis_bin:+$npm_clis_bin:}$HOME/.local/bin:$HOME/go/bin:$PATH"
+  cat >> ~/.bashrc << EOF
 
 # User bin paths
-export PATH="$HOME/.local/bin:$HOME/go/bin:$PATH"
+export PATH="${npm_clis_bin:+$npm_clis_bin:}\$HOME/.local/bin:\$HOME/go/bin:\$PATH"
 EOF
+}
+
+install_npm_clis() {
+  if [ -z "${WORKSPACE_DIR_NAME:-}" ]; then
+    echo "WORKSPACE_DIR_NAME is unset; skipping npm CLIs"
+    return 0
+  fi
+  local prefix="/${WORKSPACE_DIR_NAME}/npm-clis"
+  if [ ! -f "${prefix}/package.json" ]; then
+    echo "No ${prefix}/package.json; skipping npm CLIs"
+    return 0
+  fi
+  npm ci --omit=dev --ignore-scripts --prefix "${prefix}"
 }
 
 setup_atuin() {
@@ -146,6 +163,7 @@ EOF
 main() {
   fix_apt_sources
   setup_shell_paths
+  install_npm_clis
   install_python_deps
   setup_completions
   setup_atuin

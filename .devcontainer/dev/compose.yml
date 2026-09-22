@@ -31,6 +31,7 @@ services:
       - USER=${CONTAINER_USER}
       - DEV_ENV_DIR
       - KEEPASS_DB_PATH
+      - WORKSPACE_DIR_NAME
       - CONTAINER_HOST=unix:///var/run/podman/podman.sock
     volumes:
       - ${HOST_DEV_CLAUDE_DIR}:/home/${CONTAINER_USER}/.claude
