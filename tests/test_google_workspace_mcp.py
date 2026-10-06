@@ -86,5 +86,38 @@ class GoogleWorkspaceCredentialsTests(unittest.TestCase):
         self.assertEqual(list(self.oauth_env.parent.iterdir()), [self.oauth_env])
 
 
+class GoogleWorkspaceStartupTests(unittest.TestCase):
+    def test_first_start_loads_keepass_before_checking_oauth_client_file(self):
+        post_create = SCRIPT_PATH.parents[1] / '.devcontainer' / 'dev' / 'post-create.sh'
+        # Load the real startup sequence without executing its final main call.
+        script = post_create.read_text().rsplit('\nmain', 1)[0]
+        script += '''
+fix_apt_sources() { :; }
+setup_shell_paths() { :; }
+install_npm_clis() { :; }
+install_python_deps() { :; }
+setup_completions() { :; }
+setup_atuin() { :; }
+setup_claude_mcp_servers() { :; }
+setup_and_unlock_dummy_keyring() { :; }
+task_oauth_file="$1"
+bootstrap_secrets() { touch "$task_oauth_file"; }
+setup_google_workspace_mcp() {
+  if [ ! -f "$task_oauth_file" ]; then
+    echo "OAuth client file checked before KeePass bootstrap" >&2
+    return 1
+  fi
+}
+main
+'''
+        with tempfile.TemporaryDirectory() as task_dir:
+            result = subprocess.run(
+                ['bash', '-c', script, 'startup-test', str(Path(task_dir) / 'oauth.env')],
+                env={**os.environ, 'DEV_ENV_DIR': str(SCRIPT_PATH.parents[1])},
+                capture_output=True, text=True,
+            )
+        self.assertEqual(result.returncode, 0, result.stderr)
+
+
 if __name__ == '__main__':
     unittest.main()

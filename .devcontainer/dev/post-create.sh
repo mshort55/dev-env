@@ -174,8 +174,8 @@ main() {
   setup_completions
   setup_atuin
   setup_claude_mcp_servers
-  setup_google_workspace_mcp
   bootstrap_secrets
+  setup_google_workspace_mcp
   setup_and_unlock_dummy_keyring
 }
 

@@ -148,7 +148,9 @@ RUN \
     # cursor agent cli
     curl https://cursor.com/install -fsS | bash && \
     # openai codex cli
-    curl -fsSL https://chatgpt.com/codex/install.sh | sh && \
+    # Packages must stay outside ~/.codex. compose.yml bind-mounts the operator
+    # directory there, which hides an image install and leaves the old CLI in place.
+    curl -fsSL https://chatgpt.com/codex/install.sh | CODEX_HOME="/home/${CONTAINER_USER}/.local/share/codex-package" CODEX_NON_INTERACTIVE=1 sh && \
     # ginkgo
     go install "github.com/onsi/ginkgo/v2/ginkgo@v${GINKGO_VERSION}" && \
     # gopls (for claude code)

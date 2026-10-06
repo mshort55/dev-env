@@ -34,6 +34,7 @@ services:
       - KEEPASS_DB_PATH
       - UV_VERSION
       - WORKSPACE_DIR_NAME
+      - WORKSPACE_MCP_VERSION
       - CONTAINER_HOST=unix:///var/run/podman/podman.sock
     volumes:
       - ${HOST_DEV_CLAUDE_DIR}:/home/${CONTAINER_USER}/.claude
