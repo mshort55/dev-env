@@ -19,6 +19,7 @@ ARG NODE_VERSION
 ARG OPENSHIFT_VERSION
 ARG PODMAN_VERSION
 ARG RUST_VERSION
+ARG UV_VERSION
 ARG YQ_VERSION
 ARG ZELLIJ_VERSION
 
@@ -138,6 +139,8 @@ ENV PATH="/home/${CONTAINER_USER}/.cargo/bin:$PATH"
 
 # User level software
 RUN \
+    # uv (isolated Python tools, including Google Workspace MCP)
+    curl -fsSL "https://astral.sh/uv/${UV_VERSION}/install.sh" | sh && \
     # rust
     # curl -fsSL https://sh.rustup.rs | sh -s -- -y --default-toolchain ${RUST_VERSION} && \
     # claude code

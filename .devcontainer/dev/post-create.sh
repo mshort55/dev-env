@@ -51,13 +51,19 @@ EOF
 
 setup_claude_mcp_servers() {
   # claude mcp add atlassian npx mcp-remote https://mcp.atlassian.com/v1/mcp
-  claude mcp add --scope user jira-mcp-server python3 -- -m jira_mcp_server.main
+  if ! claude mcp get jira-mcp-server >/dev/null 2>&1; then
+    claude mcp add --scope user jira-mcp-server python3 -- -m jira_mcp_server.main
+  fi
   # `claude mcp add` always writes an empty "env": {} for the server, which
   # replaces (rather than merges with) the inherited process environment at
   # spawn time, wiping out the JIRA_* vars exported in ~/.bashrc. Drop the
   # key so the server inherits the environment normally.
   jq 'del(.mcpServers["jira-mcp-server"].env)' ~/.claude.json > ~/.claude.json.tmp \
     && mv ~/.claude.json.tmp ~/.claude.json
+}
+
+setup_google_workspace_mcp() {
+  bash "${DEV_ENV_DIR}/scripts/setup-google-workspace-mcp.sh"
 }
 
 fix_apt_sources() {
@@ -168,6 +174,7 @@ main() {
   setup_completions
   setup_atuin
   setup_claude_mcp_servers
+  setup_google_workspace_mcp
   bootstrap_secrets
   setup_and_unlock_dummy_keyring
 }

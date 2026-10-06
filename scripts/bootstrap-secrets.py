@@ -9,6 +9,7 @@ import shutil
 import sys
 import getpass
 import subprocess
+import tempfile
 from pathlib import Path
 from typing import cast, Optional
 from pykeepass import PyKeePass
@@ -248,6 +249,42 @@ def setup_jira_env(kp: PyKeePass):
     )
 
 
+def setup_google_workspace_mcp_credentials(kp: PyKeePass):
+    """Load a complete OAuth client into a private file used only by the MCP launcher."""
+    print("Setting up Google Workspace MCP credentials...")
+
+    env_vars: dict[str, str] = {}
+    for env_name in ('GOOGLE_OAUTH_CLIENT_ID', 'GOOGLE_OAUTH_CLIENT_SECRET'):
+        keepass_title = f'google_workspace_mcp_env_{env_name}'
+        entry = cast(Optional[Entry], kp.find_entries(title=keepass_title, first=True))
+        if entry and entry.password:
+            env_vars[env_name] = entry.password
+        else:
+            print(f"  ⚠️  Warning: {keepass_title} entry not found or has no password")
+
+    if len(env_vars) != 2:
+        print("  ⚠️  Skipping Google Workspace MCP credentials until both OAuth entries are available")
+        return
+
+    codex_dir = Path(os.environ.get('CODEX_HOME') or Path.home() / '.codex')
+    workspace_config_dir = codex_dir / 'google-workspace'
+    workspace_config_dir.mkdir(mode=0o700, parents=True, exist_ok=True)
+    workspace_config_dir.chmod(0o700)
+    oauth_env = workspace_config_dir / 'oauth.env'
+    # The temporary file starts with mode 0600 and replaces credentials atomically.
+    with tempfile.NamedTemporaryFile(mode='w', dir=workspace_config_dir, delete=False) as temp_file:
+        temp_path = Path(temp_file.name)
+        try:
+            for env_name, env_value in env_vars.items():
+                temp_file.write(f'export {env_name}={shlex.quote(env_value)}\n')
+            temp_file.close()
+            temp_path.replace(oauth_env)
+        finally:
+            temp_path.unlink(missing_ok=True)
+
+    print("Google Workspace MCP credentials configured")
+
+
 def setup_github_cli_config(kp: PyKeePass):
     print("Setting up GitHub CLI configuration...")
 
@@ -367,6 +404,7 @@ def main():
     setup_claude_code_env(kp)
     setup_kube_context_env(kp)
     setup_jira_env(kp)
+    setup_google_workspace_mcp_credentials(kp)
     setup_github_cli_config(kp)
     setup_docker_config(kp)
     setup_git_config(kp)

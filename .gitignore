@@ -1,2 +1,5 @@
 .env
 .claude_state
+__pycache__/
+verifications/evidence/
+.venv
