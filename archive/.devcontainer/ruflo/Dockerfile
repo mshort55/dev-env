@@ -26,7 +26,7 @@ RUN apk add --no-cache \
     python3 \
     py3-pip
 
-COPY requirements.txt /tmp/requirements.txt
+COPY requirements/bootstrap.txt /tmp/bootstrap-requirements.txt
 
 # Other software installations
 RUN \
@@ -50,7 +50,7 @@ RUN \
     # gopls (for claude code)
     GOBIN=/usr/local/bin go install golang.org/x/tools/gopls@v"${GOPLS_VERSION}" && \
     # python deps (keepass/crypto)
-    pip3 install --no-cache-dir --break-system-packages -r /tmp/requirements.txt && \
+    pip3 install --no-cache-dir --break-system-packages -r /tmp/bootstrap-requirements.txt && \
     # cleanup
     apk del py3-pip && \
     rm -rf /tmp/* /root/.cache /root/.config

@@ -15,7 +15,7 @@ fi
 codex mcp list >/dev/null
 
 # The CLI's --env option stores values; env_vars forwards names from the shell.
-cat >> "$codex_dir/config.toml" <<'EOF'
+cat >>"$codex_dir/config.toml" <<'EOF'
 
 [mcp_servers.jira]
 command = "python3"

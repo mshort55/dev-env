@@ -40,7 +40,7 @@ operator_snapshot() {
     stat -c '%n %Y' "$REAL_HOME/.bashrc" 2>/dev/null || echo "absent $REAL_HOME/.bashrc"
     stat -c '%n %Y' "$REAL_HOME/.codex" 2>/dev/null || echo "absent $REAL_HOME/.codex"
     stat -c '%n %Y' "$REAL_HOME/.ssh" 2>/dev/null || echo "absent $REAL_HOME/.ssh"
-  } > "$OUT/operator-home.$label.txt"
+  } >"$OUT/operator-home.$label.txt"
 }
 
 operator_snapshot before
@@ -53,7 +53,7 @@ env -u KEEPASS_DB_PATH \
   PYTHONDONTWRITEBYTECODE=1 \
   "$PYTHON" scripts/bootstrap-secrets.py \
   >"$OUT/missing-env.out" 2>"$OUT/missing-env.err"
-echo $? > "$OUT/missing-env.exit"
+echo $? >"$OUT/missing-env.exit"
 set -e
 grep -F 'KEEPASS_DB_PATH environment variable not set' "$OUT/missing-env.out" >/dev/null
 [ "$(cat "$OUT/missing-env.exit")" = "1" ]
@@ -62,7 +62,7 @@ set +e
 KEEPASS_DB_PATH="$SCRATCH/keepass/missing.kdbx" \
   "$PYTHON" scripts/bootstrap-secrets.py \
   >"$OUT/missing-file.out" 2>"$OUT/missing-file.err"
-echo $? > "$OUT/missing-file.exit"
+echo $? >"$OUT/missing-file.exit"
 set -e
 grep -F "KeePass database not found at $SCRATCH/keepass/missing.kdbx" "$OUT/missing-file.out" >/dev/null
 [ "$(cat "$OUT/missing-file.exit")" = "1" ]
@@ -79,7 +79,7 @@ set +e
   "$PYTHON" scripts/bootstrap-secrets.py
 status=$?
 set -e
-echo "$status" > "$OUT/wrong-password.exit"
+echo "$status" >"$OUT/wrong-password.exit"
 [ "$status" = "1" ]
 grep -F 'Incorrect password. 2 attempt(s) remaining.' "$OUT/wrong-password.txt" >/dev/null
 grep -F 'Incorrect password. 1 attempt(s) remaining.' "$OUT/wrong-password.txt" >/dev/null
@@ -96,7 +96,7 @@ set +e
   "$PYTHON" scripts/bootstrap-secrets.py
 status=$?
 set -e
-echo "$status" > "$OUT/success.exit"
+echo "$status" >"$OUT/success.exit"
 [ "$status" = "0" ]
 
 oauth="$HOME/.codex/google-workspace/oauth.env"
@@ -132,11 +132,11 @@ if [ -f "$HOME/.bashrc" ] && grep -F 'GOOGLE_OAUTH_CLIENT_SECRET' "$HOME/.bashrc
 fi
 
 operator_snapshot after
-tail -n +2 "$OUT/operator-home.before.txt" > "$OUT/operator-home.before.stats"
-tail -n +2 "$OUT/operator-home.after.txt" > "$OUT/operator-home.after.stats"
+tail -n +2 "$OUT/operator-home.before.txt" >"$OUT/operator-home.before.stats"
+tail -n +2 "$OUT/operator-home.after.txt" >"$OUT/operator-home.after.stats"
 cmp "$OUT/operator-home.before.stats" "$OUT/operator-home.after.stats"
 
-cat > "$OUT/side-effects.txt" <<EOF
+cat >"$OUT/side-effects.txt" <<EOF
 oauth_env=$oauth
 oauth_env_mode=$mode
 oauth_dir_mode=$dirmode

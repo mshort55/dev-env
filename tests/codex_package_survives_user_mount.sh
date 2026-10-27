@@ -31,7 +31,7 @@ recipe=${recipe//\/home\/\$\{CONTAINER_USER\}/$home}
 recipe=${recipe//\$\{HOME\}/$home}
 
 install_sh="$home/install-codex.sh"
-printf '%s\n' 'set -euo pipefail' "$recipe" > "$install_sh"
+printf '%s\n' 'set -euo pipefail' "$recipe" >"$install_sh"
 env -u CODEX_HOME HOME="$home" CODEX_NON_INTERACTIVE=1 bash "$install_sh"
 
 link="$home/.local/bin/codex"

@@ -4,7 +4,7 @@ This directory is the maintained source for verifying the user-facing behavior o
 
 ## Baseline preconditions
 
-- Run `bash verifications/verify.sh` to execute every check, or run `bash verifications/scripts/launch.sh` and keep the printed `state=` path when driving one feature.
+- Run `nox` for all repository checks. For just bootstrap and image verification, run `bash verifications/verify.sh`, or run `bash verifications/scripts/launch.sh` and keep the printed `state=` path when driving one feature.
 - Run `bash verifications/scripts/doctor.sh STATE` and require `doctor=ok`, `surface=cli`, and `container=not-used`.
 - Source `STATE` only in a subshell or inside a helper. It sets `HOME` to `/tmp/dev-env-verify-<run-id>/home`.
 - Export `PYTHONDONTWRITEBYTECODE=1`, `GIT_CONFIG_GLOBAL=$SCRATCH/home/.gitconfig`, and `GNUPGHOME=$SCRATCH/home/.gnupg` before any bootstrap drive.

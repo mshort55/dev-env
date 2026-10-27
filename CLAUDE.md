@@ -28,7 +28,7 @@ dev-env/
 │   ├── bootstrap-secrets.py        # Active KeePass bootstrap
 │   └── common.sh                   # Shared shell helpers
 ├── docker-compose.env-bridge.yml   # Loads `.env` for compose
-├── requirements.txt                # Python deps for KeePass integration
+├── requirements/                  # Python dependency inputs and lockfiles
 └── .env                            # User-specific config (gitignored)
 ```
 
@@ -112,6 +112,6 @@ When modifying the active secrets bootstrap:
 - gcloud `credentials.db` is stored as a KeePass attachment
 - GPG setup enables loopback pinentry for non-interactive use
 
-## Dependencies (`requirements.txt`)
+## Dependencies (`requirements/bootstrap.txt`)
 
 All Python dependencies support KeePass access and related crypto/parsing: `pykeepass`, `pycryptodomex`, `argon2-cffi`, `lxml`, `construct`, and `pyotp`.

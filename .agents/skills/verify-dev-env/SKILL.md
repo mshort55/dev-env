@@ -11,6 +11,14 @@ description: >-
 
 Skill docs live in `.agents/skills/verify-dev-env/`. The runnable scripts live in `verifications/`. Run all of them from the dev-env repo root:
 
+For full repository verification, run `nox`. It adds linting, strict Python type
+checks, Python and shell tests, and isolated Workspace MCP setup/stdio checks to
+the bootstrap and image workflow below. `nox -s integration` runs just the
+bootstrap, image, and MCP checks. See `README.md#verification` for setup and
+prerequisites. A successful full run requires every selected Nox session to pass.
+
+To run only the bootstrap and image workflow:
+
 ```bash
 bash verifications/verify.sh
 ```
@@ -23,7 +31,7 @@ The shared container named `dev` is not started. `.devcontainer/dev/compose.yml`
 
 `verifications/verify.sh` calls `verifications/scripts/launch.sh`. There is no server. A run is ready when launch prints `ready state=/tmp/dev-env-verify-<run-id>/state.env evidence=...` and doctor prints `doctor=ok`.
 
-`launch.sh` creates a mode-`700` scratch directory, a disposable KeePass database containing only the two Google Workspace OAuth fixture entries, a mode-`600` password file, and the evidence directory. It installs `requirements.txt` into a scratch virtualenv only when `python3` cannot import `pykeepass`.
+`launch.sh` creates a mode-`700` scratch directory, a disposable KeePass database containing only the two Google Workspace OAuth fixture entries, a mode-`600` password file, and the evidence directory. It installs `requirements/bootstrap.txt` into a scratch virtualenv only when `python3` cannot import `pykeepass`.
 
 Source the state file only inside a subshell or inside the helper scripts. It sets `HOME` to the scratch home.
 

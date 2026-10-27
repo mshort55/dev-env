@@ -73,7 +73,7 @@ RUN sed -i 's|http://ports.ubuntu.com|https://ports.ubuntu.com|g' /etc/apt/sourc
     locale-gen en_US.UTF-8 && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
-COPY requirements.txt /tmp/requirements.txt
+COPY requirements/bootstrap.txt /tmp/bootstrap-requirements.txt
 
 # Other software installations
 RUN \
@@ -129,8 +129,8 @@ RUN \
     # zellij
     curl -fsSL "https://github.com/zellij-org/zellij/releases/download/v${ZELLIJ_VERSION}/zellij-no-web-aarch64-unknown-linux-musl.tar.gz" | tar -xz -C /usr/local/bin && \
     # python deps (keepass/crypto)
-    pip3 install --no-cache-dir --break-system-packages --require-hashes -r /tmp/requirements.txt && \
-    rm /tmp/requirements.txt && \
+    pip3 install --no-cache-dir --break-system-packages --require-hashes -r /tmp/bootstrap-requirements.txt && \
+    rm /tmp/bootstrap-requirements.txt && \
     # finalize and clean up
     chmod +x /usr/local/bin/kind /usr/local/bin/jq && \
     apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/*

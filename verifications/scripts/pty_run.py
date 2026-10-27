@@ -32,7 +32,7 @@ import time
 
 
 def parse_args(argv: list[str]) -> tuple[str, float, list[tuple[str, str | None]], list[str]]:
-    transcript = ''
+    transcript = ""
     timeout = 30.0
     steps: list[tuple[str, str | None]] = []
     pending_expect: str | None = None
@@ -40,44 +40,44 @@ def parse_args(argv: list[str]) -> tuple[str, float, list[tuple[str, str | None]
     index = 0
     while index < len(argv):
         arg = argv[index]
-        if arg == '--':
+        if arg == "--":
             if pending_expect is not None:
                 steps.append((pending_expect, None))
                 pending_expect = None
             command = argv[index + 1 :]
             break
-        if arg == '--transcript':
+        if arg == "--transcript":
             index += 1
             transcript = argv[index]
-        elif arg == '--timeout':
+        elif arg == "--timeout":
             index += 1
             timeout = float(argv[index])
-        elif arg == '--expect':
+        elif arg == "--expect":
             if pending_expect is not None:
                 steps.append((pending_expect, None))
             index += 1
             pending_expect = argv[index]
-        elif arg in ('--send', '--send-file'):
+        elif arg in ("--send", "--send-file"):
             if pending_expect is None:
-                raise SystemExit(f'{arg} without --expect')
+                raise SystemExit(f"{arg} without --expect")
             index += 1
-            if arg == '--send':
+            if arg == "--send":
                 payload = argv[index]
             else:
-                payload = open(argv[index], encoding='utf-8').read()
-                if payload.endswith('\n'):
+                payload = open(argv[index], encoding="utf-8").read()
+                if payload.endswith("\n"):
                     payload = payload[:-1]
-            steps.append((pending_expect, payload + '\n'))
+            steps.append((pending_expect, payload + "\n"))
             pending_expect = None
         else:
-            raise SystemExit(f'unknown argument: {arg}')
+            raise SystemExit(f"unknown argument: {arg}")
         index += 1
     else:
-        raise SystemExit('missing -- before the command')
+        raise SystemExit("missing -- before the command")
     if not transcript:
-        raise SystemExit('--transcript is required')
+        raise SystemExit("--transcript is required")
     if not command:
-        raise SystemExit('missing command after --')
+        raise SystemExit("missing command after --")
     if pending_expect is not None:
         steps.append((pending_expect, None))
     return transcript, timeout, steps, command
@@ -94,7 +94,7 @@ def main() -> None:
         os.execvp(command[0], command)
         raise SystemExit(127)
 
-    buffer = ''
+    buffer = ""
     chunks: list[str] = []
     step_index = 0
     deadline = time.monotonic() + timeout
@@ -132,11 +132,11 @@ def main() -> None:
         except OSError as exc:
             if exc.errno != errno.EIO:
                 raise
-            raw = b''
+            raw = b""
         if not raw:
             child_exited = True
             continue
-        text = raw.decode('utf-8', errors='replace')
+        text = raw.decode("utf-8", errors="replace")
         chunks.append(text)
         buffer += text
 
@@ -151,15 +151,15 @@ def main() -> None:
         if not reaped:
             _, status = os.waitpid(pid, 0)
 
-    output = ''.join(chunks)
+    output = "".join(chunks)
     if timed_out or step_index != len(steps):
-        waiting_for = steps[step_index][0] if step_index < len(steps) else ''
-        output += f'\n[pty_run timeout or missed prompt waiting for: {waiting_for}]\n'
-        with open(transcript_path, 'w', encoding='utf-8') as handle:
+        waiting_for = steps[step_index][0] if step_index < len(steps) else ""
+        output += f"\n[pty_run timeout or missed prompt waiting for: {waiting_for}]\n"
+        with open(transcript_path, "w", encoding="utf-8") as handle:
             handle.write(output)
         raise SystemExit(2)
 
-    with open(transcript_path, 'w', encoding='utf-8') as handle:
+    with open(transcript_path, "w", encoding="utf-8") as handle:
         handle.write(output)
 
     if os.WIFEXITED(status):
@@ -167,5 +167,5 @@ def main() -> None:
     raise SystemExit(1)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

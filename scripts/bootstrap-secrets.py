@@ -3,51 +3,54 @@
 Bootstrap secrets from KeePass database into container.
 """
 
+import getpass
 import os
 import shlex
 import shutil
-import sys
-import getpass
 import subprocess
+import sys
 import tempfile
 from pathlib import Path
-from typing import cast, Optional
+from typing import cast
+
 from pykeepass import PyKeePass
 from pykeepass.attachment import Attachment
 from pykeepass.entry import Entry
 
 
-def add_env_vars_to_shell_profile(env_vars: dict[str, str], section_name: str):
-    profile_path = Path.home() / ('.bashrc' if shutil.which('bash') else '.ashrc')
-    profile_lines = profile_path.read_text().splitlines(keepends=True) if profile_path.exists() else []
+def add_env_vars_to_shell_profile(env_vars: dict[str, str], section_name: str) -> None:
+    profile_path = Path.home() / (".bashrc" if shutil.which("bash") else ".ashrc")
+    profile_lines = (
+        profile_path.read_text().splitlines(keepends=True) if profile_path.exists() else []
+    )
 
-    section_comment = f'# {section_name}'
-    section_lines = [f'{section_comment}\n']
+    section_comment = f"# {section_name}"
+    section_lines = [f"{section_comment}\n"]
 
     for env_name, env_value in env_vars.items():
-        section_lines.append(f'export {env_name}={shlex.quote(env_value)}\n')
+        section_lines.append(f"export {env_name}={shlex.quote(env_value)}\n")
 
     for idx, line in enumerate(profile_lines):
-        if line.rstrip('\n') == section_comment:
+        if line.rstrip("\n") == section_comment:
             end_idx = idx + 1
-            while end_idx < len(profile_lines) and profile_lines[end_idx].startswith('export '):
+            while end_idx < len(profile_lines) and profile_lines[end_idx].startswith("export "):
                 end_idx += 1
             profile_lines[idx:end_idx] = section_lines
             break
     else:
-        if profile_lines and not profile_lines[-1].endswith('\n'):
-            profile_lines[-1] = f'{profile_lines[-1]}\n'
+        if profile_lines and not profile_lines[-1].endswith("\n"):
+            profile_lines[-1] = f"{profile_lines[-1]}\n"
         if profile_lines and profile_lines[-1].strip():
-            profile_lines.append('\n')
+            profile_lines.append("\n")
         profile_lines.extend(section_lines)
 
-    profile_path.write_text(''.join(profile_lines))
+    profile_path.write_text("".join(profile_lines))
 
 
-def setup_ssh_keys(kp: PyKeePass):
+def setup_ssh_keys(kp: PyKeePass) -> None:
     print("Setting up SSH keys...")
 
-    entry = cast(Optional[Entry], kp.find_entries(title='ssh', first=True))
+    entry = cast(Entry | None, kp.find_entries(title="ssh", first=True))
     if not entry:
         print("⚠️  Warning: No SSH entry found in database")
         return
@@ -60,25 +63,27 @@ def setup_ssh_keys(kp: PyKeePass):
         print("⚠️  Warning: SSH entry has no notes (public key)")
         return
 
-    ssh_dir = Path.home() / '.ssh'
+    ssh_dir = Path.home() / ".ssh"
     ssh_dir.mkdir(mode=0o700, exist_ok=True)
 
-    private_key_path = ssh_dir / 'id_ed25519'
-    private_key_content = cast(str, entry.password if entry.password.endswith('\n') else entry.password + '\n')
+    private_key_path = ssh_dir / "id_ed25519"
+    private_key_content = cast(
+        str, entry.password if entry.password.endswith("\n") else entry.password + "\n"
+    )
     private_key_path.write_text(private_key_content)
     private_key_path.chmod(0o600)
 
-    public_key_path = ssh_dir / 'id_ed25519.pub'
+    public_key_path = ssh_dir / "id_ed25519.pub"
     public_key_path.write_text(entry.notes)
     public_key_path.chmod(0o644)
 
-    print(f"SSH keys config complete")
+    print("SSH keys config complete")
 
 
-def setup_gpg_key(kp: PyKeePass):
+def setup_gpg_key(kp: PyKeePass) -> None:
     print("Setting up GPG key...")
 
-    entry = cast(Optional[Entry], kp.find_entries(title='gpg', first=True))
+    entry = cast(Entry | None, kp.find_entries(title="gpg", first=True))
     if not entry:
         print("⚠️  Warning: No GPG entry found in database")
         return
@@ -91,10 +96,10 @@ def setup_gpg_key(kp: PyKeePass):
 
     try:
         subprocess.run(
-            ['gpg', '--import', '--batch'],
+            ["gpg", "--import", "--batch"],
             input=gpg_private_key.encode(),
             capture_output=True,
-            check=True
+            check=True,
         )
         print("GPG key imported successfully")
     except subprocess.CalledProcessError as e:
@@ -104,39 +109,38 @@ def setup_gpg_key(kp: PyKeePass):
         print("⚠️  Warning: gpg command not found, skipping GPG setup")
         return
 
-    gpg_conf_dir = Path.home() / '.gnupg'
+    gpg_conf_dir = Path.home() / ".gnupg"
     gpg_conf_dir.mkdir(mode=0o700, exist_ok=True)
 
-    gpg_agent_conf = gpg_conf_dir / 'gpg-agent.conf'
-    gpg_agent_conf.write_text('allow-loopback-pinentry\n')
+    gpg_agent_conf = gpg_conf_dir / "gpg-agent.conf"
+    gpg_agent_conf.write_text("allow-loopback-pinentry\n")
     gpg_agent_conf.chmod(0o600)
 
-    gpg_conf = gpg_conf_dir / 'gpg.conf'
-    gpg_conf.write_text('pinentry-mode loopback\n')
+    gpg_conf = gpg_conf_dir / "gpg.conf"
+    gpg_conf.write_text("pinentry-mode loopback\n")
     gpg_conf.chmod(0o600)
 
-    bashrc_path = Path.home() / '.bashrc'
-    gpg_tty_config = '\n# GPG configuration\nexport GPG_TTY=$(tty)\n'
+    bashrc_path = Path.home() / ".bashrc"
+    gpg_tty_config = "\n# GPG configuration\nexport GPG_TTY=$(tty)\n"
 
-    bashrc_content = bashrc_path.read_text() if bashrc_path.exists() else ''
-    if 'GPG_TTY' not in bashrc_content:
-        with bashrc_path.open('a') as f:
+    bashrc_content = bashrc_path.read_text() if bashrc_path.exists() else ""
+    if "GPG_TTY" not in bashrc_content:
+        with bashrc_path.open("a") as f:
             f.write(gpg_tty_config)
 
     print("GPG configuration complete")
 
 
-def setup_gcloud_config(kp: PyKeePass):
+def setup_gcloud_config(kp: PyKeePass) -> None:
     print("Setting up gcloud configuration...")
 
-    GCLOUD_ADC_ENTRY_TITLE = '.config/gcloud/application_default_credentials.json'
-    GCLOUD_CONFIG_ENTRY_TITLE = '.config/gcloud/configurations/config_default'
-    GCLOUD_CREDENTIALS_DB_ENTRY_TITLE = '.config/gcloud/credentials.db'
+    GCLOUD_ADC_ENTRY_TITLE = ".config/gcloud/application_default_credentials.json"
+    GCLOUD_CREDENTIALS_DB_ENTRY_TITLE = ".config/gcloud/credentials.db"
 
-    gcloud_dir = Path.home() / '.config' / 'gcloud'
+    gcloud_dir = Path.home() / ".config" / "gcloud"
     gcloud_dir.mkdir(mode=0o700, parents=True, exist_ok=True)
 
-    adc_entry = cast(Optional[Entry], kp.find_entries(title=GCLOUD_ADC_ENTRY_TITLE, first=True))
+    adc_entry = cast(Entry | None, kp.find_entries(title=GCLOUD_ADC_ENTRY_TITLE, first=True))
     if adc_entry and adc_entry.password:
         adc_filename = Path(GCLOUD_ADC_ENTRY_TITLE).name
         adc_path = gcloud_dir / adc_filename
@@ -146,19 +150,9 @@ def setup_gcloud_config(kp: PyKeePass):
     else:
         print(f"  ⚠️  Warning: {GCLOUD_ADC_ENTRY_TITLE} entry not found or has no password")
 
-    # config_entry = cast(Optional[Entry], kp.find_entries(title=GCLOUD_CONFIG_ENTRY_TITLE, first=True))
-    # if config_entry and config_entry.password:
-    #     config_parts = Path(GCLOUD_CONFIG_ENTRY_TITLE).parts
-    #     config_dir = gcloud_dir / config_parts[-2]
-    #     config_dir.mkdir(mode=0o700, exist_ok=True)
-    #     config_path = config_dir / config_parts[-1]
-    #     config_path.write_text(config_entry.password)
-    #     config_path.chmod(0o600)
-    #     print(f"  - {GCLOUD_CONFIG_ENTRY_TITLE} configured")
-    # else:
-    #     print(f"  ⚠️  Warning: {GCLOUD_CONFIG_ENTRY_TITLE} entry not found or has no password")
-
-    creds_entry = cast(Optional[Entry], kp.find_entries(title=GCLOUD_CREDENTIALS_DB_ENTRY_TITLE, first=True))
+    creds_entry = cast(
+        Entry | None, kp.find_entries(title=GCLOUD_CREDENTIALS_DB_ENTRY_TITLE, first=True)
+    )
     if creds_entry:
         if creds_entry.attachments:
             attachment = cast(Attachment, creds_entry.attachments[0])
@@ -176,13 +170,15 @@ def setup_gcloud_config(kp: PyKeePass):
     print("gcloud configuration complete")
 
 
-def setup_env_vars_from_keepass(kp: PyKeePass, env_var_mappings: dict[str, str], section_name: str):
+def setup_env_vars_from_keepass(
+    kp: PyKeePass, env_var_mappings: dict[str, str], section_name: str
+) -> None:
     print(f"Setting up {section_name}...")
 
     env_vars = {}
 
     for env_name, keepass_title in env_var_mappings.items():
-        entry = cast(Optional[Entry], kp.find_entries(title=keepass_title, first=True))
+        entry = cast(Entry | None, kp.find_entries(title=keepass_title, first=True))
         if entry and entry.password:
             env_vars[env_name] = entry.password
             print(f"  - {env_name} configured")
@@ -195,36 +191,40 @@ def setup_env_vars_from_keepass(kp: PyKeePass, env_var_mappings: dict[str, str],
     print(f"{section_name} config complete")
 
 
-def setup_claude_code_env(kp: PyKeePass):
+def setup_claude_code_env(kp: PyKeePass) -> None:
     setup_env_vars_from_keepass(
         kp,
         {
-            'ANTHROPIC_VERTEX_PROJECT_ID': 'claude_env_ANTHROPIC_VERTEX_PROJECT_ID',
-            'CLAUDE_CODE_USE_VERTEX': 'claude_env_CLAUDE_CODE_USE_VERTEX',
-            'CLOUD_ML_REGION': 'claude_env_CLOUD_ML_REGION'
+            "ANTHROPIC_VERTEX_PROJECT_ID": "claude_env_ANTHROPIC_VERTEX_PROJECT_ID",
+            "CLAUDE_CODE_USE_VERTEX": "claude_env_CLAUDE_CODE_USE_VERTEX",
+            "CLOUD_ML_REGION": "claude_env_CLOUD_ML_REGION",
         },
-        "Claude Code environment variables"
+        "Claude Code environment variables",
     )
 
 
 def normalize_shell_command_value(value: str) -> str:
     normalized_value = value.strip()
-    if len(normalized_value) >= 2 and normalized_value[0] == normalized_value[-1] and normalized_value[0] in {"'", '"'}:
+    if (
+        len(normalized_value) >= 2
+        and normalized_value[0] == normalized_value[-1]
+        and normalized_value[0] in {"'", '"'}
+    ):
         return normalized_value[1:-1]
     return normalized_value
 
 
-def setup_kube_context_env(kp: PyKeePass):
+def setup_kube_context_env(kp: PyKeePass) -> None:
     print("Setting up Kubernetes context environment variables...")
 
     env_vars = {}
 
     for env_name, keepass_title in {
-        'THREE_NODE': 'kube_env_THREE_NODE',
-        'KC': 'kube_env_KC',
-        'OME': 'kube_env_OME'
+        "THREE_NODE": "kube_env_THREE_NODE",
+        "KC": "kube_env_KC",
+        "OME": "kube_env_OME",
     }.items():
-        entry = cast(Optional[Entry], kp.find_entries(title=keepass_title, first=True))
+        entry = cast(Entry | None, kp.find_entries(title=keepass_title, first=True))
         if entry and entry.password:
             env_vars[env_name] = normalize_shell_command_value(entry.password)
             print(f"  - {env_name} configured")
@@ -237,46 +237,48 @@ def setup_kube_context_env(kp: PyKeePass):
     print("Kubernetes context environment variables config complete")
 
 
-def setup_jira_env(kp: PyKeePass):
+def setup_jira_env(kp: PyKeePass) -> None:
     setup_env_vars_from_keepass(
         kp,
         {
-            'JIRA_ACCESS_TOKEN': 'jira_mcp_env_JIRA_ACCESS_TOKEN',
-            'JIRA_EMAIL': 'jira_mcp_env_JIRA_EMAIL',
-            'JIRA_SERVER_URL': 'jira_mcp_env_JIRA_SERVER_URL'
+            "JIRA_ACCESS_TOKEN": "jira_mcp_env_JIRA_ACCESS_TOKEN",
+            "JIRA_EMAIL": "jira_mcp_env_JIRA_EMAIL",
+            "JIRA_SERVER_URL": "jira_mcp_env_JIRA_SERVER_URL",
         },
-        "Jira environment variables"
+        "Jira environment variables",
     )
 
 
-def setup_google_workspace_mcp_credentials(kp: PyKeePass):
+def setup_google_workspace_mcp_credentials(kp: PyKeePass) -> None:
     """Load a complete OAuth client into a private file used only by the MCP launcher."""
     print("Setting up Google Workspace MCP credentials...")
 
     env_vars: dict[str, str] = {}
-    for env_name in ('GOOGLE_OAUTH_CLIENT_ID', 'GOOGLE_OAUTH_CLIENT_SECRET'):
-        keepass_title = f'google_workspace_mcp_env_{env_name}'
-        entry = cast(Optional[Entry], kp.find_entries(title=keepass_title, first=True))
+    for env_name in ("GOOGLE_OAUTH_CLIENT_ID", "GOOGLE_OAUTH_CLIENT_SECRET"):
+        keepass_title = f"google_workspace_mcp_env_{env_name}"
+        entry = cast(Entry | None, kp.find_entries(title=keepass_title, first=True))
         if entry and entry.password:
             env_vars[env_name] = entry.password
         else:
             print(f"  ⚠️  Warning: {keepass_title} entry not found or has no password")
 
     if len(env_vars) != 2:
-        print("  ⚠️  Skipping Google Workspace MCP credentials until both OAuth entries are available")
+        print(
+            "  ⚠️  Skipping Google Workspace MCP credentials until both OAuth entries are available"
+        )
         return
 
-    codex_dir = Path(os.environ.get('CODEX_HOME') or Path.home() / '.codex')
-    workspace_config_dir = codex_dir / 'google-workspace'
+    codex_dir = Path(os.environ.get("CODEX_HOME") or Path.home() / ".codex")
+    workspace_config_dir = codex_dir / "google-workspace"
     workspace_config_dir.mkdir(mode=0o700, parents=True, exist_ok=True)
     workspace_config_dir.chmod(0o700)
-    oauth_env = workspace_config_dir / 'oauth.env'
+    oauth_env = workspace_config_dir / "oauth.env"
     # The temporary file starts with mode 0600 and replaces credentials atomically.
-    with tempfile.NamedTemporaryFile(mode='w', dir=workspace_config_dir, delete=False) as temp_file:
+    with tempfile.NamedTemporaryFile(mode="w", dir=workspace_config_dir, delete=False) as temp_file:
         temp_path = Path(temp_file.name)
         try:
             for env_name, env_value in env_vars.items():
-                temp_file.write(f'export {env_name}={shlex.quote(env_value)}\n')
+                temp_file.write(f"export {env_name}={shlex.quote(env_value)}\n")
             temp_file.close()
             temp_path.replace(oauth_env)
         finally:
@@ -285,15 +287,15 @@ def setup_google_workspace_mcp_credentials(kp: PyKeePass):
     print("Google Workspace MCP credentials configured")
 
 
-def setup_github_cli_config(kp: PyKeePass):
+def setup_github_cli_config(kp: PyKeePass) -> None:
     print("Setting up GitHub CLI configuration...")
 
-    GH_HOSTS_ENTRY_TITLE = '.config/gh/hosts.yml'
+    GH_HOSTS_ENTRY_TITLE = ".config/gh/hosts.yml"
 
-    gh_dir = Path.home() / '.config' / 'gh'
+    gh_dir = Path.home() / ".config" / "gh"
     gh_dir.mkdir(mode=0o700, parents=True, exist_ok=True)
 
-    entry = cast(Optional[Entry], kp.find_entries(title=GH_HOSTS_ENTRY_TITLE, first=True))
+    entry = cast(Entry | None, kp.find_entries(title=GH_HOSTS_ENTRY_TITLE, first=True))
     if entry and entry.password:
         hosts_filename = Path(GH_HOSTS_ENTRY_TITLE).name
         hosts_path = gh_dir / hosts_filename
@@ -306,15 +308,15 @@ def setup_github_cli_config(kp: PyKeePass):
     print("GitHub CLI configuration complete")
 
 
-def setup_docker_config(kp: PyKeePass):
+def setup_docker_config(kp: PyKeePass) -> None:
     print("Setting up Docker configuration...")
 
-    DOCKER_CONFIG_ENTRY_TITLE = '.docker/config.json'
+    DOCKER_CONFIG_ENTRY_TITLE = ".docker/config.json"
 
-    docker_dir = Path.home() / '.docker'
+    docker_dir = Path.home() / ".docker"
     docker_dir.mkdir(mode=0o700, parents=True, exist_ok=True)
 
-    entry = cast(Optional[Entry], kp.find_entries(title=DOCKER_CONFIG_ENTRY_TITLE, first=True))
+    entry = cast(Entry | None, kp.find_entries(title=DOCKER_CONFIG_ENTRY_TITLE, first=True))
     if entry and entry.password:
         config_filename = Path(DOCKER_CONFIG_ENTRY_TITLE).name
         config_path = docker_dir / config_filename
@@ -327,23 +329,23 @@ def setup_docker_config(kp: PyKeePass):
     print("Docker configuration complete")
 
 
-def setup_git_config(kp: PyKeePass):
+def setup_git_config(kp: PyKeePass) -> None:
     print("Setting up git configuration...")
 
     git_configs = {
-        'user.email': 'git_user_email',
-        'user.name': 'git_user_name',
-        'user.signingkey': 'git_signingkey'
+        "user.email": "git_user_email",
+        "user.name": "git_user_name",
+        "user.signingkey": "git_signingkey",
     }
 
     for config_key, keepass_title in git_configs.items():
-        entry = cast(Optional[Entry], kp.find_entries(title=keepass_title, first=True))
+        entry = cast(Entry | None, kp.find_entries(title=keepass_title, first=True))
         if entry and entry.password:
             try:
                 subprocess.run(
-                    ['git', 'config', '--global', config_key, entry.password],
+                    ["git", "config", "--global", config_key, entry.password],
                     capture_output=True,
-                    check=True
+                    check=True,
                 )
                 print(f"  - {config_key} configured")
             except subprocess.CalledProcessError as e:
@@ -355,8 +357,8 @@ def setup_git_config(kp: PyKeePass):
             print(f"  ⚠️  Warning: {keepass_title} entry not found or has no password")
 
     try:
-        subprocess.run(['git', 'config', '--global', 'commit.gpgsign', 'true'], check=True)
-        subprocess.run(['git', 'config', '--global', 'tag.gpgsign', 'true'], check=True)
+        subprocess.run(["git", "config", "--global", "commit.gpgsign", "true"], check=True)
+        subprocess.run(["git", "config", "--global", "tag.gpgsign", "true"], check=True)
         print("  - commit.gpgsign and tag.gpgsign enabled")
     except subprocess.CalledProcessError as e:
         print(f"  ⚠️  Warning: Failed to set gpgsign flags: {e}")
@@ -376,7 +378,9 @@ def open_keepass_database(kdbx_path: str, max_attempts: int = 3) -> PyKeePass:
             return PyKeePass(kdbx_path, password=master_password)
         except Exception as e:
             if attempt < max_attempts:
-                print(f"⚠️  Error: Incorrect password. {max_attempts - attempt} attempt(s) remaining.")
+                print(
+                    f"⚠️  Error: Incorrect password. {max_attempts - attempt} attempt(s) remaining."
+                )
             else:
                 print(f"⚠️  Error: Failed to open database after {max_attempts} attempts: {e}")
                 sys.exit(1)
@@ -385,8 +389,8 @@ def open_keepass_database(kdbx_path: str, max_attempts: int = 3) -> PyKeePass:
     raise RuntimeError("Unreachable: should have returned or exited")
 
 
-def main():
-    kdbx_path = os.environ.get('KEEPASS_DB_PATH')
+def main() -> None:
+    kdbx_path = os.environ.get("KEEPASS_DB_PATH")
     if not kdbx_path:
         print("⚠️  Error: KEEPASS_DB_PATH environment variable not set")
         sys.exit(1)
@@ -412,5 +416,5 @@ def main():
     print("\nAll secrets configured successfully!")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

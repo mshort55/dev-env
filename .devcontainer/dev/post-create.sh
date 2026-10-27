@@ -3,7 +3,7 @@ set -e
 source "${DEV_ENV_DIR}/scripts/common.sh"
 
 setup_completions() {
-  cat >> ~/.bashrc << 'EOF'
+  cat >>~/.bashrc <<'EOF'
 
 # Shell completions
 source <(kubectl completion bash)
@@ -19,7 +19,7 @@ setup_shell_paths() {
     npm_clis_bin="/${WORKSPACE_DIR_NAME}/npm-clis/node_modules/.bin"
   fi
   export PATH="${npm_clis_bin:+$npm_clis_bin:}$HOME/.local/bin:$HOME/go/bin:$PATH"
-  cat >> ~/.bashrc << EOF
+  cat >>~/.bashrc <<EOF
 
 # User bin paths
 export PATH="${npm_clis_bin:+$npm_clis_bin:}\$HOME/.local/bin:\$HOME/go/bin:\$PATH"
@@ -41,7 +41,7 @@ install_npm_clis() {
 
 setup_atuin() {
   curl -fsSL https://raw.githubusercontent.com/rcaloras/bash-preexec/master/bash-preexec.sh -o ~/.bash-preexec.sh
-  cat >> ~/.bashrc << 'EOF'
+  cat >>~/.bashrc <<'EOF'
 
 # Atuin shell history
 [[ -f ~/.bash-preexec.sh ]] && source ~/.bash-preexec.sh
@@ -58,8 +58,8 @@ setup_claude_mcp_servers() {
   # replaces (rather than merges with) the inherited process environment at
   # spawn time, wiping out the JIRA_* vars exported in ~/.bashrc. Drop the
   # key so the server inherits the environment normally.
-  jq 'del(.mcpServers["jira-mcp-server"].env)' ~/.claude.json > ~/.claude.json.tmp \
-    && mv ~/.claude.json.tmp ~/.claude.json
+  jq 'del(.mcpServers["jira-mcp-server"].env)' ~/.claude.json >~/.claude.json.tmp &&
+    mv ~/.claude.json.tmp ~/.claude.json
 }
 
 setup_google_workspace_mcp() {
@@ -68,6 +68,10 @@ setup_google_workspace_mcp() {
 
 setup_codex_jira_mcp() {
   bash "${DEV_ENV_DIR}/scripts/setup-jira-mcp.sh"
+}
+
+setup_verification() {
+  bash "${DEV_ENV_DIR}/scripts/setup-verification.sh"
 }
 
 fix_apt_sources() {
@@ -91,7 +95,7 @@ bootstrap_secrets() {
 }
 
 setup_and_unlock_dummy_keyring() {
-  cat >> ~/.bashrc << 'EOF'
+  cat >>~/.bashrc <<'EOF'
 
 # --- Shared Headless Keyring ---
 # One D-Bus session + one gnome-keyring for ALL terminals.
@@ -182,6 +186,7 @@ main() {
   bootstrap_secrets
   setup_codex_jira_mcp
   setup_google_workspace_mcp
+  setup_verification
   setup_and_unlock_dummy_keyring
 }
 

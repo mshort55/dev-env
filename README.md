@@ -125,27 +125,64 @@ Ubuntu packages still receive repository updates at image build time.
 Google Cloud CLI, GitHub CLI, and AWS CLI continue to follow their existing release
 channels. The local Jira source checkout remains editable.
 
-Python dependencies target the container's Python 3.12. Update `requirements.in`
+Python dependencies target the container's Python 3.12. Update `requirements/bootstrap.in`
 and `requirements/workspace-mcp.in` (matching `WORKSPACE_MCP_VERSION`), then regenerate:
 
 ```bash
-uv pip compile --python-version 3.12 --generate-hashes -o requirements.txt requirements.in
+uv pip compile --python-version 3.12 --generate-hashes -o requirements/bootstrap.txt requirements/bootstrap.in
 uv pip compile --python-version 3.12 --generate-hashes -o requirements/workspace-mcp.txt requirements/workspace-mcp.in
-uv pip compile --python-version 3.12 --generate-hashes -o requirements/jira-mcp.txt ../jira-mcp-server_stolostron/pyproject.toml requirements/jira-build.in requirements.in
+uv pip compile --python-version 3.12 --generate-hashes -o requirements/jira-mcp.txt ../jira-mcp-server_stolostron/pyproject.toml requirements/jira-build.in requirements/bootstrap.in
+uv pip compile --python-version 3.12 --generate-hashes -o requirements/verification.txt requirements/verification.in
 ```
 
 The base and Jira installs require the recorded hashes. Jira's editable install
 uses the locked build backend without resolving additional dependencies. Workspace
 MCP uses the same dependency constraints during setup and launch.
 
-After completing updates, run:
+## Verification
+
+Run every check from the repository root:
 
 ```bash
-PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests -v
-bash tests/codex_package_survives_user_mount.sh
-PYTHONDONTWRITEBYTECODE=1 bash verifications/verify.sh
+nox
 ```
 
-The verification workflow uses disposable credentials and builds a temporary image.
-The Docker feature and Workspace MCP also need isolated smoke tests because the
-Dockerfile-only build does not run devcontainer features or post-create setup.
+Container setup installs Nox automatically. For an existing environment, install
+[uv](https://docs.astral.sh/uv/getting-started/installation/) and run
+`bash scripts/setup-verification.sh` once. Ensure `~/.local/bin` is on `PATH`.
+Nox installs the locked dependencies from `requirements/verification.txt` into isolated,
+reusable Python 3.12 environments under `.nox/`.
+
+| Session | Checks |
+| --- | --- |
+| `lint` | Ruff lint rules and Python formatting |
+| `types` | Strict mypy, including function parameter and return annotations |
+| `shell` | ShellCheck and shfmt formatting |
+| `tests` | pytest discovery and every shell script under `tests/` |
+| `integration` | KeePass bootstrap, container image build, Workspace MCP registration and stdio handshake |
+
+Use `nox -l` to list sessions, `nox -s lint types` to select checks, or
+`nox -s format` to apply lint fixes and format Python and shell files. Ordinary
+verification leaves source files unchanged. Independent checks continue after a
+failure; the final summary and exit status report failures. Missing tools fail
+their session instead of silently skipping checks.
+
+Discovery includes tracked and new, unignored files, including `.devcontainer/`.
+Python files (`*.py`), shell files (`*.sh`, `*.bash`), and scripts with shell
+shebangs are checked. Archives, virtualenvs, generated evidence, and symlinks are
+excluded. Add Python tests as `tests/**/test_*.py` or `tests/**/*_test.py`, or add
+Bash test scripts anywhere under `tests/`; no runner edits are needed. Add a Nox
+session and its name to `nox.options.sessions` to introduce another kind of check.
+
+The full suite needs Linux ARM64, Bash, Git, curl, Codex, uv/uvx, and a working
+Podman or Docker engine. It downloads dependencies, the latest Codex installer,
+and image build inputs, so network access is required. Tool sessions can be run
+individually without a container engine. CI runs the same `nox` command on an
+ARM64 Ubuntu runner.
+
+Integration uses disposable homes and fixture credentials, reads `.env.example`,
+and removes its temporary image. Evidence stays in `verifications/evidence/`.
+MCP verification initializes the Workspace server and lists tools; it does not
+call Google APIs. Jira registration is covered by the Python tests, without a
+live Jira connection. The image build does not run devcontainer features or
+post-create setup, so Docker feature changes still need a separate smoke test.

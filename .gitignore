@@ -3,3 +3,7 @@
 __pycache__/
 verifications/evidence/
 .venv
+.nox/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/

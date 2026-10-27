@@ -57,7 +57,7 @@ if [ -d "$SCRATCH/pids" ]; then
   for pid_file in "$SCRATCH/pids"/*; do
     [ -f "$pid_file" ] || continue
     pid=$(cat "$pid_file")
-    if [ -d "/proc/$pid" ] && tr '\0' '\n' < "/proc/$pid/environ" | grep -Fxq "SCRATCH=$SCRATCH"; then
+    if [ -d "/proc/$pid" ] && tr '\0' '\n' <"/proc/$pid/environ" | grep -Fxq "SCRATCH=$SCRATCH"; then
       kill "$pid" 2>/dev/null || true
       wait "$pid" 2>/dev/null || true
     fi

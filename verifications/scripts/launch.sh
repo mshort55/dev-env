@@ -16,22 +16,22 @@ chmod 700 "$SCRATCH" "$SCRATCH/home" "$SCRATCH/keepass"
 PYTHON="python3"
 if ! "$PYTHON" -c 'import pykeepass' >/dev/null 2>&1; then
   python3 -m venv "$SCRATCH/venv"
-  "$SCRATCH/venv/bin/pip" install --require-hashes -r "$REPO/requirements.txt"
+  "$SCRATCH/venv/bin/pip" install --require-hashes -r "$REPO/requirements/bootstrap.txt"
   PYTHON="$SCRATCH/venv/bin/python3"
 fi
 
 KEEPASS_PASSWORD="verify-master"
 OAUTH_CLIENT_ID="verify-client-id"
 OAUTH_CLIENT_SECRET="verify-client-secret"
-printf '%s\n' "$KEEPASS_PASSWORD" > "$SCRATCH/password"
+printf '%s\n' "$KEEPASS_PASSWORD" >"$SCRATCH/password"
 chmod 600 "$SCRATCH/password"
 
 KEEPASS_DB_PATH="$SCRATCH/keepass/verify.kdbx"
 KEEPASS_PASSWORD="$KEEPASS_PASSWORD" \
-OAUTH_CLIENT_ID="$OAUTH_CLIENT_ID" \
-OAUTH_CLIENT_SECRET="$OAUTH_CLIENT_SECRET" \
-KEEPASS_DB_PATH="$KEEPASS_DB_PATH" \
-"$PYTHON" - <<'PY'
+  OAUTH_CLIENT_ID="$OAUTH_CLIENT_ID" \
+  OAUTH_CLIENT_SECRET="$OAUTH_CLIENT_SECRET" \
+  KEEPASS_DB_PATH="$KEEPASS_DB_PATH" \
+  "$PYTHON" - <<'PY'
 import os
 from pykeepass import create_database
 
@@ -52,7 +52,7 @@ database.save()
 PY
 chmod 600 "$KEEPASS_DB_PATH"
 
-cat > "$SCRATCH/state.env" <<EOF
+cat >"$SCRATCH/state.env" <<EOF
 RUN_ID=$RUN_ID
 SURFACE=cli
 FORBIDDEN_CONTAINER_NAME=dev
@@ -72,7 +72,7 @@ EOF
 chmod 600 "$SCRATCH/state.env"
 
 # Paths only. The password stays in the mode-600 state file.
-cat > "$VERIFY_DIR/evidence/$RUN_ID/run.env" <<EOF
+cat >"$VERIFY_DIR/evidence/$RUN_ID/run.env" <<EOF
 RUN_ID=$RUN_ID
 SURFACE=cli
 STATE=$SCRATCH/state.env

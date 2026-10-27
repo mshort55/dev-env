@@ -1,0 +1,44 @@
+name: Verify
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: verify-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    # The workstation Dockerfile installs ARM64 binaries.
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Read uv version
+        id: versions
+        run: sed -n 's/^UV_VERSION=/uv=/p' .env.example >> "$GITHUB_OUTPUT"
+      - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
+        with:
+          version: ${{ steps.versions.outputs.uv }}
+          python-version: "3.12"
+          enable-cache: true
+          cache-dependency-glob: |
+            requirements/*.txt
+      - name: Install verification runner and Codex
+        run: |
+          bash scripts/setup-verification.sh
+          curl -fsSL https://chatgpt.com/codex/install.sh | CODEX_NON_INTERACTIVE=1 sh
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+      - name: Run all checks
+        run: nox
+      - name: Show integration logs on failure
+        if: failure()
+        run: |
+          if [ -d verifications/evidence ]; then
+            find verifications/evidence -type f -name '*.log' -exec tail -n 80 {} +
+          fi

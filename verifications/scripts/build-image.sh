@@ -33,8 +33,8 @@ else
   exit 1
 fi
 
-printf '%s\n' "$TAG" > "$SCRATCH/image-tag"
-printf '%s\n' "$ENGINE" > "$SCRATCH/image-engine"
+printf '%s\n' "$TAG" >"$SCRATCH/image-tag"
+printf '%s\n' "$ENGINE" >"$SCRATCH/image-engine"
 
 BUILD_ARG_NAMES=(
   ATUIN_VERSION
@@ -61,7 +61,7 @@ BUILD_ARG_NAMES=(
 )
 
 build_args=()
-: > "$OUT/build-args.txt"
+: >"$OUT/build-args.txt"
 for key in "${BUILD_ARG_NAMES[@]}"; do
   line=$(grep -E "^${key}=" "$ENV_EXAMPLE" | head -n 1 || true)
   if [ -z "$line" ]; then
@@ -70,13 +70,13 @@ for key in "${BUILD_ARG_NAMES[@]}"; do
   fi
   value=${line#*=}
   case "$value" in
-    *'$'*|*'${'*)
+    *'$'*)
       echo "build-image: $key in .env.example is interpolated" >&2
       exit 1
       ;;
   esac
   build_args+=(--build-arg "${key}=${value}")
-  printf '%s=%s\n' "$key" "$value" >> "$OUT/build-args.txt"
+  printf '%s=%s\n' "$key" "$value" >>"$OUT/build-args.txt"
 done
 
 {
@@ -85,7 +85,7 @@ done
   echo "env_file=.env.example"
   echo "dockerfile=.devcontainer/dev/Dockerfile"
   echo "container_started=no"
-} > "$OUT/build.env"
+} >"$OUT/build.env"
 
 set +e
 "$ENGINE" build \
@@ -96,17 +96,17 @@ set +e
   >"$OUT/build.log" 2>&1
 status=$?
 set -e
-echo "$status" > "$OUT/build.exit"
+echo "$status" >"$OUT/build.exit"
 if [ "$status" -ne 0 ]; then
   echo "build-image: $ENGINE build failed; log is $OUT/build.log" >&2
   exit "$status"
 fi
 
-"$ENGINE" image inspect --format '{{.Id}}' "$TAG" > "$OUT/image-id.txt"
+"$ENGINE" image inspect --format '{{.Id}}' "$TAG" >"$OUT/image-id.txt"
 "$ENGINE" rmi "$TAG" >"$OUT/rmi.out" 2>"$OUT/rmi.err"
 rm -f "$SCRATCH/image-tag" "$SCRATCH/image-engine"
 
-cat > "$OUT/side-effects.txt" <<EOF
+cat >"$OUT/side-effects.txt" <<EOF
 engine=$ENGINE
 tag=$TAG
 image_removed=yes
