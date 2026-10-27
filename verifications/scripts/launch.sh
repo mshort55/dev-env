@@ -16,7 +16,7 @@ chmod 700 "$SCRATCH" "$SCRATCH/home" "$SCRATCH/keepass"
 PYTHON="python3"
 if ! "$PYTHON" -c 'import pykeepass' >/dev/null 2>&1; then
   python3 -m venv "$SCRATCH/venv"
-  "$SCRATCH/venv/bin/pip" install -r "$REPO/requirements.txt"
+  "$SCRATCH/venv/bin/pip" install --require-hashes -r "$REPO/requirements.txt"
   PYTHON="$SCRATCH/venv/bin/python3"
 fi
 

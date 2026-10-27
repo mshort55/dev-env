@@ -22,13 +22,13 @@ Preconditions:
 - `CODEX_HOME` is `$SCRATCH/codex-setup`, not the operator's `~/.codex`.
 - `UV_TOOL_DIR` is `$SCRATCH/uv/tools` and `UV_TOOL_BIN_DIR` is `$SCRATCH/uv/bin`.
 - `XDG_CACHE_HOME` is `$SCRATCH/cache`.
-- `uv` is on `PATH`. If it is not, set `UV_VERSION` from the `UV_VERSION=` line in `.env.example` (`0.12.23`) so the script can install it. Do not read `.env`; it is host-specific.
+- `uv` is on `PATH`. If it is not, set `UV_VERSION` from the `UV_VERSION=` line in `.env.example` (`0.13.6`) so the script can install it. Do not read `.env`; it is host-specific.
 - Evidence directory: `$EVIDENCE_DIR/setup-google-workspace-mcp/`.
-- This drive needs network access for `uv tool install workspace-mcp==2.0.1` unless that exact version is already installed inside `UV_TOOL_DIR`.
+- This drive needs network access for `uv tool install --force --python /usr/bin/python3 --constraints requirements/workspace-mcp.txt workspace-mcp==2.2.1` unless that exact version is already installed inside `UV_TOOL_DIR`.
 - `bash verifications/verify.sh` does not run this feature. Drive it with the command below.
 
 - **Register the server.** Create the scratch uv and Codex directories mode `700`. From the repo root run `bash scripts/setup-google-workspace-mcp.sh`. Save stdout, stderr, and the exit code as `register.out`, `register.err`, and `register.exit`.
-- **Proof.** Exit code `0`. `$CODEX_HOME/config.toml` contains a `[mcp_servers.google-workspace]` table whose `command` is `bash` and whose `args` include `$DEV_ENV_REPO/scripts/google-workspace-mcp.sh`. `$CODEX_HOME/google-workspace` and `$CODEX_HOME/google-workspace/credentials-read-only` exist and are mode `700`. Stdout contains `Google Workspace MCP configured; add the Google OAuth KeePass entries and rerun scripts/bootstrap-secrets.py.` when `oauth.env` was absent before the command. `register.err` may contain `Refusing to create helper binaries under temporary dir "/tmp"` because `CODEX_HOME` is under `/tmp`; the toml file is still the proof. The operator's `~/.codex/config.toml` mtime is unchanged.
+- **Proof.** Exit code `0`. `$CODEX_HOME/config.toml` contains a `[mcp_servers.google-workspace]` table whose `command` is `bash` and whose `args` include `$DEV_ENV_REPO/scripts/google-workspace-mcp.sh`. `$CODEX_HOME/google-workspace` and `$CODEX_HOME/google-workspace/credentials-read-only` exist and are mode `700`. Stdout contains `Google Workspace MCP registered; OAuth client credentials are not loaded yet.` when `oauth.env` was absent before the command. `register.err` may contain `Refusing to create helper binaries under temporary dir "/tmp"` because `CODEX_HOME` is under `/tmp`; the toml file is still the proof. The operator's `~/.codex/config.toml` mtime is unchanged.
 
 ## Gotchas
 

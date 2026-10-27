@@ -8,6 +8,7 @@ services:
         - BUF_VERSION
         - CONTAINER_UID
         - CONTAINER_USER
+        - DOCKER_COMPOSE_VERSION
         - GINKGO_VERSION
         - GO_VERSION
         - GOPLS_VERSION

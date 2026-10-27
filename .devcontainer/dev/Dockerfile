@@ -1,12 +1,12 @@
 # Ubuntu 24.04 LTS
-# docker inspect ubuntu:24.04 --format='{{.Created}}'
-# 2026-09-11T11:53:37.343727408Z
-FROM ubuntu@sha256:008173c23f95b170204355c12626cb5a965d779a7e1283b09e9cffbb1bf33ca3
+# Ubuntu 24.04 image checked 2026-10-27.
+FROM ubuntu@sha256:24737cef17f4e22b1977df7d9a05e77c4e28b7da5b8911f8d8ccda136bf3573c
 
 ARG ATUIN_VERSION
 ARG BUF_VERSION
 ARG CONTAINER_UID
 ARG CONTAINER_USER
+ARG DOCKER_COMPOSE_VERSION
 ARG GINKGO_VERSION
 ARG GOPLS_VERSION
 ARG GO_VERSION
@@ -77,6 +77,11 @@ COPY requirements.txt /tmp/requirements.txt
 
 # Other software installations
 RUN \
+    # docker compose (plugin and standalone command)
+    mkdir -p /usr/local/lib/docker/cli-plugins && \
+    curl -fsSL "https://github.com/docker/compose/releases/download/v${DOCKER_COMPOSE_VERSION}/docker-compose-linux-aarch64" -o /usr/local/lib/docker/cli-plugins/docker-compose && \
+    chmod +x /usr/local/lib/docker/cli-plugins/docker-compose && \
+    ln -s /usr/local/lib/docker/cli-plugins/docker-compose /usr/local/bin/docker-compose && \
     # go
     curl -fsSL "https://go.dev/dl/go${GO_VERSION}.linux-arm64.tar.gz" | tar -xz -C /usr/local && \
     # node.js
@@ -124,7 +129,7 @@ RUN \
     # zellij
     curl -fsSL "https://github.com/zellij-org/zellij/releases/download/v${ZELLIJ_VERSION}/zellij-no-web-aarch64-unknown-linux-musl.tar.gz" | tar -xz -C /usr/local/bin && \
     # python deps (keepass/crypto)
-    pip3 install --no-cache-dir --break-system-packages -r /tmp/requirements.txt && \
+    pip3 install --no-cache-dir --break-system-packages --require-hashes -r /tmp/requirements.txt && \
     rm /tmp/requirements.txt && \
     # finalize and clean up
     chmod +x /usr/local/bin/kind /usr/local/bin/jq && \
@@ -144,7 +149,7 @@ RUN \
     # rust
     # curl -fsSL https://sh.rustup.rs | sh -s -- -y --default-toolchain ${RUST_VERSION} && \
     # claude code
-    curl -fsSL https://claude.ai/install.sh | bash && \
+    curl -fsSL https://claude.ai/install.sh | bash -s -- latest && \
     # cursor agent cli
     curl https://cursor.com/install -fsS | bash && \
     # openai codex cli

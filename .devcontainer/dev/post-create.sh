@@ -76,7 +76,8 @@ fix_apt_sources() {
 }
 
 install_python_deps() {
-  pip3 install --break-system-packages -e /Repos/jira-mcp-server_stolostron
+  pip3 install --break-system-packages --require-hashes -r "${DEV_ENV_DIR}/requirements/jira-mcp.txt"
+  pip3 install --break-system-packages --no-deps --no-build-isolation -e /Repos/jira-mcp-server_stolostron
 }
 
 bootstrap_secrets() {

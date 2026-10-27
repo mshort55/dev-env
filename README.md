@@ -5,9 +5,8 @@ Personal development container with pre-configured tools, languages, and secrets
 ## What's Included
 
 **Languages & Runtimes:**
-- Python 3.11
-- Go 1.24
-- Node.js 24.11.1
+- Python 3.12 (Ubuntu 24.04 packages)
+- Go and Node.js 24 (versions in `.env.example`)
 
 **CLI Tools:**
 - GitHub CLI (`gh`)
@@ -101,3 +100,45 @@ After adding or changing those KeePass entries, rerun `python3 scripts/bootstrap
    ```
    Add: `"dev.containers.dockerPath": "podman"`
 6. Set up Compose for Podman in Podman Desktop app
+
+## Updating software
+
+Update version variables in both `.env.example` and your local `.env`; preserve local paths and credentials.
+The Dockerfile pins Ubuntu 24.04 by digest. `devcontainer.json` pins Docker/Moby,
+Buildx, and VS Code extensions; regenerate `devcontainer-lock.json` when
+changing a feature. `DOCKER_COMPOSE_VERSION` in `.env` controls both `docker compose`
+and `docker-compose`.
+The feature's Compose installer is disabled to keep this as the only Compose version.
+`installDockerBuildx: false` disables the feature's second, floating GitHub download;
+Moby still installs Buildx at the exact `mobyBuildxVersion` package pin.
+The external `/UbuntuSync/npm-clis/package.json` and its lockfile own pnpm, Repomix,
+and skills; startup installs them with `npm ci`.
+
+Ubuntu packages still receive repository updates at image build time.
+Google Cloud CLI, GitHub CLI, and AWS CLI continue to follow their existing release
+channels. The local Jira source checkout remains editable.
+
+Python dependencies target the container's Python 3.12. Update `requirements.in`
+and `requirements/workspace-mcp.in` (matching `WORKSPACE_MCP_VERSION`), then regenerate:
+
+```bash
+uv pip compile --python-version 3.12 --generate-hashes -o requirements.txt requirements.in
+uv pip compile --python-version 3.12 --generate-hashes -o requirements/workspace-mcp.txt requirements/workspace-mcp.in
+uv pip compile --python-version 3.12 --generate-hashes -o requirements/jira-mcp.txt ../jira-mcp-server_stolostron/pyproject.toml requirements/jira-build.in requirements.in
+```
+
+The base and Jira installs require the recorded hashes. Jira's editable install
+uses the locked build backend without resolving additional dependencies. Workspace
+MCP uses the same dependency constraints during setup and launch.
+
+After completing updates, run:
+
+```bash
+PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests -v
+bash tests/codex_package_survives_user_mount.sh
+PYTHONDONTWRITEBYTECODE=1 bash verifications/verify.sh
+```
+
+The verification workflow uses disposable credentials and builds a temporary image.
+The Docker feature and Workspace MCP also need isolated smoke tests because the
+Dockerfile-only build does not run devcontainer features or post-create setup.

@@ -1,6 +1,7 @@
 #!/bin/bash
 set -euo pipefail
 
+dev_env_dir="${DEV_ENV_DIR:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
 workspace_config_dir="${CODEX_HOME:-$HOME/.codex}/google-workspace"
 oauth_env="$workspace_config_dir/oauth.env"
 
@@ -18,4 +19,6 @@ export WORKSPACE_MCP_CREDENTIALS_DIR="$workspace_config_dir/credentials-read-onl
 export PATH="$HOME/.local/bin:$PATH"
 : "${WORKSPACE_MCP_VERSION:?Run dev-env/scripts/setup-google-workspace-mcp.sh to configure the MCP version}"
 
-exec uvx "workspace-mcp@${WORKSPACE_MCP_VERSION}" --transport stdio --tools drive docs sheets slides --read-only
+exec uvx --python /usr/bin/python3 \
+  --constraints "$dev_env_dir/requirements/workspace-mcp.txt" \
+  "workspace-mcp@${WORKSPACE_MCP_VERSION}" --transport stdio --tools drive docs sheets slides --read-only
