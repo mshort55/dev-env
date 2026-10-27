@@ -66,6 +66,10 @@ setup_google_workspace_mcp() {
   bash "${DEV_ENV_DIR}/scripts/setup-google-workspace-mcp.sh"
 }
 
+setup_codex_jira_mcp() {
+  bash "${DEV_ENV_DIR}/scripts/setup-jira-mcp.sh"
+}
+
 fix_apt_sources() {
   sudo rm -f /etc/apt/sources.list.d/yarn.list
   # Keep Ubuntu mirrors on HTTPS — HTTP to ports.ubuntu.com:80 can time out.
@@ -176,6 +180,7 @@ main() {
   setup_atuin
   setup_claude_mcp_servers
   bootstrap_secrets
+  setup_codex_jira_mcp
   setup_google_workspace_mcp
   setup_and_unlock_dummy_keyring
 }

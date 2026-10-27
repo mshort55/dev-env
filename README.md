@@ -81,6 +81,13 @@ Kubernetes cluster targets are loaded from KeePass entries named `kube_env_THREE
 Those KeePass values can be stored either as raw `oc login ...` commands or wrapped in a single pair of shell quotes; the bootstrap normalizes both forms.
 After adding or changing those KeePass entries, rerun `python3 scripts/bootstrap-secrets.py` inside the container to refresh your shell profile.
 
+Jira MCP is installed from `/Repos/jira-mcp-server_stolostron` and registered with
+Claude and Codex during container setup. Codex forwards `JIRA_SERVER_URL`,
+`JIRA_ACCESS_TOKEN`, and `JIRA_EMAIL` from its environment; KeePass supplies these
+through your shell profile. Start Codex from a new container terminal after bootstrap.
+To register it in an existing container, run `bash "$DEV_ENV_DIR/scripts/setup-jira-mcp.sh"`,
+then restart Codex. Repeated setup preserves an existing `jira` server configuration.
+
 ## Host Setup (macOS with Podman)
 
 1. Install Podman Desktop
