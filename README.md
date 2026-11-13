@@ -1,188 +1,55 @@
 # dev-env
 
-Personal development container with pre-configured tools, languages, and secrets management.
+Personal development container for CLI, cloud, Kubernetes, and AI-assisted work.
+Includes language runtimes, development tools, shell configuration, and optional
+KeePass-based credential setup.
 
-## What's Included
+## Setup
 
-**Languages & Runtimes:**
-- Python 3.12 (Ubuntu 24.04 packages)
-- Go and Node.js 24 (versions in `.env.example`)
+1. Install VS Code with Dev Containers and configure your container engine.
+   The current configuration uses Podman; on macOS, configure VS Code's
+   `dev.containers.dockerPath` as `podman` and enable Compose in Podman Desktop.
+2. Copy `.env.example` to `.env`. Set your container username and UID, host mount
+   paths, and the repository's container path (`DEV_ENV_DIR`). See
+   [.env.example](.env.example) for available settings.
+3. Ensure the configured host directories and external setup inputs exist.
+   [post-create.sh](.devcontainer/dev/post-create.sh) defines these dependencies,
+   including synced settings and local source checkouts.
+4. Open this repository in VS Code and choose **Reopen in Container**.
+   Enter your KeePass master password if credential setup is enabled.
 
-**CLI Tools:**
-- GitHub CLI (`gh`)
-- Google Cloud CLI (`gcloud`)
-- OpenShift Client (`oc`)
-- Kubernetes Client (`kubectl`)
-- Docker-in-Docker
-- Git, Vim, Podman
+If you change `WORKSPACE_DIR_NAME`, also update `workspaceFolder` in
+[devcontainer.json](.devcontainer/dev/devcontainer.json).
 
-**Agent CLIs:**
-- Claude Code
-- Cursor Agent
-- OpenAI Codex
+## Configuration and persistence
 
-**VS Code Extensions:**
-- Claude Code
-- Python + debugpy
-- Go
-- GitLens
-- ESLint, Prettier
-- Vim keybindings
+Host directories mounted by [compose.yml](.devcontainer/dev/compose.yml) persist
+across rebuilds. Other container-local files may be lost when rebuilding.
 
-## Configuration
+[post-create.sh](.devcontainer/dev/post-create.sh) configures each new container.
+Some user settings are restored from the synced workspace, replacing local copies;
+edit their synced sources to keep changes across rebuilds. This setup does not
+rerun on ordinary container restarts.
 
-The `.env` file contains all configuration for the dev container. You may need to customize these variables for your environment:
+Credentials come from the optional KeePass database configured in `.env`.
+To refresh them, run `python3 "$DEV_ENV_DIR/scripts/bootstrap-secrets.py"` inside
+the container, then open a new terminal.
 
-**Container User Configuration:**
-- `CONTAINER_USER` - Username inside the container
-- `CONTAINER_UID` - User ID inside the container
+## Maintenance
 
-**Directory Names:**
-- `GENERAL_DIR_NAME` - Name for general files directory (used on both host and container)
-- `REPOS_DIR_NAME` - Name for repositories directory (used on both host and container)
-- `WORKSPACE_DIR_NAME` - Name for workspace sync directory (used on both host and container)
-
-**Host Paths:**
-- `HOST_GENERAL_DIR` - Local directory containing persistent files (bash history, Claude/Cursor/Codex config)
-- `HOST_REPOS_DIR` - Local directory containing your git repositories
-- `HOST_WORKSPACE_DIR` - Local directory containing your KeePass database and synced files
-
-**Container Paths:**
-- `DEV_ENV_DIR` - Where this dev-env repository is located inside the container
-- `KEEPASS_DB_PATH` - Where the KeePass database is located inside the container
-
-## Quick Start
-
-1. Open this folder in VS Code
-2. When prompted, click "Reopen in Container"
-3. Enter your KeePass master password when the bootstrap script runs
-
-The container automatically configures SSH keys, GPG, git, gcloud, GitHub CLI, and other credentials from your KeePass database on first startup.
-
-## How It Works
-
-- **Dockerfile**: Base Ubuntu 24.04 image with all tools installed
-- **docker-compose.yml**: Mounts your host directories (configured in `.env`) into the container
-- **devcontainer.json**: VS Code dev container configuration
-- **general-setup.py**: Configures general shell environment:
-  - Enhanced bash history (50k entries, persistent across sessions)
-  - Shell completions (kubectl, oc, gcloud, gh)
-- **bootstrap-secrets.py**: Reads secrets from your KeePass database (path configured in `.env`) and configures:
-  - SSH keys (`~/.ssh/id_ed25519`)
-  - GPG keys (imported and configured)
-  - Git configuration (user, email, signing key)
-  - gcloud authentication and configuration
-  - GitHub CLI authentication
-  - Docker/Podman configuration
-  - Claude Code environment variables
-  - Kubernetes context variables
-
-Kubernetes cluster targets are loaded from KeePass entries named `kube_env_THREE_NODE`, `kube_env_KC`, and `kube_env_OME`, then exported into your shell as `THREE_NODE`, `KC`, and `OME`.
-Those KeePass values can be stored either as raw `oc login ...` commands or wrapped in a single pair of shell quotes; the bootstrap normalizes both forms.
-After adding or changing those KeePass entries, rerun `python3 scripts/bootstrap-secrets.py` inside the container to refresh your shell profile.
-
-Jira MCP is installed from `/Repos/jira-mcp-server_stolostron` and registered with
-Claude and Codex during container setup. Codex forwards `JIRA_SERVER_URL`,
-`JIRA_ACCESS_TOKEN`, and `JIRA_EMAIL` from its environment; KeePass supplies these
-through your shell profile. Start Codex from a new container terminal after bootstrap.
-To register it in an existing container, run `bash "$DEV_ENV_DIR/scripts/setup-jira-mcp.sh"`,
-then restart Codex. Repeated setup preserves an existing `jira` server configuration.
-
-## Host Setup (macOS with Podman)
-
-1. Install Podman Desktop
-2. Set up Podman VM (may need krunkit):
-   ```bash
-   brew tap slp/krunkit
-   brew install krunkit
-   ```
-3. Increase Podman VM resources:
-   - CPU: 8 cores
-   - Memory: 30GB
-   - Disk: 480GB
-4. Install VS Code and the Dev Containers extension
-5. Configure VS Code to use Podman:
-   ```bash
-   vim "$HOME/Library/Application Support/Code/User/settings.json"
-   ```
-   Add: `"dev.containers.dockerPath": "podman"`
-6. Set up Compose for Podman in Podman Desktop app
-
-## Updating software
-
-Update version variables in both `.env.example` and your local `.env`; preserve local paths and credentials.
-The Dockerfile pins Ubuntu 24.04 by digest. `devcontainer.json` pins Docker/Moby,
-Buildx, and VS Code extensions; regenerate `devcontainer-lock.json` when
-changing a feature. `DOCKER_COMPOSE_VERSION` in `.env` controls both `docker compose`
-and `docker-compose`.
-The feature's Compose installer is disabled to keep this as the only Compose version.
-`installDockerBuildx: false` disables the feature's second, floating GitHub download;
-Moby still installs Buildx at the exact `mobyBuildxVersion` package pin.
-The external `/UbuntuSync/npm-clis/package.json` and its lockfile own pnpm, Repomix,
-and skills; startup installs them with `npm ci`.
-
-Ubuntu packages still receive repository updates at image build time.
-Google Cloud CLI, GitHub CLI, and AWS CLI continue to follow their existing release
-channels. The local Jira source checkout remains editable.
-
-Python dependencies target the container's Python 3.12. Update `requirements/bootstrap.in`
-and `requirements/workspace-mcp.in` (matching `WORKSPACE_MCP_VERSION`), then regenerate:
-
-```bash
-uv pip compile --python-version 3.12 --generate-hashes -o requirements/bootstrap.txt requirements/bootstrap.in
-uv pip compile --python-version 3.12 --generate-hashes -o requirements/workspace-mcp.txt requirements/workspace-mcp.in
-uv pip compile --python-version 3.12 --generate-hashes -o requirements/jira-mcp.txt ../jira-mcp-server_stolostron/pyproject.toml requirements/jira-build.in requirements/bootstrap.in
-uv pip compile --python-version 3.12 --generate-hashes -o requirements/verification.txt requirements/verification.in
-```
-
-The base and Jira installs require the recorded hashes. Jira's editable install
-uses the locked build backend without resolving additional dependencies. Workspace
-MCP uses the same dependency constraints during setup and launch.
+- Keep shared configuration defaults in `.env.example` and local values in `.env`.
+- Tool installation lives in [Dockerfile](.devcontainer/dev/Dockerfile); editor
+  extensions and container features live in `devcontainer.json`.
+- Keep dependency lockfiles in sync when updating versions, then rebuild the
+  container to apply image or setup changes.
 
 ## Verification
 
-Run every check from the repository root:
+Run `nox` from the repository root for lint, type, shell, test, and integration
+checks. Use `nox -l` to list sessions or `nox -s lint types` to select checks.
+Run `bash scripts/setup-verification.sh` if Nox is not installed.
 
-```bash
-nox
-```
-
-Container setup installs Nox automatically. For an existing environment, install
-[uv](https://docs.astral.sh/uv/getting-started/installation/) and run
-`bash scripts/setup-verification.sh` once. Ensure `~/.local/bin` is on `PATH`.
-Nox installs the locked dependencies from `requirements/verification.txt` into isolated,
-reusable Python 3.12 environments under `.nox/`.
-
-| Session | Checks |
-| --- | --- |
-| `lint` | Ruff lint rules and Python formatting |
-| `types` | Strict mypy, including function parameter and return annotations |
-| `shell` | ShellCheck and shfmt formatting |
-| `tests` | pytest discovery and every shell script under `tests/` |
-| `integration` | KeePass bootstrap, container image build, Workspace MCP registration and stdio handshake |
-
-Use `nox -l` to list sessions, `nox -s lint types` to select checks, or
-`nox -s format` to apply lint fixes and format Python and shell files. Ordinary
-verification leaves source files unchanged. Independent checks continue after a
-failure; the final summary and exit status report failures. Missing tools fail
-their session instead of silently skipping checks.
-
-Discovery includes tracked and new, unignored files, including `.devcontainer/`.
-Python files (`*.py`), shell files (`*.sh`, `*.bash`), and scripts with shell
-shebangs are checked. Archives, virtualenvs, generated evidence, and symlinks are
-excluded. Add Python tests as `tests/**/test_*.py` or `tests/**/*_test.py`, or add
-Bash test scripts anywhere under `tests/`; no runner edits are needed. Add a Nox
-session and its name to `nox.options.sessions` to introduce another kind of check.
-
-The full suite needs Linux ARM64, Bash, Git, curl, Codex, uv/uvx, and a working
-Podman or Docker engine. It downloads dependencies, the latest Codex installer,
-and image build inputs, so network access is required. Tool sessions can be run
-individually without a container engine. CI runs the same `nox` command on an
-ARM64 Ubuntu runner.
-
-Integration uses disposable homes and fixture credentials, reads `.env.example`,
-and removes its temporary image. Evidence stays in `verifications/evidence/`.
-MCP verification initializes the Workspace server and lists tools; it does not
-call Google APIs. Jira registration is covered by the Python tests, without a
-live Jira connection. The image build does not run devcontainer features or
-post-create setup, so Docker feature changes still need a separate smoke test.
+The full suite requires Linux ARM64, network access, and a working Podman or Docker
+engine. Integration checks use disposable credentials and leave evidence in
+`verifications/evidence/`; they do not exercise dev-container features or
+post-create setup. See [noxfile.py](noxfile.py) for check details.

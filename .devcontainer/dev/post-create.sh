@@ -49,6 +49,18 @@ eval "$(atuin init bash)"
 EOF
 }
 
+setup_claude_settings() {
+  local settings_source="/${WORKSPACE_DIR_NAME:-UbuntuSync}/.claude/settings.json"
+  mkdir -p "$HOME/.claude"
+  cp -- "$settings_source" "$HOME/.claude/settings.json"
+}
+
+setup_ccstatusline_settings() {
+  local settings_source="/${WORKSPACE_DIR_NAME:-UbuntuSync}/.claude/ccstatusline/settings.json"
+  mkdir -p "$HOME/.config/ccstatusline"
+  cp -- "$settings_source" "$HOME/.config/ccstatusline/settings.json"
+}
+
 setup_claude_mcp_servers() {
   # claude mcp add atlassian npx mcp-remote https://mcp.atlassian.com/v1/mcp
   if ! claude mcp get jira-mcp-server >/dev/null 2>&1; then
@@ -176,6 +188,8 @@ EOF
 }
 
 main() {
+  setup_claude_settings
+  setup_ccstatusline_settings
   fix_apt_sources
   setup_shell_paths
   install_npm_clis
