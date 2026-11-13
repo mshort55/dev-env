@@ -248,6 +248,15 @@ def setup_jira_env(kp: PyKeePass) -> None:
         "Jira environment variables",
     )
 
+def setup_enmaas_env(kp: PyKeePass) -> None:
+    setup_env_vars_from_keepass(
+        kp,
+        {
+            "ENMAAS_KEY": "enmaas_key",
+        },
+        "EnMaaS environment variable",
+    )
+
 
 def setup_google_workspace_mcp_credentials(kp: PyKeePass) -> None:
     """Load a complete OAuth client into a private file used only by the MCP launcher."""
@@ -408,6 +417,7 @@ def main() -> None:
     setup_claude_code_env(kp)
     setup_kube_context_env(kp)
     setup_jira_env(kp)
+    setup_enmaas_env(kp)
     setup_google_workspace_mcp_credentials(kp)
     setup_github_cli_config(kp)
     setup_docker_config(kp)
