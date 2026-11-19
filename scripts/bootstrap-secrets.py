@@ -242,11 +242,12 @@ def setup_jira_env(kp: PyKeePass) -> None:
         kp,
         {
             "JIRA_ACCESS_TOKEN": "jira_mcp_env_JIRA_ACCESS_TOKEN",
-            "JIRA_EMAIL": "jira_mcp_env_JIRA_EMAIL",
+            "JIRA_EMAIL": "email",
             "JIRA_SERVER_URL": "jira_mcp_env_JIRA_SERVER_URL",
         },
         "Jira environment variables",
     )
+
 
 def setup_enmaas_env(kp: PyKeePass) -> None:
     setup_env_vars_from_keepass(
@@ -342,7 +343,7 @@ def setup_git_config(kp: PyKeePass) -> None:
     print("Setting up git configuration...")
 
     git_configs = {
-        "user.email": "git_user_email",
+        "user.email": "email",
         "user.name": "git_user_name",
         "user.signingkey": "git_signingkey",
     }
