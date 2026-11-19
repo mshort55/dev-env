@@ -107,6 +107,7 @@ install_python_deps() { :; }
 setup_completions() { :; }
 setup_atuin() { :; }
 setup_claude_mcp_servers() { :; }
+setup_codex() { :; }
 setup_codex_jira_mcp() { :; }
 setup_verification() { :; }
 setup_and_unlock_dummy_keyring() { :; }

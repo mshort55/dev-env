@@ -82,6 +82,10 @@ setup_codex_jira_mcp() {
   bash "${DEV_ENV_DIR}/scripts/setup-jira-mcp.sh"
 }
 
+setup_codex() {
+  bash "${DEV_ENV_DIR}/scripts/setup-codex.sh"
+}
+
 setup_verification() {
   bash "${DEV_ENV_DIR}/scripts/setup-verification.sh"
 }
@@ -198,6 +202,7 @@ main() {
   setup_atuin
   setup_claude_mcp_servers
   bootstrap_secrets
+  setup_codex
   setup_codex_jira_mcp
   setup_google_workspace_mcp
   setup_verification

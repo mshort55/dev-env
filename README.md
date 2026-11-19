@@ -38,7 +38,7 @@ the container, then open a new terminal.
 ## Maintenance
 
 - Keep shared configuration defaults in `.env.example` and local values in `.env`.
-- Tool installation lives in [Dockerfile](.devcontainer/dev/Dockerfile); editor
+- Most tool installation lives in [Dockerfile](.devcontainer/dev/Dockerfile); editor
   extensions and container features live in `devcontainer.json`.
 - Keep dependency lockfiles in sync when updating versions, then rebuild the
   container to apply image or setup changes.
