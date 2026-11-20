@@ -20,9 +20,9 @@ from pykeepass.entry import Entry
 
 def add_env_vars_to_shell_profile(env_vars: dict[str, str], section_name: str) -> None:
     profile_path = Path.home() / (".bashrc" if shutil.which("bash") else ".ashrc")
-    profile_lines = (
-        profile_path.read_text().splitlines(keepends=True) if profile_path.exists() else []
-    )
+    profile_path.touch(mode=0o600, exist_ok=True)
+    profile_path.chmod(0o600)
+    profile_lines = profile_path.read_text().splitlines(keepends=True)
 
     section_comment = f"# {section_name}"
     section_lines = [f"{section_comment}\n"]
