@@ -22,7 +22,7 @@ bash verifications/verify.sh
 
 That entry point launches a scratch home, checks it, drives the KeePass bootstrap, builds the dev container image from `.env.example`, and then deletes the scratch home and the verify image tag. Proof stays in `verifications/evidence/<run-id>/`.
 
-The shared container named `dev` is not started. `.devcontainer/dev/compose.yml` pins that name and bind-mounts the operator's Claude, Cursor, Codex, repository, and workspace directories. Agents build with Docker inside the development container. The independent `Podman image build` CI job runs `bash verifications/verify.sh --image-only podman` for the Mac host. Both use the same build script, which removes its `dev-env:verify-<run-id>` tag after inspection. It does not read `.env` and does not tag `dev-env:latest`.
+The shared container named `dev` is not started. `.devcontainer/dev/compose.yml` pins that name and bind-mounts the operator's Claude, Cursor, Codex, repository, and workspace directories. Agents build with Docker inside the development container. The independent `Podman image build` CI job runs `node verifications/scripts/build-image.ts podman` for the Mac host. Both use the same build script, which removes its `dev-env:verify-<run-id>` tag after inspection. It does not read `.env` and does not tag `dev-env:latest`.
 
 ## Launch
 
@@ -52,19 +52,19 @@ Bootstrap alone:
 bash verifications/scripts/drive-bootstrap.sh /tmp/dev-env-verify-<run-id>/state.env
 ```
 
-Image build alone, after launch:
+To build the image independently, run
 
 ```bash
-bash verifications/scripts/build-image.sh /tmp/dev-env-verify-<run-id>/state.env
+node verifications/scripts/build-image.ts docker
 ```
 
-The build passes each `args` name from `.devcontainer/dev/compose.yml` using the literal value in `.env.example`. `HOST_*` paths are not build args and are not read. A successful build downloads the software the Dockerfile installs. It does not run `.devcontainer/dev/post-create.ts`. The `hcp` client and Rust stay commented out in the Dockerfile, so this build does not download them.
+The build passes each Dockerfile `ARG` using the literal value in `.env.example`. `HOST_*` paths are not build args and are not read. A successful build downloads the software the Dockerfile installs. It does not run `.devcontainer/dev/post-create.ts`. The build installs system and user tools through `.devcontainer/dev/install-tools.ts`.
 
 Set `PYTHONDONTWRITEBYTECODE=1` for every Python drive so the repo does not gain `__pycache__`.
 
 ## Evidence
 
-Proof goes to `verifications/evidence/<run-id>/`. `launch.sh` writes `run.env` there (paths only, no password). `drive-bootstrap.sh` writes `bootstrap-secrets/`. `build-image.sh` writes `container-image/`, including `engine-version.txt`, `build.env`, `build.log`, `build.exit`, and `image-id.txt`.
+Proof goes to `verifications/evidence/<run-id>/`. `launch.sh` writes `run.env` there (paths only, no password). `drive-bootstrap.sh` writes `bootstrap-secrets/`. `build-image.ts` writes `container-image/`, including `engine-version.txt`, `build.env`, `build.log`, `build.exit`, and `image-id.txt`.
 
 A bootstrap proof is complete only when all of these are true:
 
@@ -97,6 +97,6 @@ Command paths below are from the dev-env repo root. Scripts live in `verificatio
 - `bash verifications/scripts/launch.sh` creates the scratch home, fixture database, state file, and evidence directory. Prints `ready state=... evidence=...`.
 - `bash verifications/scripts/doctor.sh STATE` performs the read-only readiness check. Prints `doctor=ok` or exits non-zero.
 - `bash verifications/scripts/drive-bootstrap.sh STATE` drives every bootstrap sub-feature and writes `evidence/<run-id>/bootstrap-secrets/`.
-- `bash verifications/scripts/build-image.sh STATE` builds from `.env.example`, records the image id, and removes the verify tag.
+- `node verifications/scripts/build-image.ts docker` builds from `.env.example`, records the image id, and removes the verify tag.
 - `python3 verifications/scripts/pty_run.py --transcript PATH [--timeout SEC] [--expect TEXT [--send TEXT | --send-file PATH]]... -- COMMAND...` runs `COMMAND` on a PTY. Use `--send-file` for the master password so it is not a process argument. Exit `2` means a prompt was missed.
 - `bash verifications/scripts/cleanup.sh STATE` deletes the scratch directory and prints `cleaned scratch=... evidence=...`.

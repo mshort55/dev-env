@@ -42,7 +42,7 @@ if [ "$mode" != image ]; then
   bash "$ROOT/scripts/drive-bootstrap.sh" "$STATE"
 fi
 if [ "$mode" != bootstrap ]; then
-  bash "$ROOT/scripts/build-image.sh" "$STATE" "${2:-docker}"
+  node "$ROOT/scripts/build-image.ts" "${2:-docker}" "$EVIDENCE_DIR"
 fi
 
 printf 'verified evidence=%s\n' "$EVIDENCE_DIR"

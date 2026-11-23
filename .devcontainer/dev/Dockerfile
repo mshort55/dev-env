@@ -67,6 +67,7 @@ RUN sed -i 's|http://ports.ubuntu.com|https://ports.ubuntu.com|g' /etc/apt/sourc
     ubuntu-standard \
     unzip \
     vim \
+    xz-utils \
     xxd && \
     sed -i -e 's/# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen && \
     locale-gen en_US.UTF-8 && \
@@ -75,62 +76,15 @@ RUN sed -i 's|http://ports.ubuntu.com|https://ports.ubuntu.com|g' /etc/apt/sourc
 COPY .devcontainer/dev/10-github.conf /etc/ssh/ssh_config.d/10-github.conf
 COPY requirements/bootstrap.txt /tmp/bootstrap-requirements.txt
 
-# Other software installations
-RUN \
-    # docker compose (plugin and standalone command)
-    mkdir -p /usr/local/lib/docker/cli-plugins && \
-    curl -fsSL "https://github.com/docker/compose/releases/download/v${DOCKER_COMPOSE_VERSION}/docker-compose-linux-aarch64" -o /usr/local/lib/docker/cli-plugins/docker-compose && \
-    chmod +x /usr/local/lib/docker/cli-plugins/docker-compose && \
-    ln -s /usr/local/lib/docker/cli-plugins/docker-compose /usr/local/bin/docker-compose && \
-    # go
-    curl -fsSL "https://go.dev/dl/go${GO_VERSION}.linux-arm64.tar.gz" | tar -xz -C /usr/local && \
-    # node.js
-    curl -fsSL "https://nodejs.org/dist/v${NODE_VERSION}/node-v${NODE_VERSION}-linux-arm64.tar.xz" | tar -xJ --strip-components=1 -C /usr/local && \
-    # gcloud-cli
-    curl -fsSL https://packages.cloud.google.com/apt/doc/apt-key.gpg | gpg --dearmor -o /usr/share/keyrings/cloud.google.gpg && \
-    echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main" | tee /etc/apt/sources.list.d/google-cloud-sdk.list && \
-    apt-get update && apt-get install -y google-cloud-cli && \
-    # gh-cli
-    mkdir -p -m 755 /etc/apt/keyrings && \
-    curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg -o /etc/apt/keyrings/githubcli-archive-keyring.gpg && \
-    chmod go+r /etc/apt/keyrings/githubcli-archive-keyring.gpg && \
-    echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" > /etc/apt/sources.list.d/github-cli.list && \
-    apt-get update && apt-get install -y gh && \
-    # oc & kubectl
-    curl -fsSL "https://mirror.openshift.com/pub/openshift-v4/clients/ocp/${OPENSHIFT_VERSION}/openshift-client-linux-arm64.tar.gz" | tar -xz -C /usr/local/bin oc kubectl && \
-    # yq
-    curl -fsSL "https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/yq_linux_arm64.tar.gz" | tar -xz --transform='s/yq_linux_arm64/yq/' -C /usr/local/bin ./yq_linux_arm64 && \
-    # jq
-    curl -fsSL "https://github.com/jqlang/jq/releases/download/jq-${JQ_VERSION}/jq-linux-arm64" -o /usr/local/bin/jq && \
-    # kind
-    curl -fsSL "https://kind.sigs.k8s.io/dl/v${KIND_VERSION}/kind-linux-arm64" -o /usr/local/bin/kind && \
-    # kustomize
-    curl -fsSL "https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize/v${KUSTOMIZE_VERSION}/kustomize_v${KUSTOMIZE_VERSION}_linux_arm64.tar.gz" | tar -xz -C /usr/local/bin kustomize && \
-    # hcp-cli
-    # curl -fsSL "https://developers.redhat.com/content-gateway/file/pub/mce/clients/hcp-cli/${HCP_VERSION}/hcp-cli-${HCP_VERSION}-linux-arm64.tar.gz" | tar -xz -C /usr/local/bin && \
-    # grpcurl
-    curl -fsSL "https://github.com/fullstorydev/grpcurl/releases/download/v${GRPCURL_VERSION}/grpcurl_${GRPCURL_VERSION}_linux_arm64.tar.gz" | tar -xz --no-same-owner -C /usr/local/bin grpcurl && \
-    # buf
-    curl -fsSL "https://github.com/bufbuild/buf/releases/download/v${BUF_VERSION}/buf-Linux-aarch64.tar.gz" | tar -xz -C /usr/local --strip-components 1 && \
-    # aws-cli
-    curl -fsSL https://awscli.amazonaws.com/awscli-exe-linux-aarch64.zip -o awscliv2.zip && \
-    unzip -q awscliv2.zip && \
-    ./aws/install && \
-    rm -rf awscliv2.zip aws && \
-    # aws sam cli
-    # curl -fsSL https://github.com/aws/aws-sam-cli/releases/latest/download/aws-sam-cli-linux-arm64.zip -o awssamcli.zip && \
-    # unzip awssamcli.zip -d sam-installation && \
-    # sudo ./sam-installation/install && \
-    # atuin
-    curl -fsSL "https://github.com/atuinsh/atuin/releases/download/v${ATUIN_VERSION}/atuin-aarch64-unknown-linux-gnu.tar.gz" | tar -xz -C /usr/local/bin --strip-components=1 && \
-    # zellij
-    curl -fsSL "https://github.com/zellij-org/zellij/releases/download/v${ZELLIJ_VERSION}/zellij-no-web-aarch64-unknown-linux-musl.tar.gz" | tar -xz -C /usr/local/bin && \
-    # python deps (keepass/crypto)
-    pip3 install --no-cache-dir --break-system-packages --require-hashes -r /tmp/bootstrap-requirements.txt && \
-    rm /tmp/bootstrap-requirements.txt && \
-    # finalize and clean up
-    chmod +x /usr/local/bin/kind /usr/local/bin/jq && \
-    apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/*
+# Install the runtime before invoking repository-owned TypeScript.
+RUN curl -fsSL --retry 3 "https://nodejs.org/dist/v${NODE_VERSION}/node-v${NODE_VERSION}-linux-arm64.tar.xz" -o /tmp/node.tar.xz && \
+    tar -xJf /tmp/node.tar.xz --strip-components=1 -C /usr/local && \
+    rm /tmp/node.tar.xz && test "$(node --version)" = "v${NODE_VERSION}"
+
+COPY .devcontainer/dev/install-tools.ts /usr/local/lib/dev-env/install-tools.ts
+RUN node /usr/local/lib/dev-env/install-tools.ts system
+RUN pip3 install --no-cache-dir --break-system-packages --require-hashes -r /tmp/bootstrap-requirements.txt && \
+    rm /tmp/bootstrap-requirements.txt
 
 RUN useradd -m -s /bin/bash -u ${CONTAINER_UID} ${CONTAINER_USER} && \
     echo "${CONTAINER_USER} ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
@@ -139,20 +93,7 @@ USER ${CONTAINER_USER}
 
 ENV PATH="/home/${CONTAINER_USER}/.cargo/bin:$PATH"
 
-# User level software
-RUN \
-    # uv (isolated Python tools, including Google Workspace MCP)
-    curl -fsSL "https://astral.sh/uv/${UV_VERSION}/install.sh" | sh && \
-    # rust
-    # curl -fsSL https://sh.rustup.rs | sh -s -- -y --default-toolchain ${RUST_VERSION} && \
-    # claude code
-    curl -fsSL https://claude.ai/install.sh | bash -s -- latest && \
-    # cursor agent cli
-    curl https://cursor.com/install -fsS | bash && \
-    # ginkgo
-    go install "github.com/onsi/ginkgo/v2/ginkgo@v${GINKGO_VERSION}" && \
-    # gopls (for claude code)
-    go install "golang.org/x/tools/gopls@v${GOPLS_VERSION}"
+RUN node /usr/local/lib/dev-env/install-tools.ts user
 
 WORKDIR /${WORKSPACE_DIR_NAME}
 
