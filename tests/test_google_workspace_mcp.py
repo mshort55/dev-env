@@ -100,6 +100,8 @@ class GoogleWorkspaceStartupTests(unittest.TestCase):
         # Load the real startup sequence without executing its final main call.
         script = post_create.read_text().rsplit("\nmain", 1)[0]
         script += """
+setup_claude_settings() { :; }
+setup_ccstatusline_settings() { :; }
 fix_apt_sources() { :; }
 setup_shell_paths() { :; }
 install_npm_clis() { :; }
@@ -124,7 +126,12 @@ main
         with tempfile.TemporaryDirectory() as task_dir:
             result = subprocess.run(
                 ["bash", "-c", script, "startup-test", str(Path(task_dir) / "oauth.env")],
-                env={**os.environ, "DEV_ENV_DIR": str(SCRIPT_PATH.parents[1])},
+                env={
+                    **os.environ,
+                    "DEV_ENV_DIR": str(SCRIPT_PATH.parents[1]),
+                    "HOME": task_dir,
+                    "WORKSPACE_DIR_NAME": task_dir.lstrip("/"),
+                },
                 capture_output=True,
                 text=True,
             )

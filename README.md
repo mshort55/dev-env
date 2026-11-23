@@ -12,9 +12,18 @@ KeePass-based credential setup.
 2. Copy `.env.example` to `.env`. Set your container username and UID, host mount
    paths, and the repository's container path (`DEV_ENV_DIR`). See
    [.env.example](.env.example) for available settings.
-3. Ensure the configured host directories and external setup inputs exist.
-   [post-create.sh](.devcontainer/dev/post-create.sh) defines these dependencies,
-   including synced settings and local source checkouts.
+3. Check the configured host directories before opening the container.
+
+   - In the [workspace directory](GLOSSARY.md) (`HOST_WORKSPACE_DIR`), place
+     your settings files at `.claude/settings.json` and
+     `.claude/ccstatusline/settings.json`.
+   - In the repositories directory (`HOST_REPOS_DIR`), place the `dev-env`
+     checkout where it will be mounted at `DEV_ENV_DIR` (default `/Repos/dev-env`).
+     Place the Jira MCP checkout directly under `HOST_REPOS_DIR` as `jira-mcp-server_stolostron`.
+     Keep `REPOS_DIR_NAME=Repos` so the Jira checkout is available at the exact
+     path used by [post-create.sh](.devcontainer/dev/post-create.sh),
+     `/Repos/jira-mcp-server_stolostron`.
+
 4. Open this repository in VS Code and choose **Reopen in Container**.
    Enter your KeePass master password if credential setup is enabled.
 
@@ -27,8 +36,8 @@ Host directories mounted by [compose.yml](.devcontainer/dev/compose.yml) persist
 across rebuilds. Other container-local files may be lost when rebuilding.
 
 [post-create.sh](.devcontainer/dev/post-create.sh) configures each new container.
-Some user settings are restored from the synced workspace, replacing local copies;
-edit their synced sources to keep changes across rebuilds. This setup does not
+It copies some user settings from the workspace directory, replacing local copies.
+Edit the source files in the workspace directory to keep changes across rebuilds. This setup does not
 rerun on ordinary container restarts.
 
 Credentials come from the optional KeePass database configured in `.env`.
@@ -49,7 +58,11 @@ Run `nox` from the repository root for lint, type, shell, test, and integration
 checks. Use `nox -l` to list sessions or `nox -s lint types` to select checks.
 Run `bash scripts/setup-verification.sh` if Nox is not installed.
 
-The full suite requires Linux ARM64, network access, and a working Podman or Docker
-engine. Integration checks use disposable credentials and leave evidence in
-`verifications/evidence/`; they do not exercise dev-container features or
-post-create setup. See [noxfile.py](noxfile.py) for check details.
+The full suite requires Linux ARM64, network access, and Docker inside the
+development container. Integration checks use disposable credentials and write
+evidence to `verifications/evidence/`. See [noxfile.py](noxfile.py) for check details.
+
+Before merging changes to the Dockerfile, its build arguments, or files it
+copies, confirm the `Podman image build` CI check passed for the proposed change.
+For changes to host mounts, container features, or post-create setup, verify the
+affected behavior in a freshly rebuilt development container on the Mac.

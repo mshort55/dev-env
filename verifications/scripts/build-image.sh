@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Build the dev container image from .env.example. Does not start a container.
-# Usage: build-image.sh /tmp/dev-env-verify-<run-id>/state.env
+# Usage: build-image.sh /tmp/dev-env-verify-<run-id>/state.env [docker|podman]
 set -euo pipefail
 
 STATE=${1:?usage: build-image.sh STATE}
@@ -24,14 +24,19 @@ case "$TAG" in
     ;;
 esac
 
-if command -v podman >/dev/null 2>&1; then
-  ENGINE=podman
-elif command -v docker >/dev/null 2>&1; then
-  ENGINE=docker
-else
-  echo "build-image: podman or docker is required" >&2
+ENGINE=${2:-docker}
+case "$ENGINE" in
+  docker | podman) ;;
+  *)
+    echo "build-image: unsupported engine: $ENGINE" >&2
+    exit 2
+    ;;
+esac
+if ! command -v "$ENGINE" >/dev/null 2>&1; then
+  echo "build-image: $ENGINE is required" >&2
   exit 1
 fi
+"$ENGINE" version | tee "$OUT/engine-version.txt"
 
 printf '%s\n' "$TAG" >"$SCRATCH/image-tag"
 printf '%s\n' "$ENGINE" >"$SCRATCH/image-engine"

@@ -72,13 +72,7 @@ RUN sed -i 's|http://ports.ubuntu.com|https://ports.ubuntu.com|g' /etc/apt/sourc
     locale-gen en_US.UTF-8 && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
-COPY <<'EOF' /etc/ssh/ssh_config.d/10-github.conf
-Host github.com
-    IdentityAgent none
-    IdentitiesOnly yes
-    IdentityFile ~/.ssh/id_ed25519
-    ControlPath none
-EOF
+COPY .devcontainer/dev/10-github.conf /etc/ssh/ssh_config.d/10-github.conf
 COPY requirements/bootstrap.txt /tmp/bootstrap-requirements.txt
 
 # Other software installations

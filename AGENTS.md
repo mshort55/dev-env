@@ -1,12 +1,7 @@
 # dev-env
 
-## Container changes
-
-- Put image-level tool installs in the [Dockerfile](.devcontainer/dev/Dockerfile). Configure VS Code extensions and container features in [devcontainer.json](.devcontainer/dev/devcontainer.json). Update the corresponding lockfile when changing a pinned dependency.
-- Put shared environment defaults in [.env.example](.env.example) and machine-specific values in the local `.env`. If you rename the workspace mount, update `workspaceFolder` in `devcontainer.json` to match.
-
-## Verification
-
-Run `nox` from the checkout root for the full suite. For a focused check, use `nox -l` to list sessions and `nox -s <session>` to run one. See the [verification prerequisites](README.md#verification) for setup and container engine requirements.
-
-For changes to container features or post-create setup, verify the affected behavior in a freshly rebuilt development container. The Nox integration session exercises the image and bootstrap scripts independently of that lifecycle.
+- When renaming the workspace mount, follow [Setup](README.md#setup).
+- When a change adds, removes, or relocates a required host file or checkout, update the [Setup checklist](README.md#setup).
+- When changing environment defaults, installed tools, extensions, features, or pinned dependencies, follow [Maintenance](README.md#maintenance).
+- For repository checks and host rebuilds, follow [Verification](README.md#verification).
+- When changing the Dockerfile, its build arguments, or files it copies, use [verify-dev-env](.agents/skills/verify-dev-env/SKILL.md) and report the engine and evidence directory.

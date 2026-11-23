@@ -126,11 +126,16 @@ def integration(session: nox.Session) -> None:
     """Verify bootstrap, the container image, and isolated MCP startup."""
     prepare(session)
     require_tools(session, "bash", "codex", "uv", "uvx", "git")
-    if not (shutil.which("podman") or shutil.which("docker")):
-        session.error("Container verification requires Podman or Docker.")
+    if session.posargs not in ([], ["--bootstrap-only"]):
+        session.error("Expected no arguments or --bootstrap-only")
+    if not session.posargs:
+        require_tools(session, "docker")
     run_checks(
         session,
-        [["bash", "verifications/verify.sh"], ["python", "verifications/scripts/check_mcp.py"]],
+        [
+            ["bash", "verifications/verify.sh", *session.posargs],
+            ["python", "verifications/scripts/check_mcp.py"],
+        ],
         external=True,
     )
 

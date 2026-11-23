@@ -30,15 +30,34 @@ jobs:
           cache-dependency-glob: |
             requirements/*.txt
       - name: Install verification runner and Codex
+        id: tools
         run: |
           bash scripts/setup-verification.sh
           curl -fsSL https://chatgpt.com/codex/install.sh | CODEX_NON_INTERACTIVE=1 sh
           echo "$HOME/.local/bin" >> "$GITHUB_PATH"
-      - name: Run all checks
-        run: nox
+      - name: Run code checks and tests
+        run: nox -s lint types shell tests
+      - name: Verify bootstrap and MCP
+        if: ${{ !cancelled() && steps.tools.outcome == 'success' }}
+        run: nox -s integration -- --bootstrap-only
       - name: Show integration logs on failure
         if: failure()
         run: |
           if [ -d verifications/evidence ]; then
             find verifications/evidence -type f -name '*.log' -exec tail -n 80 {} +
+          fi
+
+  podman-image:
+    name: Podman image build
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Build with Podman
+        run: bash verifications/verify.sh --image-only podman
+      - name: Show build evidence on failure
+        if: failure()
+        run: |
+          if [ -d verifications/evidence ]; then
+            find verifications/evidence -type f \( -name 'engine-version.txt' -o -name 'build.log' \) -exec tail -n 80 {} +
           fi

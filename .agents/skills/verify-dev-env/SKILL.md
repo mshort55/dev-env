@@ -11,11 +11,8 @@ description: >-
 
 Skill docs live in `.agents/skills/verify-dev-env/`. The runnable scripts live in `verifications/`. Run all of them from the dev-env repo root:
 
-For full repository verification, run `nox`. It adds linting, strict Python type
-checks, Python and shell tests, and isolated Workspace MCP setup/stdio checks to
-the bootstrap and image workflow below. `nox -s integration` runs just the
-bootstrap, image, and MCP checks. See `README.md#verification` for setup and
-prerequisites. A successful full run requires every selected Nox session to pass.
+For the full suite, prerequisites, and pre-merge checks, follow the
+[README verification guide](../../../README.md#verification).
 
 To run only the bootstrap and image workflow:
 
@@ -25,7 +22,7 @@ bash verifications/verify.sh
 
 That entry point launches a scratch home, checks it, drives the KeePass bootstrap, builds the dev container image from `.env.example`, and then deletes the scratch home and the verify image tag. Proof stays in `verifications/evidence/<run-id>/`.
 
-The shared container named `dev` is not started. `.devcontainer/dev/compose.yml` pins that name and bind-mounts the operator's Claude, Cursor, Codex, repository, and workspace directories. The image build uses `podman build` or `docker build` with tag `dev-env:verify-<run-id>`, then removes that tag. It does not read `.env` and does not tag `dev-env:latest`.
+The shared container named `dev` is not started. `.devcontainer/dev/compose.yml` pins that name and bind-mounts the operator's Claude, Cursor, Codex, repository, and workspace directories. Agents build with Docker inside the development container. The independent `Podman image build` CI job runs `bash verifications/verify.sh --image-only podman` for the Mac host. Both use the same build script, which removes its `dev-env:verify-<run-id>` tag after inspection. It does not read `.env` and does not tag `dev-env:latest`.
 
 ## Launch
 
@@ -67,7 +64,7 @@ Set `PYTHONDONTWRITEBYTECODE=1` for every Python drive so the repo does not gain
 
 ## Evidence
 
-Proof goes to `verifications/evidence/<run-id>/`. `launch.sh` writes `run.env` there (paths only, no password). `drive-bootstrap.sh` writes `bootstrap-secrets/`. `build-image.sh` writes `container-image/`, including `build.log`, `build.exit`, and `image-id.txt`.
+Proof goes to `verifications/evidence/<run-id>/`. `launch.sh` writes `run.env` there (paths only, no password). `drive-bootstrap.sh` writes `bootstrap-secrets/`. `build-image.sh` writes `container-image/`, including `engine-version.txt`, `build.env`, `build.log`, `build.exit`, and `image-id.txt`.
 
 A bootstrap proof is complete only when all of these are true:
 
