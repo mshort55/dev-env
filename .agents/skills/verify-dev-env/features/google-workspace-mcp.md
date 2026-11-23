@@ -1,36 +1,26 @@
 # Google Workspace MCP launcher
 
-The launcher refuses to start unless both Google OAuth variables are in a private env file, then replaces itself with the read-only Workspace MCP server on stdio.
+Codex runs `node scripts/google-workspace-mcp.ts` from the path saved by [Google Workspace setup](./setup-google-workspace-mcp.md). The launcher reads the OAuth client ID and secret from `$CODEX_HOME/google-workspace/oauth.env`. The default Codex home is `~/.codex`.
 
 ## Sub-features
 
-- `workspace-mcp-missing-file` exits when `oauth.env` is absent.
-- `workspace-mcp-incomplete-file` exits when the file does not set both variables.
-- `workspace-mcp-exec` replaces the process with `uvx --python /usr/bin/python3 --constraints requirements/workspace-mcp.txt workspace-mcp@2.2.1` in read-only mode.
+- `workspace-mcp-missing-file` exits with status 1 when the OAuth file is missing.
+- `workspace-mcp-incomplete-file` exits with status 1 and identifies the missing client ID or secret.
+- `workspace-mcp-exec` starts the pinned Workspace server on stdio with the Drive, Docs, Sheets and Slides tools in read-only mode. The server uses the `credentials-read-only` directory beside the OAuth file.
 
 ## How to get to it (user POV)
 
-- Codex starts the server with `bash <dev-env>/scripts/google-workspace-mcp.sh` after `scripts/setup-google-workspace-mcp.sh` registers it.
-- From a shell, run `bash scripts/google-workspace-mcp.sh`. The credential file is `$CODEX_HOME/google-workspace/oauth.env`, or `~/.codex/google-workspace/oauth.env` when `CODEX_HOME` is unset.
+- Start Codex after Workspace setup. Codex invokes the command saved for `google-workspace` when it connects.
+- To see a credential error directly, run `node scripts/google-workspace-mcp.ts` with a disposable `CODEX_HOME`.
 
 ## Driving it with verify-dev-env
 
-Preconditions:
+Preconditions: Run `npm ci` with the pinned Node version. Install Codex, uv and uvx on PATH and provide `/usr/bin/python3` and network access.
 
-- `doctor.sh STATE` printed `doctor=ok`.
-- `CODEX_HOME` is `$SCRATCH/codex-launcher`, created mode `700` for this drive. Do not use `$HOME/.codex` from the operator, and do not reuse the bootstrap scratch `.codex` unless this drive is meant to consume that fixture.
-- `HOME` is `$SCRATCH/home`.
-- Evidence directory: `$EVIDENCE_DIR/google-workspace-mcp/`.
-- `bash verifications/verify.sh` does not run this feature. Drive it with the commands below.
-
-- **Refuse a missing file.** Run `mkdir -p "$CODEX_HOME" && bash scripts/google-workspace-mcp.sh` from the repo root with `CODEX_HOME` set and no `oauth.env` under it. Exit code `1`. Stderr is `Google Workspace OAuth client file is missing:` Save stdout, stderr, and the exit code as `missing-file.out`, `missing-file.err`, and `missing-file.exit`.
-- **Refuse an incomplete file.** Write an empty `$CODEX_HOME/google-workspace/oauth.env` (mode `600`) and run `bash scripts/google-workspace-mcp.sh`. Exit code `1`. Stderr contains `Google OAuth client ID is missing`. Save `incomplete-file.err` and `incomplete-file.exit`.
-- **Hand off to the server.** Write both `export GOOGLE_OAUTH_CLIENT_ID=...` and `export GOOGLE_OAUTH_CLIENT_SECRET=...` lines into that `oauth.env` using the fixture values from `STATE`. Run `timeout 20 bash scripts/google-workspace-mcp.sh < /dev/null`. Record stdout, stderr, and the exit code as `exec.out`, `exec.err`, and `exec.exit`.
-- **Proof.** The missing-file and incomplete-file exits are `1` and their stderr matches the strings above. For the handoff, stderr does not contain `Google Workspace OAuth client file is missing`. Exit code `124` means `timeout` stopped a still-running server, which is the expected long-running stdio process. Any other exit code must be accompanied by `exec.err`; report the sub-feature unreachable when `uvx` cannot start `workspace-mcp`. Do not replace `uvx` with a stub.
+- **Exercise the launcher.** Run `npm run check -- mcp`. The drive checks the missing file, missing ID and missing secret before starting the saved command with disposable credentials.
+- **Inspect the server.** Open `tools.json` in the printed evidence directory to inspect the advertised tools. The drive checks the read-only inventory and writes `result.txt` after removing the scratch home.
 
 ## Gotchas
 
-- With `CODEX_HOME` unset, the script reads the operator's real `~/.codex/google-workspace/oauth.env` and will start the server with their Google credentials.
-- The success path never returns. `timeout` must be the parent of the script so cleanup does not have to hunt for a process by name. After it exits, confirm no child whose `/proc/<pid>/environ` contains this run's `CODEX_HOME` is still alive. Kill only those pids.
-- `uvx --python /usr/bin/python3 --constraints requirements/workspace-mcp.txt workspace-mcp@2.2.1` may download the package. A download failure is an unreachable result, not a reason to mock the binary.
-- The script exports `WORKSPACE_MCP_CREDENTIALS_DIR` under the same `CODEX_HOME` and passes `--tools drive docs sheets slides --read-only`. Assert those arguments only from `exec.err` or a process listing captured while `timeout` is still running. Do not infer them from the source file alone.
+- The launcher uses stdio. A direct invocation with valid credentials waits for an MCP client.
+- The drive lists tools without making a Google API call. Startup diagnostics go to `server.log`.

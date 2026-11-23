@@ -45,6 +45,7 @@ services:
       - ${HOST_DEV_ZELLIJ_CACHE_DIR}:/home/${CONTAINER_USER}/.cache/zellij
       - ${HOST_BINARIES_DIR}:/home/${CONTAINER_USER}/Binaries
       - ${HOST_REPOS_DIR}:/${REPOS_DIR_NAME}
+      - dev-env-packages:${DEV_ENV_DIR}/node_modules
       - ${HOST_WORKSPACE_DIR}:/${WORKSPACE_DIR_NAME}
     networks:
       - dev-net
@@ -55,3 +56,6 @@ services:
 
 networks:
   dev-net:
+
+volumes:
+  dev-env-packages:

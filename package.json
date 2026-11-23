@@ -1,0 +1,32 @@
+{
+  "name": "dev-env",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "discover": "node scripts/discover.ts",
+    "test": "node scripts/check.ts tests",
+    "typecheck": "node scripts/check.ts types",
+    "check": "node scripts/check.ts",
+    "lint": "node scripts/check.ts lint",
+    "format": "node scripts/check.ts format",
+    "format:check": "node scripts/check.ts format-check",
+    "verify": "node verifications/verify.ts"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.6.8",
+    "@modelcontextprotocol/sdk": "1.32.2",
+    "@types/node": "24.19.2",
+    "node-pty": "1.1.0",
+    "typescript": "6.0.3"
+  },
+  "dependencies": {
+    "@node-rs/argon2": "2.2.2",
+    "kdbxweb": "2.1.1"
+  },
+  "overrides": {
+    "@xmldom/xmldom": "0.8.15"
+  },
+  "allowScripts": {
+    "node-pty": true
+  }
+}

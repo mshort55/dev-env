@@ -52,5 +52,5 @@
       }
     }
   },
-  "postCreateCommand": "bash $DEV_ENV_DIR/.devcontainer/dev/post-create.sh"
+  "postCreateCommand": "node \"$DEV_ENV_DIR/.devcontainer/dev/post-create.ts\""
 }

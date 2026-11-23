@@ -21,7 +21,7 @@ KeePass-based credential setup.
      checkout where it will be mounted at `DEV_ENV_DIR` (default `/Repos/dev-env`).
      Place the Jira MCP checkout directly under `HOST_REPOS_DIR` as `jira-mcp-server_stolostron`.
      Keep `REPOS_DIR_NAME=Repos` so the Jira checkout is available at the exact
-     path used by [post-create.sh](.devcontainer/dev/post-create.sh),
+     path used by [post-create.ts](.devcontainer/dev/post-create.ts),
      `/Repos/jira-mcp-server_stolostron`.
 
 4. Open this repository in VS Code and choose **Reopen in Container**.
@@ -35,34 +35,68 @@ If you change `WORKSPACE_DIR_NAME`, also update `workspaceFolder` in
 Host directories mounted by [compose.yml](.devcontainer/dev/compose.yml) persist
 across rebuilds. Other container-local files may be lost when rebuilding.
 
-[post-create.sh](.devcontainer/dev/post-create.sh) configures each new container.
+[post-create.ts](.devcontainer/dev/post-create.ts) configures each new container.
 It copies some user settings from the workspace directory, replacing local copies.
 Edit the source files in the workspace directory to keep changes across rebuilds. This setup does not
 rerun on ordinary container restarts.
 
 Credentials come from the optional KeePass database configured in `.env`.
-To refresh them, run `python3 "$DEV_ENV_DIR/scripts/bootstrap-secrets.py"` inside
+To refresh them, run `node "$DEV_ENV_DIR/scripts/bootstrap-secrets.ts"` inside
 the container, then open a new terminal.
+
+Container creation runs `node scripts/setup-codex.ts` to install the latest
+Codex CLI and update an existing managed daemon. To verify this lifecycle in
+disposable homes, run `node --test tests/codex-install-lifecycle.ts` with network access.
+To repeat Jira registration inside the container, run `node scripts/setup-jira-mcp.ts claude`
+for Claude Code or `node scripts/setup-jira-mcp.ts` for Codex from the checkout.
 
 ## Maintenance
 
 - Keep shared configuration defaults in `.env.example` and local values in `.env`.
-- Most tool installation lives in [Dockerfile](.devcontainer/dev/Dockerfile); editor
-  extensions and container features live in `devcontainer.json`.
+- The [Dockerfile](.devcontainer/dev/Dockerfile) installs Node and runs
+  [install-tools.ts](.devcontainer/dev/install-tools.ts) to install workstation tools.
+  Editor extensions and container features live in `devcontainer.json`.
 - Keep dependency lockfiles in sync when updating versions, then rebuild the
   container to apply image or setup changes.
 
 ## Verification
 
-Run `nox` from the repository root for lint, type, shell, test, and integration
-checks. Use `nox -l` to list sessions or `nox -s lint types` to select checks.
-Run `bash scripts/setup-verification.sh` if Nox is not installed.
+For host verification, install the Node.js version pinned by `NODE_VERSION` in
+[.env.example](.env.example), then run `npm ci` in this checkout. Opening the
+devcontainer requires only the host tools listed under Setup. Container creation
+installs the checkout’s packages in a separate volume at `$DEV_ENV_DIR/node_modules`.
 
-The full suite requires Linux ARM64, network access, and Docker inside the
-development container. Integration checks use disposable credentials and write
-evidence to `verifications/evidence/`. See [noxfile.py](noxfile.py) for check details.
+Run `npm run check` for the full suite. Select checks by name, for example
+`npm run check -- lint format-check types tests` for code checks or
+`npm run check -- bootstrap mcp` for the KeePass and Workspace MCP drives.
+Use `npm run check -- --list` to list checks. The runner reports every failed
+check after the selected checks finish. Run `npm run format` to apply formatting
+or `npm run discover` to list the active sources.
+
+The full suite requires Linux ARM64, network access, Docker, Git, Bash, curl,
+Codex, Claude Code, Python 3 with the workstation’s Jira MCP package, uv and uvx.
+Run `npm run check -- jira` to start the installed Jira server through Claude and Codex against a disposable local Jira endpoint. The `lifecycle` check installs disposable copies of Codex
+and exercises its daemon under your user cache directory. To change this
+location, set `CODEX_REPRO_ROOT` to a writable directory outside the system
+temporary directory.
+Integration evidence stays under `verifications/evidence/`.
+
+To build the image alone, run `node verifications/scripts/build-image.ts docker`
+or select `podman` for the Linux ARM64 CI build. The command prints the evidence
+directory and removes its temporary image tag after inspection.
 
 Before merging changes to the Dockerfile, its build arguments, or files it
 copies, confirm the `Podman image build` CI check passed for the proposed change.
 For changes to host mounts, container features, or post-create setup, verify the
 affected behavior in a freshly rebuilt development container on the Mac.
+Choose **Dev Containers: Rebuild Container** in VS Code. Open two Bash terminals
+and run the following in each.
+
+```sh
+echo "$DBUS_SESSION_BUS_ADDRESS"
+dbus-send --session --print-reply --dest=org.freedesktop.secrets \
+  /org/freedesktop/secrets/collection/login org.freedesktop.DBus.Properties.Get \
+  string:org.freedesktop.Secret.Collection string:Locked
+```
+
+Both terminals should print the same bus address and report `boolean false`.

@@ -19,9 +19,14 @@ jobs:
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - name: Read uv version
+      - name: Read tool versions
         id: versions
-        run: sed -n 's/^UV_VERSION=/uv=/p' .env.example >> "$GITHUB_OUTPUT"
+        run: sed -n -e 's/^UV_VERSION=/uv=/p' -e 's/^NODE_VERSION=/node=/p' .env.example >> "$GITHUB_OUTPUT"
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
+        with:
+          node-version: ${{ steps.versions.outputs.node }}
+          cache: npm
+      - run: npm ci
       - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
         with:
           version: ${{ steps.versions.outputs.uv }}
@@ -29,23 +34,34 @@ jobs:
           enable-cache: true
           cache-dependency-glob: |
             requirements/*.txt
-      - name: Install verification runner and Codex
-        id: tools
+      - name: Install integration prerequisites
         run: |
-          bash scripts/setup-verification.sh
-          curl -fsSL https://chatgpt.com/codex/install.sh | CODEX_NON_INTERACTIVE=1 sh
+          sudo apt-get update
+          sudo apt-get install -y dbus-x11 gnome-keyring
+          curl -fsSL https://claude.ai/install.sh -o "$RUNNER_TEMP/install-claude.sh"
+          bash "$RUNNER_TEMP/install-claude.sh" latest
+          node scripts/setup-codex.ts
           echo "$HOME/.local/bin" >> "$GITHUB_PATH"
-      - name: Run code checks and tests
-        run: nox -s lint types shell tests
-      - name: Verify bootstrap and MCP
-        if: ${{ !cancelled() && steps.tools.outcome == 'success' }}
-        run: nox -s integration -- --bootstrap-only
-      - name: Show integration logs on failure
-        if: failure()
+      - name: Install the Jira MCP server
         run: |
-          if [ -d verifications/evidence ]; then
-            find verifications/evidence -type f -name '*.log' -exec tail -n 80 {} +
-          fi
+          git init -q "$RUNNER_TEMP/jira-server"
+          git -C "$RUNNER_TEMP/jira-server" fetch --depth=1 https://github.com/stolostron/jira-mcp-server.git 12b3af14b337771c03b94c069eb7cd748588f42a
+          git -C "$RUNNER_TEMP/jira-server" checkout --detach FETCH_HEAD
+          uv venv --python 3.12 "$RUNNER_TEMP/jira-venv"
+          uv pip install --python "$RUNNER_TEMP/jira-venv/bin/python" --require-hashes -r requirements/jira-mcp.txt
+          uv pip install --python "$RUNNER_TEMP/jira-venv/bin/python" --no-deps --no-build-isolation -e "$RUNNER_TEMP/jira-server"
+          echo "$RUNNER_TEMP/jira-venv/bin" >> "$GITHUB_PATH"
+      - name: Run code checks and tests
+        run: npm run check -- lint format-check types tests lifecycle jira
+      - name: Verify bootstrap and isolated Workspace MCP startup
+        if: ${{ !cancelled() }}
+        run: npm run check -- bootstrap mcp
+      - name: Keep verification evidence
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: verification-evidence
+          path: verifications/evidence/
 
   podman-image:
     name: Podman image build
@@ -53,11 +69,17 @@ jobs:
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Read pinned Node version
+        id: versions
+        run: sed -n 's/^NODE_VERSION=/node=/p' .env.example >> "$GITHUB_OUTPUT"
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
+        with:
+          node-version: ${{ steps.versions.outputs.node }}
       - name: Build with Podman
-        run: bash verifications/verify.sh --image-only podman
-      - name: Show build evidence on failure
-        if: failure()
-        run: |
-          if [ -d verifications/evidence ]; then
-            find verifications/evidence -type f \( -name 'engine-version.txt' -o -name 'build.log' \) -exec tail -n 80 {} +
-          fi
+        run: node verifications/scripts/build-image.ts podman
+      - name: Keep image build evidence
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: podman-image-evidence
+          path: verifications/evidence/*/container-image/
