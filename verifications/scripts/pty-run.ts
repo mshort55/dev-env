@@ -8,12 +8,19 @@ function parse(args: string[]) {
   const steps: { expect: string; send?: string }[] = [];
   let i = 0;
   for (; i < args.length && args[i] !== '--'; i += 2) {
-    const option = args[i], value = args[i + 1];
+    const option = args[i],
+      value = args[i + 1];
     if (value === undefined) throw new Error(`missing value for ${option}`);
     switch (option) {
-      case '--transcript': transcript = value; break;
-      case '--timeout': timeout = Number(value); break;
-      case '--expect': steps.push({ expect: value }); break;
+      case '--transcript':
+        transcript = value;
+        break;
+      case '--timeout':
+        timeout = Number(value);
+        break;
+      case '--expect':
+        steps.push({ expect: value });
+        break;
       case '--send':
       case '--send-file': {
         const step = steps.at(-1);
@@ -21,7 +28,8 @@ function parse(args: string[]) {
         step.send = option === '--send' ? value : readFileSync(value, 'utf8').replace(/\r?\n$/, '');
         break;
       }
-      default: throw new Error(`unknown argument: ${option}`);
+      default:
+        throw new Error(`unknown argument: ${option}`);
     }
   }
   if (!transcript) throw new Error('--transcript is required');
@@ -35,7 +43,9 @@ async function drive() {
   mkdirSync(dirname(transcript), { recursive: true });
   const child = pty.spawn(command[0], command.slice(1), { cwd: process.cwd(), env: process.env });
   const chunks: string[] = [];
-  let buffer = '', index = 0, expired = false;
+  let buffer = '',
+    index = 0,
+    expired = false;
   child.onData((chunk) => {
     chunks.push(chunk);
     buffer += chunk;
@@ -53,10 +63,14 @@ async function drive() {
     child.kill('SIGKILL');
   }, timeout * 1000);
   const status = await new Promise<number>((resolve) =>
-    child.onExit(({ exitCode, signal }) => resolve(signal ? 1 : exitCode)));
+    child.onExit(({ exitCode, signal }) => resolve(signal ? 1 : exitCode)),
+  );
   clearTimeout(deadline);
   const missed = expired || index !== steps.length;
-  if (missed) chunks.push(`\n[pty_run timeout or missed prompt waiting for: ${steps[index]?.expect ?? ''}]\n`);
+  if (missed)
+    chunks.push(
+      `\n[pty_run timeout or missed prompt waiting for: ${steps[index]?.expect ?? ''}]\n`,
+    );
   writeFileSync(transcript, chunks.join(''), { mode: 0o600 });
   return missed ? 2 : status;
 }

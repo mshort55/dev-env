@@ -10,7 +10,9 @@ test('image verification retains inspection evidence and removes the temporary i
   t.after(() => rmSync(dir, { recursive: true, force: true }));
   mkdirSync(join(dir, 'bin'));
   const engine = join(dir, 'bin/podman');
-  writeFileSync(engine, `#!${process.execPath}
+  writeFileSync(
+    engine,
+    `#!${process.execPath}
 const fs = require('node:fs');
 const [cmd, ...args] = process.argv.slice(2);
 const state = process.env.IMAGE_STATE;
@@ -26,10 +28,16 @@ else if (cmd === 'build') {
   if (fs.readFileSync(state, 'utf8') !== args.at(-1)) process.exit(2);
   fs.unlinkSync(state);
 } else process.exit(2);
-`, { mode: 0o700 });
+`,
+    { mode: 0o700 },
+  );
   const state = join(dir, 'engine-state');
   const run = spawnSync(process.execPath, ['verifications/scripts/build-image.ts', 'podman'], {
-    env: { ...process.env, PATH: join(dir, 'bin') + delimiter + process.env.PATH, IMAGE_STATE: state },
+    env: {
+      ...process.env,
+      PATH: join(dir, 'bin') + delimiter + process.env.PATH,
+      IMAGE_STATE: state,
+    },
     encoding: 'utf8',
   });
   assert.equal(run.status, 0, run.stderr);
@@ -43,7 +51,8 @@ else if (cmd === 'build') {
 
 test('a missing Docker executable reports the prerequisite and retains its evidence location', (t) => {
   const run = spawnSync(process.execPath, ['verifications/scripts/build-image.ts', 'docker'], {
-    env: { ...process.env, PATH: '' }, encoding: 'utf8',
+    env: { ...process.env, PATH: '' },
+    encoding: 'utf8',
   });
   const evidence = / evidence=(.+)/.exec(run.stdout)![1];
   t.after(() => rmSync(evidence, { recursive: true }));
@@ -56,7 +65,9 @@ test('a failed build preserves the engine status and transcript and removes any 
   const dir = mkdtempSync(join(tmpdir(), 'dev-env-test-image-'));
   t.after(() => rmSync(dir, { recursive: true, force: true }));
   const state = join(dir, 'image-tag');
-  writeFileSync(join(dir, 'docker'), `#!${process.execPath}
+  writeFileSync(
+    join(dir, 'docker'),
+    `#!${process.execPath}
 const fs = require('node:fs');
 const [command, ...args] = process.argv.slice(2);
 if (command === 'version') console.log('Docker fixture');
@@ -67,10 +78,17 @@ else if (command === 'build') {
 } else if (command === 'rmi' && args[0] === fs.readFileSync(process.env.PARTIAL_TAG, 'utf8')) {
   fs.unlinkSync(process.env.PARTIAL_TAG);
 } else process.exit(2);
-`, { mode: 0o700 });
-  const run = spawnSync(process.execPath, ['verifications/scripts/build-image.ts', 'docker', join(dir, 'run')], {
-    env: { ...process.env, PATH: dir, PARTIAL_TAG: state }, encoding: 'utf8',
-  });
+`,
+    { mode: 0o700 },
+  );
+  const run = spawnSync(
+    process.execPath,
+    ['verifications/scripts/build-image.ts', 'docker', join(dir, 'run')],
+    {
+      env: { ...process.env, PATH: dir, PARTIAL_TAG: state },
+      encoding: 'utf8',
+    },
+  );
   const out = join(dir, 'run/container-image');
   assert.equal(run.status, 17, run.stderr);
   assert.match(run.stderr, /build failed/);

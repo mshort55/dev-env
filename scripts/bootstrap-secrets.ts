@@ -1,4 +1,14 @@
-import { existsSync, openSync, writeSync, mkdirSync, writeFileSync, chmodSync, readFileSync, renameSync, rmSync } from 'node:fs';
+import {
+  existsSync,
+  openSync,
+  writeSync,
+  mkdirSync,
+  writeFileSync,
+  chmodSync,
+  readFileSync,
+  renameSync,
+  rmSync,
+} from 'node:fs';
 import { randomUUID } from 'node:crypto';
 import { spawnSync } from 'node:child_process';
 import { homedir } from 'node:os';
@@ -20,11 +30,19 @@ async function unlock(path: string) {
     // A detached process can still receive password lines on stdin.
   }
   const reader = createInterface({
-    input: tty ?? process.stdin, terminal: Boolean(tty),
-    output: new Writable({ write(_chunk, _encoding, done) { done(); } }),
+    input: tty ?? process.stdin,
+    terminal: Boolean(tty),
+    output: new Writable({
+      write(_chunk, _encoding, done) {
+        done();
+      },
+    }),
   });
   let cancelled = false;
-  reader.on('SIGINT', () => { cancelled = true; reader.close(); });
+  reader.on('SIGINT', () => {
+    cancelled = true;
+    reader.close();
+  });
   const lines = reader[Symbol.asyncIterator]();
   try {
     for (let attempt = 1; attempt <= 3; attempt++) {
@@ -38,9 +56,11 @@ async function unlock(path: string) {
       try {
         return await loadKeePass(path, line.value);
       } catch (error) {
-        console.log(attempt < 3
-          ? `⚠️  Error: Incorrect password. ${3 - attempt} attempt(s) remaining.`
-          : `⚠️  Error: Failed to open database after 3 attempts: ${error}`);
+        console.log(
+          attempt < 3
+            ? `⚠️  Error: Incorrect password. ${3 - attempt} attempt(s) remaining.`
+            : `⚠️  Error: Failed to open database after 3 attempts: ${error}`,
+        );
       }
     }
   } finally {
@@ -81,7 +101,9 @@ function googleWorkspace(entries: Entries) {
     if (value) exports.push(`export ${name}=${shellQuote(value)}\n`);
   }
   if (exports.length < 2) {
-    console.log('  ⚠️  Skipping Google Workspace MCP credentials until both OAuth entries are available');
+    console.log(
+      '  ⚠️  Skipping Google Workspace MCP credentials until both OAuth entries are available',
+    );
     return;
   }
   const directory = join(process.env.CODEX_HOME || join(homedir(), '.codex'), 'google-workspace');
@@ -106,7 +128,10 @@ function ssh(entries: Entries) {
   else if (!privateKey) console.log('⚠️  Warning: SSH entry has no password (private key)');
   else if (!publicKey) console.log('⚠️  Warning: SSH entry has no notes (public key)');
   else {
-    writeCredential(join(homedir(), '.ssh/id_ed25519'), privateKey.endsWith('\n') ? privateKey : privateKey + '\n');
+    writeCredential(
+      join(homedir(), '.ssh/id_ed25519'),
+      privateKey.endsWith('\n') ? privateKey : privateKey + '\n',
+    );
     writeCredential(join(homedir(), '.ssh/id_ed25519.pub'), publicKey, 0o644);
     console.log('SSH keys config complete');
   }
@@ -117,13 +142,20 @@ function gpg(entries: Entries) {
   const entry = entries.get('gpg');
   const key = field(entry, 'Password');
   if (!entry || !key) {
-    console.log(entry ? '⚠️  Warning: GPG entry has no password (private key)' : '⚠️  Warning: No GPG entry found in database');
+    console.log(
+      entry
+        ? '⚠️  Warning: GPG entry has no password (private key)'
+        : '⚠️  Warning: No GPG entry found in database',
+    );
     return;
   }
   const result = spawnSync('gpg', ['--import', '--batch'], { input: key, encoding: 'utf8' });
   if (result.status !== 0) {
-    console.log(result.error ? '⚠️  Warning: gpg command not found, skipping GPG setup'
-      : '⚠️  Warning: Failed to import GPG key: ' + result.stderr);
+    console.log(
+      result.error
+        ? '⚠️  Warning: gpg command not found, skipping GPG setup'
+        : '⚠️  Warning: Failed to import GPG key: ' + result.stderr,
+    );
     return;
   }
   console.log('GPG key imported successfully');
@@ -131,11 +163,17 @@ function gpg(entries: Entries) {
   writeCredential(join(homedir(), '.gnupg/gpg.conf'), 'pinentry-mode loopback\n');
   const path = join(homedir(), '.bashrc');
   const content = existsSync(path) ? readFileSync(path, 'utf8') : '';
-  if (!content.includes('GPG_TTY')) writeCredential(path, content + '\n# GPG configuration\nexport GPG_TTY=$(tty)\n');
+  if (!content.includes('GPG_TTY'))
+    writeCredential(path, content + '\n# GPG configuration\nexport GPG_TTY=$(tty)\n');
   console.log('GPG configuration complete');
 }
 
-function environment(entries: Entries, section: string, titles: Record<string, string>, unquote = false) {
+function environment(
+  entries: Entries,
+  section: string,
+  titles: Record<string, string>,
+  unquote = false,
+) {
   console.log(`Setting up ${section}...`);
   const exports = [];
   for (const [name, title] of Object.entries(titles)) {
@@ -146,7 +184,9 @@ function environment(entries: Entries, section: string, titles: Record<string, s
     console.log(`  - ${name} configured`);
   }
   if (exports.length) {
-    const shell = spawnSync('bash', ['--version'], { stdio: 'ignore' }).error ? '.ashrc' : '.bashrc';
+    const shell = spawnSync('bash', ['--version'], { stdio: 'ignore' }).error
+      ? '.ashrc'
+      : '.bashrc';
     const path = join(homedir(), shell);
     let profile = existsSync(path) ? readFileSync(path, 'utf8') : '';
     const heading = '# ' + section;
@@ -177,7 +217,11 @@ function credentialFile(entries: Entries, title: string) {
 
 function git(entries: Entries) {
   console.log('Setting up git configuration...');
-  const settings = { 'user.email': 'email', 'user.name': 'git_user_name', 'user.signingkey': 'git_signingkey' };
+  const settings = {
+    'user.email': 'email',
+    'user.name': 'git_user_name',
+    'user.signingkey': 'git_signingkey',
+  };
   for (const [name, title] of Object.entries(settings)) {
     const value = password(entries, title);
     if (!value) continue;
@@ -186,7 +230,11 @@ function git(entries: Entries) {
       console.log('  ⚠️  Warning: git command not found, skipping git configuration');
       return;
     }
-    console.log(result.status === 0 ? `  - ${name} configured` : `  ⚠️  Warning: Failed to set ${name}: ${result.stderr}`);
+    console.log(
+      result.status === 0
+        ? `  - ${name} configured`
+        : `  ⚠️  Warning: Failed to set ${name}: ${result.stderr}`,
+    );
   }
   for (const name of ['commit.gpgsign', 'tag.gpgsign']) {
     const result = spawnSync('git', ['config', '--global', name, 'true'], { encoding: 'utf8' });
@@ -216,7 +264,10 @@ function configure(database: kdbx.Kdbx) {
   const attachment = entry?.binaries.values().next().value;
   if (attachment) {
     const data = 'value' in attachment ? attachment.value : attachment;
-    writeCredential(join(homedir(), title), data instanceof kdbx.ProtectedValue ? data.getBinary() : new Uint8Array(data));
+    writeCredential(
+      join(homedir(), title),
+      data instanceof kdbx.ProtectedValue ? data.getBinary() : new Uint8Array(data),
+    );
     console.log(`  - ${title} configured`);
   } else {
     console.log(`  ⚠️  Warning: ${title} entry ${entry ? 'has no attachments' : 'not found'}`);
@@ -227,11 +278,20 @@ function configure(database: kdbx.Kdbx) {
     CLAUDE_CODE_USE_VERTEX: 'claude_env_CLAUDE_CODE_USE_VERTEX',
     CLOUD_ML_REGION: 'claude_env_CLOUD_ML_REGION',
   });
-  environment(entries, 'Kubernetes context environment variables', {
-    THREE_NODE: 'kube_env_THREE_NODE', KC: 'kube_env_KC', OME: 'kube_env_OME',
-  }, true);
+  environment(
+    entries,
+    'Kubernetes context environment variables',
+    {
+      THREE_NODE: 'kube_env_THREE_NODE',
+      KC: 'kube_env_KC',
+      OME: 'kube_env_OME',
+    },
+    true,
+  );
   environment(entries, 'Jira environment variables', {
-    JIRA_ACCESS_TOKEN: 'jira_mcp_env_JIRA_ACCESS_TOKEN', JIRA_EMAIL: 'email', JIRA_SERVER_URL: 'jira_mcp_env_JIRA_SERVER_URL',
+    JIRA_ACCESS_TOKEN: 'jira_mcp_env_JIRA_ACCESS_TOKEN',
+    JIRA_EMAIL: 'email',
+    JIRA_SERVER_URL: 'jira_mcp_env_JIRA_SERVER_URL',
   });
   environment(entries, 'EnMaaS environment variable', { ENMAAS_KEY: 'enmaas_key' });
   googleWorkspace(entries);
