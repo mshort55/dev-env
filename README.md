@@ -44,6 +44,12 @@ Credentials come from the optional KeePass database configured in `.env`.
 To refresh them, run `node "$DEV_ENV_DIR/scripts/bootstrap-secrets.ts"` inside
 the container, then open a new terminal.
 
+Container creation runs `node scripts/setup-codex.ts` to install the latest
+Codex CLI and update an existing managed daemon. To verify this lifecycle in
+disposable homes, run `node --test tests/codex-install-lifecycle.ts` with network access.
+To repeat Jira registration inside the container, run `node scripts/setup-jira-mcp.ts claude`
+for Claude Code or `node scripts/setup-jira-mcp.ts` for Codex from the checkout.
+
 ## Maintenance
 
 - Keep shared configuration defaults in `.env.example` and local values in `.env`.
