@@ -30,5 +30,5 @@ Preconditions:
 - `podman compose build` and `docker compose build` load `.env` when that file exists and tag the image `dev-env:latest`. This check does not call compose.
 - `HOST_*` values in `.env.example` are volume paths. They are not build args. Do not source `.env.example`; several of those lines interpolate `${HOME}`.
 - The Dockerfile installs linux-arm64 binaries. This check matches that architecture.
-- Commented-out installs, including the `hcp` client and Rust, are not downloaded. `.devcontainer/dev/post-create.sh` is not run, so npm CLIs, the Jira MCP package, and `workspace-mcp` are outside this proof.
+- Commented-out installs, including the `hcp` client and Rust, are not downloaded. `.devcontainer/dev/post-create.ts` is not run, so npm CLIs, the Jira MCP package, and `workspace-mcp` are outside this proof.
 - The build log can be large. Keep `container-image/build.log` with the evidence. Cleanup removes the image tag and the scratch directory, not the log.
