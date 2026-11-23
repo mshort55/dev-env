@@ -8,7 +8,7 @@ This directory is the maintained source for verifying the user-facing behavior o
 - Run `bash verifications/scripts/doctor.sh STATE` and require `doctor=ok`, `surface=cli`, and `container=not-used`.
 - Source `STATE` only in a subshell or inside a helper. It sets `HOME` to `/tmp/dev-env-verify-<run-id>/home`.
 - Export `PYTHONDONTWRITEBYTECODE=1`, `GIT_CONFIG_GLOBAL=$SCRATCH/home/.gitconfig`, and `GNUPGHOME=$SCRATCH/home/.gnupg` before any bootstrap drive.
-- Never start the compose service `dev`, and never run `.devcontainer/dev/post-create.sh` on the operator's machine. That container name is fixed and its volumes are the operator's real directories.
+- Never start the compose service `dev`, and never run `.devcontainer/dev/post-create.ts` on the operator's machine. That container name is fixed and its volumes are the operator's real directories.
 - The image build reads `.env.example` only. It does not read `.env` and does not tag `dev-env:latest`.
 
 ## Driving conventions

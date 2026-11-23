@@ -24,18 +24,7 @@ run() {
 }
 
 post_create() {
-  # Isolate the Codex step while retaining the real post-create ordering.
-  run bash -s <<'EOF'
-set -euo pipefail
-source <(sed '$d' "$DEV_ENV_DIR/.devcontainer/dev/post-create.sh")
-for step in setup_claude_settings setup_ccstatusline_settings fix_apt_sources \
-  setup_shell_paths install_npm_clis install_python_deps setup_completions \
-  setup_atuin setup_claude_mcp_servers bootstrap_secrets setup_codex_jira_mcp \
-  setup_google_workspace_mcp setup_verification setup_and_unlock_dummy_keyring; do
-  eval "$step() { :; }"
-done
-main
-EOF
+  run bash "$repo/scripts/setup-codex.sh"
 }
 
 seed_state() {

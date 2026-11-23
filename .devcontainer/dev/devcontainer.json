@@ -52,5 +52,5 @@
       }
     }
   },
-  "postCreateCommand": "cd \"$DEV_ENV_DIR\" && sudo chown \"$(id -u):$(id -g)\" node_modules && npm ci --include=dev && bash .devcontainer/dev/post-create.sh"
+  "postCreateCommand": "node \"$DEV_ENV_DIR/.devcontainer/dev/post-create.ts\""
 }

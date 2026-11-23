@@ -58,7 +58,7 @@ Image build alone, after launch:
 bash verifications/scripts/build-image.sh /tmp/dev-env-verify-<run-id>/state.env
 ```
 
-The build passes each `args` name from `.devcontainer/dev/compose.yml` using the literal value in `.env.example`. `HOST_*` paths are not build args and are not read. A successful build downloads the software the Dockerfile installs. It does not run `.devcontainer/dev/post-create.sh`. The `hcp` client and Rust stay commented out in the Dockerfile, so this build does not download them.
+The build passes each `args` name from `.devcontainer/dev/compose.yml` using the literal value in `.env.example`. `HOST_*` paths are not build args and are not read. A successful build downloads the software the Dockerfile installs. It does not run `.devcontainer/dev/post-create.ts`. The `hcp` client and Rust stay commented out in the Dockerfile, so this build does not download them.
 
 Set `PYTHONDONTWRITEBYTECODE=1` for every Python drive so the repo does not gain `__pycache__`.
 
