@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-import re
+import json
 import shutil
 import subprocess
 from collections.abc import Iterable
@@ -11,7 +11,6 @@ from pathlib import Path
 import nox
 
 ROOT = Path(__file__).resolve().parent
-EXCLUDED_PARTS = {"archive", ".git", ".nox", ".venv", "__pycache__", "node_modules"}
 nox.options.sessions = ["lint", "types", "shell", "tests", "integration"]
 nox.options.default_venv_backend = "uv"
 nox.options.reuse_venv = "yes"
@@ -21,34 +20,9 @@ nox.options.error_on_missing_interpreters = True
 
 def source_files(root: Path = ROOT) -> tuple[list[str], list[str]]:
     """Find tracked and new Python/shell sources, including hidden directories."""
-    result = subprocess.run(
-        ["git", "ls-files", "--cached", "--others", "--exclude-standard", "-z"],
-        cwd=root,
-        check=True,
-        capture_output=True,
-    )
-    python: list[str] = []
-    shell: list[str] = []
-    for name in sorted(set(result.stdout.decode().split("\0")) - {""}):
-        relative = Path(name)
-        path = root / relative
-        if (
-            EXCLUDED_PARTS.intersection(relative.parts)
-            or relative.parts[:2] == ("verifications", "evidence")
-            or not path.is_file()
-            or path.is_symlink()
-        ):
-            continue
-        if path.suffix == ".py":
-            python.append(name)
-        elif path.suffix in {".sh", ".bash"}:
-            shell.append(name)
-        else:
-            with path.open("rb") as handle:
-                first_line = handle.readline(256)
-            if re.match(rb"#!.*\b(?:bash|sh|dash|ksh)\b", first_line):
-                shell.append(name)
-    return python, shell
+    output = subprocess.check_output(["node", ROOT / "scripts/discover.ts"], cwd=root, text=True)
+    sources = json.loads(output)
+    return sources["python"], sources["shell"]
 
 
 def prepare(session: nox.Session) -> None:

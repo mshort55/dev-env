@@ -54,6 +54,16 @@ the container, then open a new terminal.
 
 ## Verification
 
+For host verification, install the Node.js version pinned by `NODE_VERSION` in
+[.env.example](.env.example), then run `npm ci` in this checkout. Opening the
+devcontainer requires only the host tools listed under Setup. Container creation
+installs the checkout’s packages in a separate volume at `$DEV_ENV_DIR/node_modules`.
+
+From the checkout on the host or in the container, run `npm run discover` to
+list sources, `npm test` to test discovery, and `npm run typecheck` to check
+TypeScript. The discovery command runs the mounted source directly, so edits
+take effect on the next invocation.
+
 Run `nox` from the repository root for lint, type, shell, test, and integration
 checks. Use `nox -l` to list sessions or `nox -s lint types` to select checks.
 Run `bash scripts/setup-verification.sh` if Nox is not installed.

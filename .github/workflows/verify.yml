@@ -19,9 +19,17 @@ jobs:
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - name: Read uv version
+      - name: Read tool versions
         id: versions
-        run: sed -n 's/^UV_VERSION=/uv=/p' .env.example >> "$GITHUB_OUTPUT"
+        run: sed -n -e 's/^UV_VERSION=/uv=/p' -e 's/^NODE_VERSION=/node=/p' .env.example >> "$GITHUB_OUTPUT"
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
+        with:
+          node-version: ${{ steps.versions.outputs.node }}
+          cache: npm
+      - run: npm ci
+      - run: npm run discover
+      - run: npm run typecheck
+      - run: npm test
       - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
         with:
           version: ${{ steps.versions.outputs.uv }}
