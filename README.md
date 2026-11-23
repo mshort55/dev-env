@@ -53,8 +53,9 @@ for Claude Code or `node scripts/setup-jira-mcp.ts` for Codex from the checkout.
 ## Maintenance
 
 - Keep shared configuration defaults in `.env.example` and local values in `.env`.
-- Most tool installation lives in [Dockerfile](.devcontainer/dev/Dockerfile); editor
-  extensions and container features live in `devcontainer.json`.
+- The [Dockerfile](.devcontainer/dev/Dockerfile) installs Node and runs
+  [install-tools.ts](.devcontainer/dev/install-tools.ts) to install workstation tools.
+  Editor extensions and container features live in `devcontainer.json`.
 - Keep dependency lockfiles in sync when updating versions, then rebuild the
   container to apply image or setup changes.
 
@@ -74,9 +75,9 @@ or `npm run discover` to list the active sources.
 
 The full suite requires Linux ARM64, network access, Docker, Git, Bash, curl,
 Codex, uv and uvx. The `lifecycle` check installs disposable copies of Codex
-and exercises its daemon. Set `CODEX_REPRO_ROOT` to a writable directory
-outside the system temporary directory for this check. The standalone Codex
-installer rejects executable paths under the system temporary directory.
+and exercises its daemon under your user cache directory. To change this
+location, set `CODEX_REPRO_ROOT` to a writable directory outside the system
+temporary directory.
 Integration evidence stays under `verifications/evidence/`.
 
 To build the image alone, run `node verifications/scripts/build-image.ts docker`
