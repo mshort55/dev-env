@@ -37,11 +37,22 @@ jobs:
       - name: Install integration prerequisites
         run: |
           sudo apt-get update
-          sudo apt-get install -y dbus gnome-keyring
+          sudo apt-get install -y dbus-x11 gnome-keyring
+          curl -fsSL https://claude.ai/install.sh -o "$RUNNER_TEMP/install-claude.sh"
+          bash "$RUNNER_TEMP/install-claude.sh" latest
           node scripts/setup-codex.ts
           echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+      - name: Install the Jira MCP server
+        run: |
+          git init -q "$RUNNER_TEMP/jira-server"
+          git -C "$RUNNER_TEMP/jira-server" fetch --depth=1 https://github.com/stolostron/jira-mcp-server.git 12b3af14b337771c03b94c069eb7cd748588f42a
+          git -C "$RUNNER_TEMP/jira-server" checkout --detach FETCH_HEAD
+          uv venv --python 3.12 "$RUNNER_TEMP/jira-venv"
+          uv pip install --python "$RUNNER_TEMP/jira-venv/bin/python" --require-hashes -r requirements/jira-mcp.txt
+          uv pip install --python "$RUNNER_TEMP/jira-venv/bin/python" --no-deps --no-build-isolation -e "$RUNNER_TEMP/jira-server"
+          echo "$RUNNER_TEMP/jira-venv/bin" >> "$GITHUB_PATH"
       - name: Run code checks and tests
-        run: npm run check -- lint format-check types tests lifecycle
+        run: npm run check -- lint format-check types tests lifecycle jira
       - name: Verify bootstrap and isolated Workspace MCP startup
         if: ${{ !cancelled() }}
         run: npm run check -- bootstrap mcp

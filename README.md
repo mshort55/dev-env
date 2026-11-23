@@ -74,7 +74,8 @@ check after the selected checks finish. Run `npm run format` to apply formatting
 or `npm run discover` to list the active sources.
 
 The full suite requires Linux ARM64, network access, Docker, Git, Bash, curl,
-Codex, uv and uvx. The `lifecycle` check installs disposable copies of Codex
+Codex, Claude Code, Python 3 with the workstation’s Jira MCP package, uv and uvx.
+Run `npm run check -- jira` to start the installed Jira server through Claude and Codex against a disposable local Jira endpoint. The `lifecycle` check installs disposable copies of Codex
 and exercises its daemon under your user cache directory. To change this
 location, set `CODEX_REPRO_ROOT` to a writable directory outside the system
 temporary directory.

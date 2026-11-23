@@ -1,5 +1,6 @@
 import { spawnSync } from 'node:child_process';
-import { accessSync, constants } from 'node:fs';
+import { accessSync, constants, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
 import { delimiter, join, resolve } from 'node:path';
 import { discover } from './discover.ts';
 
@@ -33,13 +34,35 @@ const checks: Record<string, () => void> = {
   lint: () => run(biome, 'lint', ...discover(root).typescript),
   'format-check': () => run(biome, 'format', ...discover(root).typescript),
   format: () => run(biome, 'format', '--write', ...discover(root).typescript),
-  types: () => run(node, 'node_modules/typescript/bin/tsc', '--noEmit'),
+  types: () => {
+    const scratch = mkdtempSync(join(tmpdir(), 'dev-env-typecheck-'));
+    try {
+      const config = join(scratch, 'tsconfig.json');
+      writeFileSync(
+        config,
+        JSON.stringify({
+          extends: join(root, 'tsconfig.json'),
+          compilerOptions: { typeRoots: [join(root, 'node_modules/@types')] },
+          files: discover(root).typescript.map((file) => join(root, file)),
+          include: [],
+        }),
+      );
+      run(node, 'node_modules/typescript/bin/tsc', '--project', config);
+    } finally {
+      rmSync(scratch, { recursive: true, force: true });
+    }
+  },
   tests: () => {
     const tests = discover(root).typescript.filter(
       (path) => path.startsWith('tests/') && path.endsWith('.test.ts'),
     );
     if (!tests.length) throw new Error('No test files found');
     run(node, '--test', ...tests);
+  },
+  jira: () => {
+    requireTools('claude', 'codex', 'python3');
+    run('python3', '-c', 'import jira_mcp_server');
+    run(node, '--test', 'tests/jira-mcp.ts');
   },
   lifecycle: () => {
     requireTools('curl', 'sh');
@@ -56,7 +79,7 @@ const checks: Record<string, () => void> = {
 
 let names = process.argv.slice(2);
 if (names.length === 0)
-  names = ['lint', 'format-check', 'types', 'tests', 'lifecycle', 'integration', 'mcp'];
+  names = ['lint', 'format-check', 'types', 'tests', 'lifecycle', 'jira', 'integration', 'mcp'];
 if (names.length === 1 && names[0] === '--list') {
   console.log(Object.keys(checks).join('\n'));
 } else if (names.some((name) => !Object.hasOwn(checks, name))) {

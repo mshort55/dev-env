@@ -48,7 +48,9 @@ async function command(
         child.on('error', (error: NodeJS.ErrnoException) => {
           reject(error.code === 'ENOENT' ? new Error(`${engine} is required`) : error);
         });
-        child.on('close', (code, signal) => done(code ?? 128 + constants.signals[signal!]));
+        child.on('close', (code, signal) =>
+          done(code ?? (signal ? 128 + constants.signals[signal] : 1)),
+        );
       });
     } finally {
       process.off('SIGTERM', terminate);
@@ -68,7 +70,7 @@ export async function buildImage(
   if (!/^[a-zA-Z0-9][a-zA-Z0-9_.-]{0,100}$/.test(runId))
     throw new Error('invalid image verification run ID');
   const out = join(evidenceDir, 'container-image');
-  const tag = `dev-env:verify-${runId}`;
+  const tag = `dev-env:verify-${runId.slice(0, 64)}-${randomUUID()}`;
   mkdirSync(out, { recursive: true, mode: 0o700 });
   const file = (name: string) => join(out, name);
   const args = buildArgs();
