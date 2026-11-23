@@ -1,10 +1,6 @@
 .git
 .env
 .venv
-.nox
-.pytest_cache
-.mypy_cache
-.ruff_cache
 **/__pycache__
 verifications/evidence
 **/node_modules
