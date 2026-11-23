@@ -37,8 +37,8 @@ esac
 [ -f "$KEEPASS_DB_PATH" ] || fail "KeePass database missing"
 [ -f "$SCRATCH/password" ] || fail "password file missing"
 [ -f "$DEV_ENV_REPO/scripts/bootstrap-secrets.ts" ] || fail "bootstrap-secrets.ts missing"
-[ -f "$DEV_ENV_REPO/scripts/google-workspace-mcp.sh" ] || fail "google-workspace-mcp.sh missing"
-[ -f "$DEV_ENV_REPO/scripts/setup-google-workspace-mcp.sh" ] || fail "setup-google-workspace-mcp.sh missing"
+[ -f "$DEV_ENV_REPO/scripts/google-workspace-mcp.ts" ] || fail "google-workspace-mcp.ts missing"
+[ -f "$DEV_ENV_REPO/scripts/setup-google-workspace-mcp.ts" ] || fail "setup-google-workspace-mcp.ts missing"
 [ -f "$DEV_ENV_REPO/.env.example" ] || fail ".env.example missing"
 [ -f "$DEV_ENV_REPO/.devcontainer/dev/Dockerfile" ] || fail "Dockerfile missing"
 case "$EVIDENCE_DIR" in
