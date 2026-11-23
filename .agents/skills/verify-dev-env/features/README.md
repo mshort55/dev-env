@@ -2,23 +2,18 @@
 
 This directory is the maintained source for verifying the user-facing behavior of dev-env. Read the index before driving the scripts, then use the matching feature file as the recipe.
 
-## Baseline preconditions
+## Running a verification
 
-- Run `nox` for all repository checks. For just bootstrap and image verification, run `bash verifications/verify.sh`, or run `bash verifications/scripts/launch.sh` and keep the printed `state=` path when driving one feature.
-- Run `bash verifications/scripts/doctor.sh STATE` and require `doctor=ok`, `surface=cli`, and `container=not-used`.
-- Source `STATE` only in a subshell or inside a helper. It sets `HOME` to `/tmp/dev-env-verify-<run-id>/home`.
-- Export `PYTHONDONTWRITEBYTECODE=1`, `GIT_CONFIG_GLOBAL=$SCRATCH/home/.gitconfig`, and `GNUPGHOME=$SCRATCH/home/.gnupg` before any bootstrap drive.
-- Never start the compose service `dev`, and never run `.devcontainer/dev/post-create.ts` on the operator's machine. That container name is fixed and its volumes are the operator's real directories.
-- The image build reads `.env.example` only. It does not read `.env` and does not tag `dev-env:latest`.
+From the repository root, run `npm ci` and select the feature in the table.
+The bootstrap and Workspace MCP checks each create a private home and remove
+it after the drive. Evidence directories are printed on the terminal.
 
-## Driving conventions
-
-- Start every recipe from the scratch home created by `launch.sh`.
-- Treat every command as literal. Keep the `bash scripts/...` and `node scripts/bootstrap-secrets.ts` forms.
-- Interactive KeePass prompts go through `verifications/scripts/pty-run.ts`.
-- The master password is `$SCRATCH/password`. Pass it with `--send-file`, never `--send` or a shell argument.
-- Restore nothing in the operator's home. The scratch directory is thrown away by `cleanup.sh`.
-- Do not remove proof artifacts during cleanup.
+| Feature | Command |
+| --- | --- |
+| KeePass bootstrap | `npm run check -- bootstrap` |
+| Workspace MCP setup and launcher | `npm run check -- mcp` |
+| Container image | `node verifications/scripts/build-image.ts docker` or `node verifications/scripts/build-image.ts podman` |
+| All checks | `npm run check` |
 
 ## Proof and skip reporting
 

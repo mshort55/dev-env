@@ -9,9 +9,11 @@ export async function writeKeePassFixture(path: string, password: string, entrie
   for (const { title, password, notes, attachment } of entries) {
     const entry = db.createEntry(db.getDefaultGroup());
     entry.fields.set('Title', title);
-    if (password !== undefined) entry.fields.set('Password', kdbx.ProtectedValue.fromString(password));
+    if (password !== undefined)
+      entry.fields.set('Password', kdbx.ProtectedValue.fromString(password));
     if (notes !== undefined) entry.fields.set('Notes', notes);
-    if (attachment) entry.binaries.set('fixture.bin', await db.createBinary(Uint8Array.from(attachment).buffer));
+    if (attachment)
+      entry.binaries.set('fixture.bin', await db.createBinary(Uint8Array.from(attachment).buffer));
   }
   await writeFile(path, new Uint8Array(await db.save()), { mode: 0o600 });
 }

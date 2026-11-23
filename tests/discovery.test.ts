@@ -6,7 +6,7 @@ import { dirname, join } from 'node:path';
 import test from 'node:test';
 import { fileURLToPath } from 'node:url';
 
-test('discovery lists active tracked and new sources, including hidden directories', t => {
+test('discovery lists active tracked and new sources, including hidden directories', (t) => {
   const cwd = mkdtempSync(join(tmpdir(), 'dev-env-sources-'));
   t.after(() => rmSync(cwd, { recursive: true, force: true }));
   execFileSync('git', ['init', '-q'], { cwd });
@@ -40,6 +40,12 @@ test('discovery lists active tracked and new sources, including hidden directori
   assert.deepEqual(JSON.parse(result), {
     typescript: ['.hidden/tool.ts', 'scripts/new file.ts'],
     python: ['scripts/tracked.py'],
-    shell: ['.devcontainer/start.sh', 'scripts/custom.ext', 'scripts/extensionless', 'scripts/library.bash', 'scripts/options'],
+    shell: [
+      '.devcontainer/start.sh',
+      'scripts/custom.ext',
+      'scripts/extensionless',
+      'scripts/library.bash',
+      'scripts/options',
+    ],
   });
 });

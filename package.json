@@ -4,10 +4,16 @@
   "type": "module",
   "scripts": {
     "discover": "node scripts/discover.ts",
-    "test": "node --test 'tests/*.test.ts'",
-    "typecheck": "tsc --noEmit"
+    "test": "node scripts/check.ts tests",
+    "typecheck": "tsc --noEmit",
+    "check": "node scripts/check.ts",
+    "lint": "node scripts/check.ts lint",
+    "format": "node scripts/check.ts format",
+    "format:check": "node scripts/check.ts format-check",
+    "verify": "node verifications/verify.ts"
   },
   "devDependencies": {
+    "@biomejs/biome": "2.6.8",
     "@modelcontextprotocol/sdk": "1.32.2",
     "@types/node": "24.19.2",
     "node-pty": "1.1.0",

@@ -27,9 +27,6 @@ jobs:
           node-version: ${{ steps.versions.outputs.node }}
           cache: npm
       - run: npm ci
-      - run: npm run discover
-      - run: npm run typecheck
-      - run: npm test
       - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
         with:
           version: ${{ steps.versions.outputs.uv }}
@@ -37,23 +34,23 @@ jobs:
           enable-cache: true
           cache-dependency-glob: |
             requirements/*.txt
-      - name: Install verification runner and Codex
-        id: tools
+      - name: Install integration prerequisites
         run: |
-          bash scripts/setup-verification.sh
-          curl -fsSL https://chatgpt.com/codex/install.sh | CODEX_NON_INTERACTIVE=1 sh
+          sudo apt-get update
+          sudo apt-get install -y dbus gnome-keyring
+          node scripts/setup-codex.ts
           echo "$HOME/.local/bin" >> "$GITHUB_PATH"
       - name: Run code checks and tests
-        run: nox -s lint types shell tests
-      - name: Verify bootstrap and MCP
-        if: ${{ !cancelled() && steps.tools.outcome == 'success' }}
-        run: nox -s integration -- --bootstrap-only
-      - name: Show integration logs on failure
-        if: failure()
-        run: |
-          if [ -d verifications/evidence ]; then
-            find verifications/evidence -type f -name '*.log' -exec tail -n 80 {} +
-          fi
+        run: npm run check -- lint format-check types tests lifecycle
+      - name: Verify bootstrap and isolated Workspace MCP startup
+        if: ${{ !cancelled() }}
+        run: npm run check -- bootstrap mcp
+      - name: Keep verification evidence
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: verification-evidence
+          path: verifications/evidence/
 
   podman-image:
     name: Podman image build
