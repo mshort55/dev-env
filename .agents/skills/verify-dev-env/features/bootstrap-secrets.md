@@ -13,7 +13,7 @@ Bootstrap secrets opens the KeePass database at `KEEPASS_DB_PATH`, asks for the 
 ## How to get to it (user POV)
 
 - From the dev-env repo, with `KEEPASS_DB_PATH` set, run `python3 scripts/bootstrap-secrets.py` and type the master password at `Enter KeePass master password:`.
-- Inside the dev container, `.devcontainer/dev/post-create.sh` runs that same command when `KEEPASS_DB_PATH` is set and the file exists. Verification does not use this entry point.
+- Inside the dev container, `.devcontainer/dev/post-create.ts` runs that same command when `KEEPASS_DB_PATH` is set and the file exists. Verification does not use this entry point.
 
 ## Driving it with verify-dev-env
 

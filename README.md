@@ -21,7 +21,7 @@ KeePass-based credential setup.
      checkout where it will be mounted at `DEV_ENV_DIR` (default `/Repos/dev-env`).
      Place the Jira MCP checkout directly under `HOST_REPOS_DIR` as `jira-mcp-server_stolostron`.
      Keep `REPOS_DIR_NAME=Repos` so the Jira checkout is available at the exact
-     path used by [post-create.sh](.devcontainer/dev/post-create.sh),
+     path used by [post-create.ts](.devcontainer/dev/post-create.ts),
      `/Repos/jira-mcp-server_stolostron`.
 
 4. Open this repository in VS Code and choose **Reopen in Container**.
@@ -35,7 +35,7 @@ If you change `WORKSPACE_DIR_NAME`, also update `workspaceFolder` in
 Host directories mounted by [compose.yml](.devcontainer/dev/compose.yml) persist
 across rebuilds. Other container-local files may be lost when rebuilding.
 
-[post-create.sh](.devcontainer/dev/post-create.sh) configures each new container.
+[post-create.ts](.devcontainer/dev/post-create.ts) configures each new container.
 It copies some user settings from the workspace directory, replacing local copies.
 Edit the source files in the workspace directory to keep changes across rebuilds. This setup does not
 rerun on ordinary container restarts.
@@ -76,3 +76,14 @@ Before merging changes to the Dockerfile, its build arguments, or files it
 copies, confirm the `Podman image build` CI check passed for the proposed change.
 For changes to host mounts, container features, or post-create setup, verify the
 affected behavior in a freshly rebuilt development container on the Mac.
+Choose **Dev Containers: Rebuild Container** in VS Code. Open two Bash terminals
+and run the following in each.
+
+```sh
+echo "$DBUS_SESSION_BUS_ADDRESS"
+dbus-send --session --print-reply --dest=org.freedesktop.secrets \
+  /org/freedesktop/secrets/collection/login org.freedesktop.DBus.Properties.Get \
+  string:org.freedesktop.Secret.Collection string:Locked
+```
+
+Both terminals should print the same bus address and report `boolean false`.

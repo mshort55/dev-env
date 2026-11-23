@@ -11,7 +11,7 @@ Setup installs the Workspace MCP tool and registers a Codex stdio server named `
 ## How to get to it (user POV)
 
 - From the dev-env repo, run `bash scripts/setup-google-workspace-mcp.sh`.
-- The dev container runs that command from `.devcontainer/dev/post-create.sh`. Verification does not use the container entry point.
+- The dev container runs that command from `.devcontainer/dev/post-create.ts`. Verification does not use the container entry point.
 
 ## Driving it with verify-dev-env
 
@@ -35,4 +35,4 @@ Preconditions:
 - `codex mcp add` writes `$CODEX_HOME/config.toml`. Without `CODEX_HOME`, that file is the operator's `~/.codex/config.toml`.
 - `uv tool install` writes the user tool directory unless `UV_TOOL_DIR` and `UV_TOOL_BIN_DIR` are both inside the scratch directory. `HOME` alone does not redirect an already-installed `uv`.
 - The `/tmp` helper-binary warning is expected for this scratch layout. Do not retarget `CODEX_HOME` into the operator's home to silence it.
-- Do not run `.devcontainer/dev/post-create.sh` to reach this command. It also runs apt, npm, and the secrets bootstrap.
+- Do not run `.devcontainer/dev/post-create.ts` to reach this command. It also runs apt, npm, and the secrets bootstrap.
