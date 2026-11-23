@@ -72,6 +72,10 @@ The full suite requires Linux ARM64, network access, and Docker inside the
 development container. Integration checks use disposable credentials and write
 evidence to `verifications/evidence/`. See [noxfile.py](noxfile.py) for check details.
 
+To build the image alone, run `node verifications/scripts/build-image.ts docker`
+or select `podman` for the Linux ARM64 CI build. The command prints the evidence
+directory and removes its temporary image tag after inspection.
+
 Before merging changes to the Dockerfile, its build arguments, or files it
 copies, confirm the `Podman image build` CI check passed for the proposed change.
 For changes to host mounts, container features, or post-create setup, verify the
