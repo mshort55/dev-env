@@ -20,5 +20,5 @@ install -d -m 700 "$workspace_config_dir" "$workspace_config_dir/credentials-rea
 codex mcp add --env "WORKSPACE_MCP_VERSION=${WORKSPACE_MCP_VERSION}" google-workspace -- bash "$dev_env_dir/scripts/google-workspace-mcp.sh"
 
 if [ ! -f "$workspace_config_dir/oauth.env" ]; then
-  echo "Google Workspace MCP registered; OAuth client credentials are not loaded yet. Run scripts/bootstrap-secrets.py to create $workspace_config_dir/oauth.env from KeePass."
+  echo "Google Workspace MCP registered; OAuth client credentials are not loaded yet. Run node scripts/bootstrap-secrets.ts to create $workspace_config_dir/oauth.env from KeePass."
 fi
