@@ -1,5 +1,5 @@
 import { spawnSync } from "node:child_process";
-import { appendFileSync, copyFileSync, existsSync, mkdirSync, readFileSync, renameSync, writeFileSync } from "node:fs";
+import { appendFileSync, copyFileSync, existsSync, mkdirSync, readFileSync, renameSync, statSync, writeFileSync } from "node:fs";
 import { homedir } from "node:os";
 import { dirname, join } from "node:path";
 
@@ -22,10 +22,10 @@ function copySettings(source: string, target: string) {
 }
 
 // Use the existing command until its TypeScript replacement lands.
-function setup(script: string, previousExtension: "py" | "sh") {
+function setup(script: string) {
   const path = join(repo, "scripts", script);
   if (existsSync(path + ".ts")) run(process.execPath, path + ".ts");
-  else run(previousExtension === "py" ? "python3" : "bash", path + "." + previousExtension);
+  else run("bash", path + ".sh");
 }
 
 run("sudo", "chown", `${process.getuid!()}:${process.getgid!()}`, "node_modules");
@@ -82,10 +82,12 @@ if (config.mcpServers?.["jira-mcp-server"]?.env !== undefined) {
   renameSync(temporary, claudePath);
 }
 
-if (process.env.KEEPASS_DB_PATH && existsSync(process.env.KEEPASS_DB_PATH)) setup("bootstrap-secrets", "py");
-setup("setup-codex", "sh");
-setup("setup-jira-mcp", "sh");
-setup("setup-google-workspace-mcp", "sh");
+if (process.env.KEEPASS_DB_PATH && statSync(process.env.KEEPASS_DB_PATH, { throwIfNoEntry: false })?.isFile()) {
+  run(process.execPath, join(repo, "scripts/bootstrap-secrets.ts"));
+}
+setup("setup-codex");
+setup("setup-jira-mcp");
+setup("setup-google-workspace-mcp");
 if (existsSync("scripts/setup-verification.sh")) run("bash", "scripts/setup-verification.sh");
 
 appendFileSync(bashrc, `

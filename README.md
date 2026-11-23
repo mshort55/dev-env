@@ -41,7 +41,7 @@ Edit the source files in the workspace directory to keep changes across rebuilds
 rerun on ordinary container restarts.
 
 Credentials come from the optional KeePass database configured in `.env`.
-To refresh them, run `python3 "$DEV_ENV_DIR/scripts/bootstrap-secrets.py"` inside
+To refresh them, run `node "$DEV_ENV_DIR/scripts/bootstrap-secrets.ts"` inside
 the container, then open a new terminal.
 
 ## Maintenance

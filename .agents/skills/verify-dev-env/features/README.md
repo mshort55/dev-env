@@ -14,8 +14,8 @@ This directory is the maintained source for verifying the user-facing behavior o
 ## Driving conventions
 
 - Start every recipe from the scratch home created by `launch.sh`.
-- Treat every command as literal. Keep the `bash scripts/...` and `python3 scripts/bootstrap-secrets.py` forms.
-- Interactive KeePass prompts go through `verifications/scripts/pty_run.py`.
+- Treat every command as literal. Keep the `bash scripts/...` and `node scripts/bootstrap-secrets.ts` forms.
+- Interactive KeePass prompts go through `verifications/scripts/pty-run.ts`.
 - The master password is `$SCRATCH/password`. Pass it with `--send-file`, never `--send` or a shell argument.
 - Restore nothing in the operator's home. The scratch directory is thrown away by `cleanup.sh`.
 - Do not remove proof artifacts during cleanup.
@@ -23,7 +23,7 @@ This directory is the maintained source for verifying the user-facing behavior o
 ## Proof and skip reporting
 
 - Capture the user action and the resulting state, not only the final status line.
-- CLI proof includes the command, stdout, stderr, and exit code. `pty_run.py` transcripts are the stdout/stderr record for interactive runs.
+- CLI proof includes the command, stdout, stderr, and exit code. `pty-run.ts` transcripts are the stdout/stderr record for interactive runs.
 - Image proof includes `container-image/build.log`, `build.exit`, and `image-id.txt`.
 - Mutation proof includes a second view of the written file: mode, sourced value comparison, and a check that the secret is absent from the transcript.
 - Record the feature id in the evidence subdirectory name.
