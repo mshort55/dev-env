@@ -108,7 +108,7 @@ def integration(session: nox.Session) -> None:
         session,
         [
             ["bash", "verifications/verify.sh", *session.posargs],
-            ["python", "verifications/scripts/check_mcp.py"],
+            ["node", "verifications/scripts/check-mcp.ts"],
         ],
         external=True,
     )
