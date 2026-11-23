@@ -1,9 +1,10 @@
+import { workspaceCredentialsDirectory } from './workspace-credentials.ts';
 import { spawnSync } from 'node:child_process';
 import { existsSync } from 'node:fs';
 import { homedir } from 'node:os';
 import { join } from 'node:path';
 
-const directory = join(process.env.CODEX_HOME || join(homedir(), '.codex'), 'google-workspace');
+const directory = workspaceCredentialsDirectory();
 const oauth = join(directory, 'oauth.env');
 function fail(message: string): never {
   console.error(message);

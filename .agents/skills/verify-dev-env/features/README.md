@@ -12,6 +12,7 @@ it after the drive. Evidence directories are printed on the terminal.
 | --- | --- |
 | KeePass bootstrap | `npm run check -- bootstrap` |
 | Workspace MCP setup and launcher | `npm run check -- mcp` |
+| Jira MCP through Claude and Codex | `npm run check -- jira` |
 | Container image | `node verifications/scripts/build-image.ts docker` or `node verifications/scripts/build-image.ts podman` |
 | All checks | `npm run check` |
 

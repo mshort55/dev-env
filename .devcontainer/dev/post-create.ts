@@ -1,9 +1,10 @@
 import { spawnSync } from 'node:child_process';
 import { appendFileSync, copyFileSync, existsSync, mkdirSync, statSync } from 'node:fs';
-import { homedir } from 'node:os';
+import { homedir, userInfo } from 'node:os';
 import { dirname, join } from 'node:path';
 
-const repo = process.env.DEV_ENV_DIR!;
+const repo = process.env.DEV_ENV_DIR;
+if (!repo) throw new Error('DEV_ENV_DIR is required');
 const home = homedir();
 const workspaceName = process.env.WORKSPACE_DIR_NAME;
 const workspace = join('/', workspaceName || 'UbuntuSync');
@@ -21,7 +22,8 @@ function copySettings(source: string, target: string) {
   copyFileSync(join(workspace, source), destination);
 }
 
-run('sudo', 'chown', `${process.getuid!()}:${process.getgid!()}`, 'node_modules');
+const { uid, gid } = userInfo();
+run('sudo', 'chown', `${uid}:${gid}`, 'node_modules');
 run('npm', 'ci', '--include=dev');
 copySettings('.claude/settings.json', '.claude/settings.json');
 copySettings('.claude/ccstatusline/settings.json', '.config/ccstatusline/settings.json');
@@ -76,7 +78,7 @@ appendFileSync(
   bashrc,
   `
 # User bin paths
-export PATH="${workspaceName ? '/${WORKSPACE_DIR_NAME}/npm-clis/node_modules/.bin:' : ''}$HOME/.local/bin:$HOME/go/bin:$PATH"
+export PATH="${workspaceName ? '/$WORKSPACE_DIR_NAME/npm-clis/node_modules/.bin:' : ''}$HOME/.local/bin:$HOME/go/bin:$PATH"
 
 # Shell completions
 source <(kubectl completion bash)

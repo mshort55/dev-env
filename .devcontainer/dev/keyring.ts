@@ -1,9 +1,10 @@
 // Each terminal imports the same session. Only the lock holder can replace it.
 import { spawnSync } from 'node:child_process';
 import { chmodSync, existsSync, mkdirSync, readFileSync, renameSync, writeFileSync } from 'node:fs';
+import { userInfo } from 'node:os';
 import { join } from 'node:path';
 
-const runtime = process.env.XDG_RUNTIME_DIR || `/tmp/runtime-${process.getuid!()}`;
+const runtime = process.env.XDG_RUNTIME_DIR || `/tmp/runtime-${userInfo().uid}`;
 process.env.XDG_RUNTIME_DIR = runtime;
 mkdirSync(runtime, { recursive: true, mode: 0o700 });
 chmodSync(runtime, 0o700);

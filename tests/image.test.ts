@@ -1,9 +1,10 @@
 import assert from 'node:assert/strict';
-import { spawnSync } from 'node:child_process';
+import { execFile, spawnSync } from 'node:child_process';
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { delimiter, join } from 'node:path';
 import test from 'node:test';
+import { promisify } from 'node:util';
 
 test('image verification retains inspection evidence and removes the temporary image', (t) => {
   const dir = mkdtempSync(join(tmpdir(), 'dev-env-test-image-'));
@@ -41,7 +42,8 @@ else if (cmd === 'build') {
     encoding: 'utf8',
   });
   assert.equal(run.status, 0, run.stderr);
-  const out = /built feature=container-image evidence=(.+)/.exec(run.stdout)![1];
+  const out = /built feature=container-image evidence=(.+)/.exec(run.stdout)?.[1];
+  assert.ok(out);
   t.after(() => rmSync(join(out, '..'), { recursive: true }));
   assert.equal(readFileSync(join(out, 'image-id.txt'), 'utf8').trim(), 'sha256:1234');
   assert.equal(readFileSync(join(out, 'build.exit'), 'utf8').trim(), '0');
@@ -54,7 +56,8 @@ test('a missing Docker executable reports the prerequisite and retains its evide
     env: { ...process.env, PATH: '' },
     encoding: 'utf8',
   });
-  const evidence = / evidence=(.+)/.exec(run.stdout)![1];
+  const evidence = / evidence=(.+)/.exec(run.stdout)?.[1];
+  assert.ok(evidence);
   t.after(() => rmSync(evidence, { recursive: true }));
   assert.equal(run.status, 1);
   assert.match(run.stderr, /docker is required/);
@@ -96,4 +99,26 @@ else if (command === 'build') {
   assert.equal(readFileSync(join(out, 'build.exit'), 'utf8').trim(), '17');
   assert.equal(existsSync(state), false);
   assert.equal(existsSync(join(out, 'image-id.txt')), false);
+});
+
+test('concurrent image checks with identical evidence basenames reserve different tags', async (t) => {
+  const dir = mkdtempSync(join(tmpdir(), 'dev-env-image-tags-'));
+  t.after(() => rmSync(dir, { recursive: true, force: true }));
+  writeFileSync(join(dir, 'docker'), '#!/bin/sh\nexit 0\n', { mode: 0o700 });
+  const tags = await Promise.all(
+    ['one', 'two'].map(async (name) => {
+      const evidence = join(dir, name, 'run');
+      await promisify(execFile)(
+        process.execPath,
+        ['verifications/scripts/build-image.ts', 'docker', evidence],
+        { env: { ...process.env, PATH: dir } },
+      );
+      const tag = readFileSync(join(evidence, 'container-image/build.env'), 'utf8').match(
+        /^tag=(.+)$/m,
+      );
+      assert.ok(tag);
+      return tag[1];
+    }),
+  );
+  assert.notEqual(tags[0], tags[1]);
 });

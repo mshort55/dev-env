@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { execFile, execFileSync, spawn, spawnSync } from 'node:child_process';
+import { execFile, execFileSync, spawn } from 'node:child_process';
 import { createServer } from 'node:http';
 import { createInterface } from 'node:readline';
 import { promisify } from 'node:util';
@@ -17,7 +17,6 @@ import { dirname, join, resolve } from 'node:path';
 import { test, type TestContext } from 'node:test';
 
 const setup = resolve(import.meta.dirname, '../scripts/setup-jira-mcp.ts');
-const hasCli = (name: string) => spawnSync(name, ['--version']).status === 0;
 
 function fixture(t: TestContext) {
   const home = mkdtempSync(join(tmpdir(), 'jira-registration-'));
@@ -47,9 +46,7 @@ function fixture(t: TestContext) {
   };
 }
 
-test('Codex keeps unrelated settings and forwards Jira credentials by name on repeated setup', {
-  skip: !hasCli('codex'),
-}, (t) => {
+test('Codex keeps unrelated settings and forwards Jira credentials by name on repeated setup', (t) => {
   const { run, config, env, options } = fixture(t);
   mkdirSync(env.CODEX_HOME);
   const original = '# Keep this comment\n[mcp_servers.other]\ncommand = "other-server"\n';
@@ -68,10 +65,8 @@ test('Codex keeps unrelated settings and forwards Jira credentials by name on re
   assert.equal(readFileSync(config, 'utf8'), contents);
 });
 
-test('Claude user registration inherits shell credentials and survives repeated setup', {
-  skip: !hasCli('claude'),
-}, (t) => {
-  const { home, run, options } = fixture(t);
+test('Claude user registration inherits shell credentials and survives repeated setup', (t) => {
+  const { home, run } = fixture(t);
   const config = join(home, '.claude.json');
   writeFileSync(config, JSON.stringify({ mcpServers: { other: { command: 'fixture' } } }));
   run('claude');
@@ -83,24 +78,15 @@ test('Claude user registration inherits shell credentials and survives repeated 
   assert.deepEqual(original.other, { command: 'fixture' });
   run('claude');
   assert.deepEqual(servers(), original);
-  const registration = execFileSync('claude', ['mcp', 'get', 'jira-mcp-server'], options);
-  assert.match(registration, /jira_mcp_server\.main/);
 });
 
 test('both clients start their installed Jira server against a disposable Jira endpoint', {
-  skip:
-    !hasCli('claude') ||
-    !hasCli('codex') ||
-    spawnSync('python3', [
-      '-c',
-      "import importlib.util, sys; sys.exit(importlib.util.find_spec('jira_mcp_server') is None)",
-    ]).status !== 0,
   timeout: 90000,
 }, async (t) => {
   const { run, env, options } = fixture(t);
   const requests: string[] = [];
   const jira = createServer((request, response) => {
-    requests.push(request.url!);
+    if (request.url) requests.push(request.url);
     response.setHeader('Content-Type', 'application/json');
     response.end(
       JSON.stringify(
@@ -119,10 +105,18 @@ test('both clients start their installed Jira server against a disposable Jira e
   assert.ok(address && typeof address === 'object');
   env.JIRA_SERVER_URL = 'http://127.0.0.1:' + address.port;
   // Make pip's installed user packages visible in the disposable home.
-  const installed = execFileSync('python3', ['-m', 'site', '--user-site'], {
-    encoding: 'utf8',
-  }).trim();
-  const isolated = execFileSync('python3', ['-m', 'site', '--user-site'], options).trim();
+  const installed = execFileSync(
+    'python3',
+    ['-c', 'import site; print(site.getusersitepackages())'],
+    {
+      encoding: 'utf8',
+    },
+  ).trim();
+  const isolated = execFileSync(
+    'python3',
+    ['-c', 'import site; print(site.getusersitepackages())'],
+    options,
+  ).trim();
   mkdirSync(dirname(isolated), { recursive: true });
   symlinkSync(installed, isolated);
   // The server runs a git fetch on startup. Keep its checkout and remote untouched.
@@ -166,9 +160,7 @@ test('both clients start their installed Jira server against a disposable Jira e
   app.stdin.end();
 });
 
-test('Codex creates private settings without credentials and leaves invalid or custom settings intact', {
-  skip: !hasCli('codex'),
-}, (t) => {
+test('Codex creates private settings without credentials and leaves invalid or custom settings intact', (t) => {
   const { run, env, config } = fixture(t);
   for (const key of ['JIRA_SERVER_URL', 'JIRA_EMAIL', 'JIRA_ACCESS_TOKEN'] as const)
     Reflect.deleteProperty(env, key);

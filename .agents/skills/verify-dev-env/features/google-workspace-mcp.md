@@ -8,8 +8,19 @@ Codex runs `node scripts/google-workspace-mcp.ts` from the path saved by [Google
 - `workspace-mcp-incomplete-file` exits with status 1 and identifies the missing client ID or secret.
 - `workspace-mcp-exec` starts the pinned Workspace server on stdio with the Drive, Docs, Sheets and Slides tools in read-only mode. The server uses the `credentials-read-only` directory beside the OAuth file.
 
-## Verification
+## How to get to it (user POV)
 
-From the dev-env checkout, run `node verifications/scripts/check-mcp.ts` after installing the repository dependencies with `npm ci`. The check exercises both credential errors and launches the real server using the command saved in Codex. It initializes MCP and lists tools with disposable credentials. It makes no Google API calls.
+- Start Codex after Workspace setup. Codex invokes the command saved for `google-workspace` when it connects.
+- To see a credential error directly, run `node scripts/google-workspace-mcp.ts` with a disposable `CODEX_HOME`.
 
-The command prints its evidence directory under `verifications/evidence/mcp-*`. Inspect `server.log` for startup errors and `tools.json` for the advertised tools. A successful run writes `result.txt` after removing the temporary home.
+## Driving it with verify-dev-env
+
+Preconditions: Run `npm ci` with the pinned Node version. Install Codex, uv and uvx on PATH and provide `/usr/bin/python3` and network access.
+
+- **Exercise the launcher.** Run `npm run check -- mcp`. The drive checks the missing file, missing ID and missing secret before starting the saved command with disposable credentials.
+- **Inspect the server.** Open `tools.json` in the printed evidence directory to inspect the advertised tools. The drive checks the read-only inventory and writes `result.txt` after removing the scratch home.
+
+## Gotchas
+
+- The launcher uses stdio. A direct invocation with valid credentials waits for an MCP client.
+- The drive lists tools without making a Google API call. Startup diagnostics go to `server.log`.

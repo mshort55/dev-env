@@ -8,8 +8,18 @@ The devcontainer runs `node scripts/setup-google-workspace-mcp.ts` during post-c
 - `workspace-setup-dirs` sets the Workspace config and token directories to mode 700.
 - `workspace-setup-reminder` prints the KeePass bootstrap command when the OAuth file is absent.
 
-## Verification
+## How to get to it (user POV)
 
-Run `node verifications/scripts/check-mcp.ts` from a checkout with its npm dependencies installed, Codex, uv and uvx on PATH, and `/usr/bin/python3` available. The checker takes the tool versions from `.env.example` and downloads the dependencies into a temporary home. It uses separate Codex, uv and XDG directories there.
+- Rebuild the development container to run setup during post-create.
+- Inside a configured workstation, repeat setup with `node scripts/setup-google-workspace-mcp.ts`.
 
-The checker verifies clean registration and starts the server. It then seeds the old Bash registration, an unrelated server and disposable credentials. After two setup runs it checks the saved command, credential contents and permissions, unrelated registration and advertised tools. The evidence directory printed at startup contains `setup.log` with setup output and Codex's registrations.
+## Driving it with verify-dev-env
+
+Preconditions: Run `npm ci` with the pinned Node version. Install Codex, uv and uvx on PATH and provide `/usr/bin/python3` and network access.
+
+- **Register and upgrade.** Run `npm run check -- mcp`. The drive checks clean registration, then seeds the old Bash registration, an unrelated server and disposable credentials. Two setup runs must preserve the credentials, permissions and unrelated server.
+- **Inspect the registration.** Read `setup.log` in the printed evidence directory for setup output and Codex's saved command. The drive starts the server from that registration and records the advertised tools in `tools.json`.
+
+## Gotchas
+
+- The drive downloads the pinned tool into disposable uv and XDG directories and removes the scratch home on exit. Read the retained evidence under `verifications/evidence/`.

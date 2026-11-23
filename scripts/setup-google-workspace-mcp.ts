@@ -1,10 +1,11 @@
+import { workspaceCredentialsDirectory } from './workspace-credentials.ts';
 import { spawnSync } from 'node:child_process';
 import { chmodSync, existsSync, mkdirSync } from 'node:fs';
 import { homedir } from 'node:os';
 import { join, resolve } from 'node:path';
 
 const repo = resolve(process.env.DEV_ENV_DIR || join(import.meta.dirname, '..'));
-const directory = join(process.env.CODEX_HOME || join(homedir(), '.codex'), 'google-workspace');
+const directory = workspaceCredentialsDirectory();
 process.env.PATH = `${join(homedir(), '.local/bin')}:${process.env.PATH}`;
 
 function required(name: string) {

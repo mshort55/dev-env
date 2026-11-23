@@ -1,3 +1,4 @@
+import { workspaceCredentialsDirectory } from './workspace-credentials.ts';
 import {
   existsSync,
   openSync,
@@ -106,7 +107,7 @@ function googleWorkspace(entries: Entries) {
     );
     return;
   }
-  const directory = join(process.env.CODEX_HOME || join(homedir(), '.codex'), 'google-workspace');
+  const directory = workspaceCredentialsDirectory();
   mkdirSync(directory, { recursive: true, mode: 0o700 });
   chmodSync(directory, 0o700);
   const temporary = join(directory, '.oauth-' + randomUUID());
