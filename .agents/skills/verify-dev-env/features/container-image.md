@@ -11,7 +11,7 @@ The dev container image installs its toolchain while it builds. Verification bui
 ## How to get to it (user POV)
 
 - Open the repo in VS Code and choose Reopen in Container. That builds `.devcontainer/dev/Dockerfile` and starts the service named `dev`. Verification does not use this entry point.
-- From the repo root, `node verifications/scripts/build-image.ts docker` performs the build without starting a container. `bash verifications/verify.sh` runs it after the bootstrap checks.
+- From the repo root, `node verifications/scripts/build-image.ts docker` performs the build without starting a container. `npm run verify` runs it after the bootstrap checks.
 
 ## Driving it with verify-dev-env
 

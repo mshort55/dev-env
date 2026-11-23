@@ -9,12 +9,17 @@ const biome = join(root, 'node_modules/.bin/biome');
 process.chdir(root);
 
 function requireTools(...names: string[]) {
-  const missing = names.filter(name => !(process.env.PATH || '').split(delimiter).some(dir => {
-    try {
-      accessSync(join(dir, name), constants.X_OK);
-      return true;
-    } catch { return false; }
-  }));
+  const missing = names.filter(
+    (name) =>
+      !(process.env.PATH || '').split(delimiter).some((dir) => {
+        try {
+          accessSync(join(dir, name), constants.X_OK);
+          return true;
+        } catch {
+          return false;
+        }
+      }),
+  );
   if (missing.length) throw new Error('Missing required tools: ' + missing.join(', '));
 }
 
@@ -29,7 +34,17 @@ const checks: Record<string, () => void> = {
   'format-check': () => run(biome, 'format', ...discover(root).typescript),
   format: () => run(biome, 'format', '--write', ...discover(root).typescript),
   types: () => run(node, 'node_modules/typescript/bin/tsc', '--noEmit'),
-  tests: () => run(node, '--test', 'tests/*.test.ts'),
+  tests: () => {
+    const tests = discover(root).typescript.filter(
+      (path) => path.startsWith('tests/') && path.endsWith('.test.ts'),
+    );
+    if (!tests.length) throw new Error('No test files found');
+    run(node, '--test', ...tests);
+  },
+  lifecycle: () => {
+    requireTools('curl', 'sh');
+    run(node, '--test', 'tests/codex-install-lifecycle.ts');
+  },
   bootstrap: () => run(node, 'verifications/verify.ts', '--bootstrap-only'),
   image: () => run(node, 'verifications/scripts/build-image.ts', 'docker'),
   integration: () => run(node, 'verifications/verify.ts'),
@@ -40,18 +55,20 @@ const checks: Record<string, () => void> = {
 };
 
 let names = process.argv.slice(2);
-if (names.length === 0) names = ['lint', 'format-check', 'types', 'tests', 'integration', 'mcp'];
+if (names.length === 0)
+  names = ['lint', 'format-check', 'types', 'tests', 'lifecycle', 'integration', 'mcp'];
 if (names.length === 1 && names[0] === '--list') {
   console.log(Object.keys(checks).join('\n'));
-} else if (names.some(name => !Object.hasOwn(checks, name))) {
+} else if (names.some((name) => !Object.hasOwn(checks, name))) {
   console.error('Select checks from: ' + Object.keys(checks).join(', '));
   process.exitCode = 2;
 } else {
   const failures = [];
   for (const name of names) {
     console.log('Running ' + name);
-    try { checks[name](); }
-    catch (error) {
+    try {
+      checks[name]();
+    } catch (error) {
       failures.push(name);
       console.error(error instanceof Error ? error.message : error);
     }

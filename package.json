@@ -4,7 +4,7 @@
   "type": "module",
   "scripts": {
     "discover": "node scripts/discover.ts",
-    "test": "node --test 'tests/*.test.ts'",
+    "test": "node scripts/check.ts tests",
     "typecheck": "tsc --noEmit",
     "check": "node scripts/check.ts",
     "lint": "node scripts/check.ts lint",

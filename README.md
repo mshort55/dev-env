@@ -59,18 +59,19 @@ For host verification, install the Node.js version pinned by `NODE_VERSION` in
 devcontainer requires only the host tools listed under Setup. Container creation
 installs the checkout’s packages in a separate volume at `$DEV_ENV_DIR/node_modules`.
 
-From the checkout on the host or in the container, run `npm run discover` to
-list sources, `npm test` to test discovery, and `npm run typecheck` to check
-TypeScript. The discovery command runs the mounted source directly, so edits
-take effect on the next invocation.
+Run `npm run check` for the full suite. Select checks by name, for example
+`npm run check -- lint format-check types tests` for code checks or
+`npm run check -- bootstrap mcp` for the KeePass and Workspace MCP drives.
+Use `npm run check -- --list` to list checks. The runner reports every failed
+check after the selected checks finish. Run `npm run format` to apply formatting
+or `npm run discover` to list the active sources.
 
-Run `nox` from the repository root for lint, type, shell, test, and integration
-checks. Use `nox -l` to list sessions or `nox -s lint types` to select checks.
-Run `bash scripts/setup-verification.sh` if Nox is not installed.
-
-The full suite requires Linux ARM64, network access, and Docker inside the
-development container. Integration checks use disposable credentials and write
-evidence to `verifications/evidence/`. See [noxfile.py](noxfile.py) for check details.
+The full suite requires Linux ARM64, network access, Docker, Git, Bash, curl,
+Codex, uv and uvx. The `lifecycle` check installs disposable copies of Codex
+and exercises its daemon. Set `CODEX_REPRO_ROOT` to a writable directory
+outside the system temporary directory for this check. The standalone Codex
+installer rejects executable paths under the system temporary directory.
+Integration evidence stays under `verifications/evidence/`.
 
 To build the image alone, run `node verifications/scripts/build-image.ts docker`
 or select `podman` for the Linux ARM64 CI build. The command prints the evidence
