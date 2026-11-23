@@ -42,16 +42,10 @@ function workstation(t: TestContext) {
   for (const tool of ["kubectl", "oc", "gh"]) {
     writeFileSync(join(bin, tool), `#!/bin/sh\necho 'complete -W fixture ${tool}'\n`, { mode: 0o755 });
   }
-  writeFileSync(join(bin, "claude"), `#!/bin/sh
-case "$2" in
-  get) exit 1 ;;
-  add) echo '{"mcpServers":{"jira-mcp-server":{"env":{}},"other":{"url":"keep"}}}' > "$HOME/.claude.json" ;;
-esac
-`, { mode: 0o755 });
   for (const step of ["bootstrap-secrets", "setup-codex", "setup-jira-mcp", "setup-google-workspace-mcp"]) {
     writeFileSync(join(repo, "scripts", step + ".ts"), `
 import { appendFileSync } from "node:fs";
-appendFileSync(process.env.HOME + "/setup-steps", "${step}\\n");
+appendFileSync(process.env.HOME + "/setup-steps", "${step}" + (process.argv[2] ? " " + process.argv[2] : "") + "\\n");
 `);
   }
   const config = JSON.parse(readFileSync(join(repo, ".devcontainer/dev/devcontainer.json"), "utf8"));
@@ -64,10 +58,8 @@ test("container creation installs workspace settings and CLIs and loads credenti
   const { home, workspace, bin, env } = workstation(t);
   assert.equal(readFileSync(join(home, ".claude/settings.json"), "utf8"), '{"theme":"dark"}');
   assert.equal(readFileSync(join(home, ".config/ccstatusline/settings.json"), "utf8"), '{"text":"fixture"}');
-  assert.deepEqual(JSON.parse(readFileSync(join(home, ".claude.json"), "utf8")).mcpServers,
-    { "jira-mcp-server": {}, other: { url: "keep" } });
   assert.deepEqual(readFileSync(join(home, "setup-steps"), "utf8").trim().split("\n"),
-    ["bootstrap-secrets", "setup-codex", "setup-jira-mcp", "setup-google-workspace-mcp"]);
+    ["setup-jira-mcp claude", "bootstrap-secrets", "setup-codex", "setup-jira-mcp", "setup-google-workspace-mcp"]);
   // Skip keyring startup in this test; a separate Linux test exercises the real services.
   writeFileSync(join(bin, "flock"), "#!/bin/sh\nexit 0\n", { mode: 0o755 });
   const shell = execFileSync("bash", ["-ec", '. "$HOME/.bashrc"; complete -p gh kubectl oc; command -v workspace-cli'],

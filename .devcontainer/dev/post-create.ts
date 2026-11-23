@@ -1,5 +1,5 @@
 import { spawnSync } from "node:child_process";
-import { appendFileSync, copyFileSync, existsSync, mkdirSync, readFileSync, renameSync, statSync, writeFileSync } from "node:fs";
+import { appendFileSync, copyFileSync, existsSync, mkdirSync, statSync } from "node:fs";
 import { homedir } from "node:os";
 import { dirname, join } from "node:path";
 
@@ -69,24 +69,13 @@ eval "$(gh completion -s bash)"
 eval "$(atuin init bash)"
 `);
 
-if (spawnSync("claude", ["mcp", "get", "jira-mcp-server"], { stdio: "ignore" }).status !== 0) {
-  run("claude", "mcp", "add", "--scope", "user", "jira-mcp-server", "python3", "--", "-m", "jira_mcp_server.main");
-}
-// An empty env from Claude's CLI prevents Jira from inheriting shell credentials.
-const claudePath = join(home, ".claude.json");
-const config = JSON.parse(readFileSync(claudePath, "utf8"));
-if (config.mcpServers?.["jira-mcp-server"]?.env !== undefined) {
-  delete config.mcpServers["jira-mcp-server"].env;
-  const temporary = claudePath + "." + process.pid;
-  writeFileSync(temporary, JSON.stringify(config, null, 2) + "\n", { mode: 0o600 });
-  renameSync(temporary, claudePath);
-}
+run(process.execPath, join(repo, "scripts/setup-jira-mcp.ts"), "claude");
 
 if (process.env.KEEPASS_DB_PATH && statSync(process.env.KEEPASS_DB_PATH, { throwIfNoEntry: false })?.isFile()) {
   run(process.execPath, join(repo, "scripts/bootstrap-secrets.ts"));
 }
-setup("setup-codex");
-setup("setup-jira-mcp");
+run(process.execPath, join(repo, "scripts/setup-codex.ts"));
+run(process.execPath, join(repo, "scripts/setup-jira-mcp.ts"));
 setup("setup-google-workspace-mcp");
 if (existsSync("scripts/setup-verification.sh")) run("bash", "scripts/setup-verification.sh");
 
