@@ -74,7 +74,6 @@ RUN sed -i 's|http://ports.ubuntu.com|https://ports.ubuntu.com|g' /etc/apt/sourc
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
 COPY .devcontainer/dev/10-github.conf /etc/ssh/ssh_config.d/10-github.conf
-COPY requirements/bootstrap.txt /tmp/bootstrap-requirements.txt
 
 # Install the runtime before invoking repository-owned TypeScript.
 RUN curl -fsSL --retry 3 "https://nodejs.org/dist/v${NODE_VERSION}/node-v${NODE_VERSION}-linux-arm64.tar.xz" -o /tmp/node.tar.xz && \
@@ -83,8 +82,6 @@ RUN curl -fsSL --retry 3 "https://nodejs.org/dist/v${NODE_VERSION}/node-v${NODE_
 
 COPY .devcontainer/dev/install-tools.ts /usr/local/lib/dev-env/install-tools.ts
 RUN node /usr/local/lib/dev-env/install-tools.ts system
-RUN pip3 install --no-cache-dir --break-system-packages --require-hashes -r /tmp/bootstrap-requirements.txt && \
-    rm /tmp/bootstrap-requirements.txt
 
 RUN useradd -m -s /bin/bash -u ${CONTAINER_UID} ${CONTAINER_USER} && \
     echo "${CONTAINER_USER} ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
