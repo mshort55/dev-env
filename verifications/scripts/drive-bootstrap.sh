@@ -30,7 +30,7 @@ chmod 700 "$GNUPGHOME"
 cd "$DEV_ENV_REPO"
 OUT="$EVIDENCE_DIR/bootstrap-secrets"
 mkdir -p "$OUT"
-PTY="$VERIFY_DIR/scripts/pty_run.py"
+PTY="$VERIFY_DIR/scripts/pty-run.ts"
 
 operator_snapshot() {
   local label=$1
@@ -51,7 +51,7 @@ env -u KEEPASS_DB_PATH \
   GIT_CONFIG_GLOBAL="$GIT_CONFIG_GLOBAL" \
   GNUPGHOME="$GNUPGHOME" \
   PYTHONDONTWRITEBYTECODE=1 \
-  "$PYTHON" scripts/bootstrap-secrets.py \
+  node scripts/bootstrap-secrets.ts \
   >"$OUT/missing-env.out" 2>"$OUT/missing-env.err"
 echo $? >"$OUT/missing-env.exit"
 set -e
@@ -60,7 +60,7 @@ grep -F 'KEEPASS_DB_PATH environment variable not set' "$OUT/missing-env.out" >/
 
 set +e
 KEEPASS_DB_PATH="$SCRATCH/keepass/missing.kdbx" \
-  "$PYTHON" scripts/bootstrap-secrets.py \
+  node scripts/bootstrap-secrets.ts \
   >"$OUT/missing-file.out" 2>"$OUT/missing-file.err"
 echo $? >"$OUT/missing-file.exit"
 set -e
@@ -68,7 +68,7 @@ grep -F "KeePass database not found at $SCRATCH/keepass/missing.kdbx" "$OUT/miss
 [ "$(cat "$OUT/missing-file.exit")" = "1" ]
 
 set +e
-"$PYTHON" "$PTY" \
+node "$PTY" \
   --transcript "$OUT/wrong-password.txt" \
   --timeout 20 \
   --expect 'Enter KeePass master password:' --send 'wrong-password' \
@@ -76,7 +76,7 @@ set +e
   --expect 'Enter KeePass master password:' --send 'wrong-password' \
   --expect 'Failed to open database after 3 attempts' \
   -- \
-  "$PYTHON" scripts/bootstrap-secrets.py
+  node scripts/bootstrap-secrets.ts
 status=$?
 set -e
 echo "$status" >"$OUT/wrong-password.exit"
@@ -85,7 +85,7 @@ grep -F 'Incorrect password. 2 attempt(s) remaining.' "$OUT/wrong-password.txt" 
 grep -F 'Incorrect password. 1 attempt(s) remaining.' "$OUT/wrong-password.txt" >/dev/null
 
 set +e
-"$PYTHON" "$PTY" \
+node "$PTY" \
   --transcript "$OUT/success.txt" \
   --timeout 30 \
   --expect 'Enter KeePass master password:' --send-file "$SCRATCH/password" \
@@ -93,7 +93,7 @@ set +e
   --expect 'Google Workspace MCP credentials configured' \
   --expect 'All secrets configured successfully!' \
   -- \
-  "$PYTHON" scripts/bootstrap-secrets.py
+  node scripts/bootstrap-secrets.ts
 status=$?
 set -e
 echo "$status" >"$OUT/success.exit"

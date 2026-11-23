@@ -42,9 +42,9 @@ Doctor is read-only. It must print `surface=cli`, `container=not-used`, `forbidd
 
 ## Drive
 
-Read `.agents/skills/verify-dev-env/features/README.md`, then the feature file. Drive the real scripts. Do not import `bootstrap-secrets.py` and call `setup_*` functions; `tests/test_google_workspace_mcp.py` already does that.
+Read `.agents/skills/verify-dev-env/features/README.md`, then the feature file. Drive the real scripts through their public commands.
 
-`scripts/bootstrap-secrets.py` asks for the master password with `getpass`, which reads `/dev/tty`. Feed it through `pty_run.py`. A stdin pipe never reaches the prompt.
+`scripts/bootstrap-secrets.ts` reads the master password from the controlling terminal when available. Use `pty-run.ts` to answer its prompt.
 
 Bootstrap alone:
 
@@ -75,7 +75,7 @@ A bootstrap proof is complete only when all of these are true:
 
 An image proof is complete when `container-image/build.exit` is `0`, `image-id.txt` is a single image id, and `side-effects.txt` records `container_started=no`, `latest_tag_used=no`, and `image_removed=yes`.
 
-Capture the command output and the files the command created. Do not treat a unit test, a mocked `PyKeePass`, or a successful process start by itself as proof.
+Capture the command output and the files the command created. Check the transcript, output files and exit status.
 
 ## Cleanup
 
@@ -98,5 +98,5 @@ Command paths below are from the dev-env repo root. Scripts live in `verificatio
 - `bash verifications/scripts/doctor.sh STATE` performs the read-only readiness check. Prints `doctor=ok` or exits non-zero.
 - `bash verifications/scripts/drive-bootstrap.sh STATE` drives every bootstrap sub-feature and writes `evidence/<run-id>/bootstrap-secrets/`.
 - `bash verifications/scripts/build-image.sh STATE` builds from `.env.example`, records the image id, and removes the verify tag.
-- `python3 verifications/scripts/pty_run.py --transcript PATH [--timeout SEC] [--expect TEXT [--send TEXT | --send-file PATH]]... -- COMMAND...` runs `COMMAND` on a PTY. Use `--send-file` for the master password so it is not a process argument. Exit `2` means a prompt was missed.
+- `node verifications/scripts/pty-run.ts --transcript PATH [--timeout SEC] [--expect TEXT [--send TEXT | --send-file PATH]]... -- COMMAND...` runs `COMMAND` on a PTY. Use `--send-file` for the master password so it is not a process argument. Exit `2` means a prompt was missed.
 - `bash verifications/scripts/cleanup.sh STATE` deletes the scratch directory and prints `cleaned scratch=... evidence=...`.

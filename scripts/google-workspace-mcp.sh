@@ -6,7 +6,7 @@ workspace_config_dir="${CODEX_HOME:-$HOME/.codex}/google-workspace"
 oauth_env="$workspace_config_dir/oauth.env"
 
 if [ ! -f "$oauth_env" ]; then
-  echo "Google Workspace OAuth client file is missing: $oauth_env. Run dev-env/scripts/bootstrap-secrets.py to load the client ID and secret from KeePass." >&2
+  echo "Google Workspace OAuth client file is missing: $oauth_env. Run node dev-env/scripts/bootstrap-secrets.ts to load the client ID and secret from KeePass." >&2
   exit 1
 fi
 

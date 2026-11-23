@@ -106,7 +106,7 @@ install_python_deps() {
 
 bootstrap_secrets() {
   if [ -n "${KEEPASS_DB_PATH}" ] && [ -f "${KEEPASS_DB_PATH}" ]; then
-    python3 "${DEV_ENV_DIR}/scripts/bootstrap-secrets.py"
+    node "${DEV_ENV_DIR}/scripts/bootstrap-secrets.ts"
   fi
 }
 
