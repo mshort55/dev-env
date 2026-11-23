@@ -21,13 +21,6 @@ function copySettings(source: string, target: string) {
   copyFileSync(join(workspace, source), destination);
 }
 
-// Use the existing command until its TypeScript replacement lands.
-function setup(script: string) {
-  const path = join(repo, 'scripts', script);
-  if (existsSync(path + '.ts')) run(process.execPath, path + '.ts');
-  else run('bash', path + '.sh');
-}
-
 run('sudo', 'chown', `${process.getuid!()}:${process.getgid!()}`, 'node_modules');
 run('npm', 'ci', '--include=dev');
 copySettings('.claude/settings.json', '.claude/settings.json');
@@ -107,8 +100,7 @@ if (
 }
 run(process.execPath, join(repo, 'scripts/setup-codex.ts'));
 run(process.execPath, join(repo, 'scripts/setup-jira-mcp.ts'));
-setup('setup-google-workspace-mcp');
-if (existsSync('scripts/setup-verification.sh')) run('bash', 'scripts/setup-verification.sh');
+run(process.execPath, join(repo, 'scripts/setup-google-workspace-mcp.ts'));
 
 appendFileSync(
   bashrc,

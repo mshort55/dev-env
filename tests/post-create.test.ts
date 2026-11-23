@@ -78,6 +78,8 @@ appendFileSync(process.env.HOME + "/setup-steps", "${step}" + (process.argv[2] ?
 `,
     );
   }
+  // An upgraded checkout can still contain a local copy of the retired Nox installer.
+  writeFileSync(join(repo, 'scripts/setup-verification.sh'), 'exit 99\n');
   const config = JSON.parse(
     readFileSync(join(repo, '.devcontainer/dev/devcontainer.json'), 'utf8'),
   );
